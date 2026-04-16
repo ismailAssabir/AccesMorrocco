@@ -18,12 +18,12 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+     protected $primaryKey = 'idUser';
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'firstName', 'lastName', 'email', 'password', 'cin', 'birthday', 'address', 'phoneNumber', 
+        'typeContrat', 'salaire', 'post', 'dateEmb', 'idDepartement', 'status','type', 
+        'fichier', 'rip'
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -45,5 +45,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+      function departement(){
+        $this->belongsto(Departement::class, 'idDepartement');
+    }
+    function departementManager(){
+        $this->hasOne(Departement::class, 'idUser');
     }
 }
