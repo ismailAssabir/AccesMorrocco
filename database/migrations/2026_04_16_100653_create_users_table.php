@@ -12,24 +12,23 @@ return new class extends Migration
     public function up(): void
 {
     Schema::create('users', function (Blueprint $table) {
-        $table->id('idUser'); // Clé primaire personnalisée
+        $table->id('idUser'); 
         $table->string('firstName', 50);
         $table->string('lastName', 50);
-        $table->string('email', 50)->unique(); // Ajouté unique() pour la sécurité
-        $table->string('password', 255); // Augmenté à 255 pour le hachage Laravel
+        $table->string('email', 50)->unique(); 
+        $table->string('password', 255);
         $table->string('cin', 50)->unique();
         $table->date('birthday');
         $table->string('address', 100)->nullable();
         $table->string('phoneNumber', 15);
         $table->enum('typeContrat', ['CD', 'CI', 'freelance'])->nullable();
         $table->decimal('salaire', 10, 2);
-        $table->string('post', 40)->nullable(); // CORRIGÉ : nullable()
+        $table->string('post', 40)->nullable();
         $table->date('dateEmb')->nullable();
         
-        // Clé étrangère vers départements
         $table->unsignedBigInteger('idDepartement')->nullable();
         $table->foreign('idDepartement')
-              ->references('idDepartement') // Vérifiez que c'est bien idDepartement dans la table departements
+              ->references('idDepartement') 
               ->on('departements')
               ->nullOnDelete();
 
@@ -50,8 +49,8 @@ return new class extends Migration
 
     Schema::create('sessions', function (Blueprint $table) {
         $table->string('id')->primary();
-        $table->unsignedBigInteger('idUser')->nullable()->index();
-        $table->foreign('idUser')->references('idUser')->on('users')->cascadeOnDelete();
+        $table->unsignedBigInteger('user_id')->nullable()->index();
+        $table->foreign('user_id')->references('idUser')->on('users')->cascadeOnDelete();
         
         $table->string('ip_address', 45)->nullable();
         $table->text('user_agent')->nullable();
