@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\Lead;
 use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
+    use HasFactory;
     protected $primaryKey = 'idClient';
     protected $fillable = [
         'firstName',
@@ -19,7 +20,8 @@ class Client extends Model
         'dateNaissance',
         'status',
         'type',
-        'created_at',
-        'updated_at',
     ];
+    function lead(){
+        return $this->hasOne(Lead::class, 'idClient');
+    }
 }

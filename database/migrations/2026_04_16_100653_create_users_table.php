@@ -32,7 +32,7 @@ return new class extends Migration
               ->on('departements')
               ->nullOnDelete();
 
-        $table->enum('status', ['active', 'desactive'])->default('active');
+        $table->enum('status', ['active', 'desactive', 'conge'])->default('active');
         $table->enum('type', ['employee', 'admin', 'manager'])->default('employee');
         $table->string('fichier');
         $table->string('rip');

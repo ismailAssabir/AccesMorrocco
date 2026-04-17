@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
+    use HasFactory;
     protected $primaryKey = 'idCategory';
     protected $fillable = [
         'nom',
         'desc',
-        'created_at',
-        'updated_at',
     ];
 }

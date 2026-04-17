@@ -7,7 +7,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Models\Tache;
+use App\Models\Departement;
+use App\Models\Reclamation;
+use App\Models\Conge;
+use App\Models\documentDemande;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -47,9 +51,32 @@ class User extends Authenticatable
         ];
     }
       function departement(){
-        $this->belongsto(Departement::class, 'idDepartement');
+        return $this->belongsto(Departement::class, 'idDepartement', 'idDepartement');
     }
     function departementManager(){
-        $this->hasOne(Departement::class, 'idUser');
+        return $this->hasOne(Departement::class, 'idUser', 'idUser');
     }
+     function taches(){
+        return $this->belongsToMany(Tache::class, 'user_taches', 'idUser', 'idTache');
+    }
+     function pointages()
+    {
+        return $this->hasMany(Pointage::class, 'idUser', 'idUser');
+    }
+    function conges(){
+        return $this->hasMany(Conge::class, 'idUser', 'idUser');
+    }
+     function lead()
+    {
+        return $this->hasOne(Lead::class, 'idUser', 'idUser');
+    }
+    function documents(){
+        return $this->hasMany(DocumentDemande::class, 'idUser', 'idUser');
+    }
+    function reclamations(){
+        return $this->hasMany(Reclamation::class, 'idUser', 'idUser');
+    }
+
+    public function isAdmin(): bool { return $this->type === 'admin'; }
+    public function isManager(): bool { return $this->type === 'manager'; }
 }

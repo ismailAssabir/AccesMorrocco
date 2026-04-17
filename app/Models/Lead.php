@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\User;
+use App\Models\Departement;
 use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
 {
+    use HasFactory;
     protected $primaryKey = 'idLead';
     protected $fillable = [
         'firstName',
@@ -20,10 +22,18 @@ class Lead extends Model
         'source',
         'note',
         'type',
-        'created_at',
-        'updated_at',
         'idUser',
         'idClient',
         'idDepartement'
     ];
+    function client(){
+        return $this->belongsTo(User::class, 'idUser', 'idClient');
+    }
+     function user()
+    {
+        return $this->belongsTo(User::class, 'idUser', 'idUser'); 
+    }
+    function departements(){
+        return $this->belongsTo(Departement::class, 'idDepartement', 'idDepartement');
+    }
 }
