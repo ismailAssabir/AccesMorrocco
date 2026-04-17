@@ -1,3 +1,366 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   PREMIUM SAAS DESIGN SYSTEM — AccesMorrocco
+   Deep Red × White × Glass
+   ============================================================ */
+
+@layer base {
+    :root {
+        --brand-600: #e11d48;
+        --brand-700: #be123c;
+        --brand-800: #9f1239;
+        --brand-900: #881337;
+        --brand-950: #4c0519;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* ============================================================
+   LOGIN PAGE — SPLIT LAYOUT
+   ============================================================ */
+@layer components {
+
+    /* ── Outer wrapper ── */
+    .login-wrapper {
+        @apply relative flex min-h-screen overflow-hidden bg-slate-50;
+    }
+
+    /* ── LEFT PANEL (brand / marketing) ── */
+    .login-left {
+        @apply hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col;
+        background: linear-gradient(
+            135deg,
+            #0f0a0b 0%,
+            #2a0614 20%,
+            #9f1239 50%,
+            #be123c 70%,
+            #881337 90%,
+            #1a0208 100%
+        );
+    }
+
+    /* animated noise texture overlay */
+    .login-left::before {
+        content: '';
+        @apply absolute inset-0 z-0 opacity-[0.04];
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 180px;
+    }
+
+    /* ── Floating blur blobs ── */
+    .blob {
+        @apply absolute rounded-full blur-3xl pointer-events-none;
+    }
+
+    .blob-1 {
+        @apply blob w-96 h-96 opacity-30 animate-float;
+        background: radial-gradient(circle, #f43f5e, #be123c);
+        top: -6rem; left: -4rem;
+    }
+
+    .blob-2 {
+        @apply blob w-80 h-80 opacity-20 animate-float-delay;
+        background: radial-gradient(circle, #fb7185, #9f1239);
+        top: 40%; right: -5rem;
+    }
+
+    .blob-3 {
+        @apply blob w-64 h-64 opacity-25 animate-float-slow;
+        background: radial-gradient(circle, #fda4af, #e11d48);
+        bottom: -4rem; left: 30%;
+    }
+
+    /* ── Left panel content ── */
+    .login-left-content {
+        @apply relative z-10 flex flex-col justify-between h-full px-12 py-14;
+    }
+
+    /* Logo badge */
+    .login-logo-badge {
+        @apply inline-flex items-center gap-3;
+        display: flex;
+        align-items: center;
+        gap: 12px; /* مهم */
+        }
+
+    .login-logo-text {
+        @apply text-white font-bold text-xl tracking-tight;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.692);
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .logo-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgb(143, 134, 134));
+}
+.card {
+    margin-bottom: 180px !important;
+}
+
+    /* Main headline */
+    .login-headline {
+        @apply text-white font-bold leading-tight;
+        font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+        letter-spacing: -0.03em;
+        text-shadow: 0 2px 24px rgba(0,0,0,0.35);
+    }
+
+    .login-headline span {
+        @apply block;
+        background: linear-gradient(90deg, #fda4af, #ffffff, #fecdd3);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 4s linear infinite;
+    }
+
+    .login-subtext {
+        @apply text-rose-200/80 text-base leading-relaxed mt-4;
+        max-width: 36ch;
+    }
+
+    /* Stats row */
+    .login-stats {
+        @apply flex items-center gap-6 mt-10;
+    }
+    .login-stat {
+        @apply flex flex-col;
+    }
+    .login-stat-value {
+        @apply text-white font-bold text-2xl tracking-tight;
+    }
+    .login-stat-label {
+        @apply text-rose-300/70 text-xs mt-0.5 uppercase tracking-wider;
+    }
+    .login-stat-divider {
+        @apply w-px h-10 bg-white/10;
+    }
+
+    /* Feature pills */
+    .login-pills {
+        @apply flex flex-wrap gap-2 mt-8;
+    }
+    .login-pill {
+        @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-rose-100/90;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        backdrop-filter: blur(6px);
+    }
+    .login-pill-dot {
+        @apply w-1.5 h-1.5 rounded-full bg-rose-400;
+    }
+
+    /* Abstract dashboard preview card */
+    .login-preview {
+        @apply relative mt-10 rounded-2xl overflow-hidden;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.10);
+        backdrop-filter: blur(12px);
+    }
+    .login-preview-bar {
+        @apply flex items-center gap-1.5 px-4 py-3;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .login-preview-dot {
+        @apply w-2.5 h-2.5 rounded-full;
+    }
+    .login-preview-body {
+        @apply p-4 space-y-2;
+    }
+    .login-preview-row {
+        @apply h-2 rounded-full;
+        background: rgba(255,255,255,0.10);
+    }
+    .login-preview-row-sm {
+        @apply h-2 rounded-full w-3/4;
+        background: rgba(255,255,255,0.07);
+    }
+    .login-preview-row-xs {
+        @apply h-2 rounded-full w-1/2;
+        background: rgba(255,255,255,0.05);
+    }
+
+    /* Footer text */
+    .login-left-footer {
+        @apply text-rose-300/50 text-xs;
+    }
+
+    /* ── RIGHT PANEL (auth card) ── */
+    .login-right {
+        @apply flex-1 flex items-center justify-center px-6 py-12 relative;
+        background: linear-gradient(160deg, #fafafa 0%, #f0f0f3 100%);
+    }
+
+    /* Subtle right-side pattern */
+    .login-right::before {
+        content: '';
+        @apply absolute inset-0 opacity-[0.015] pointer-events-none;
+        background-image: radial-gradient(#1a1a2e 1px, transparent 1px);
+        background-size: 28px 28px;
+    }
+
+    /* ── Glass Card ── */
+    .auth-card {
+        @apply relative w-full animate-fade-in-up;
+        max-width: 420px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 1.75rem;
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.04),
+            0 20px 40px -8px rgba(0, 0, 0, 0.10),
+            0 0 0 1px rgba(255,255,255,0.5) inset;
+        backdrop-filter: blur(20px);
+        padding: 2.5rem;
+    }
+    /* Accent top line */
+    .auth-card::before {
+        content: '';
+        @apply absolute top-0 left-8 right-8 h-px rounded-full;
+        background: linear-gradient(90deg, transparent, rgba(225,29,72,0.4), rgba(225,29,72,0.6), rgba(225,29,72,0.4), transparent);
+    }
+
+    /* ── Auth card header ── */
+    .auth-card-logo {
+        @apply flex items-center justify-center mb-8;
+    }
+    .auth-card-logo-inner {
+        @apply w-12 h-12 rounded-2xl flex items-center justify-center;
+        background: linear-gradient(135deg, var(--brand-600), var(--brand-800));
+        box-shadow: 0 8px 24px rgba(225,29,72,0.35);
+    }
+
+    .auth-card-title {
+        @apply text-2xl font-bold text-gray-900 text-center tracking-tight;
+        letter-spacing: -0.02em;
+    }
+    .auth-card-subtitle {
+        @apply text-sm text-gray-500 text-center mt-1.5;
+    }
+
+    /* ── Form inputs ── */
+    .auth-field {
+        @apply block w-full px-4 py-3 rounded-xl text-sm text-gray-900 placeholder-gray-400
+               transition-all duration-200 outline-none;
+        background: rgba(249, 249, 251, 0.9);
+        border: 1.5px solid rgba(203, 213, 225, 0.8);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04) inset;
+    }
+
+    .auth-field:focus {
+        border-color: var(--brand-600);
+        box-shadow:
+            0 0 0 3px rgba(225, 29, 72, 0.10),
+            0 1px 2px rgba(0,0,0,0.04) inset;
+        background: #fff;
+    }
+
+    .auth-field:hover:not(:focus) {
+        border-color: rgba(203, 213, 225, 1);
+        background: #fff;
+    }
+
+    .auth-label {
+        @apply block text-xs font-semibold text-gray-600 mb-1.5 tracking-wide uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* ── Primary CTA button ── */
+    .btn-brand {
+        @apply relative w-full py-3.5 px-6 rounded-xl font-semibold text-sm text-white
+               overflow-hidden transition-all duration-200
+               focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 60%, #9f1239 100%);
+        box-shadow: 0 4px 14px 0 rgba(225, 29, 72, 0.40);
+        letter-spacing: 0.01em;
+    }
+
+    .btn-brand::before {
+        content: '';
+        @apply absolute inset-0 opacity-0 transition-opacity duration-200;
+        background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    }
+
+    .btn-brand:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px 0 rgba(225, 29, 72, 0.45);
+    }
+
+    .btn-brand:hover::before { @apply opacity-100; }
+
+    .btn-brand:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px 0 rgba(225, 29, 72, 0.30);
+    }
+
+    .btn-brand span {
+        @apply relative z-10 flex items-center justify-center gap-2;
+    }
+
+    /* ── Divider ── */
+    .auth-divider {
+        @apply flex items-center gap-3 my-5;
+    }
+    .auth-divider-line {
+        @apply flex-1 h-px bg-gray-200;
+    }
+    .auth-divider-text {
+        @apply text-xs text-gray-400 font-medium;
+    }
+
+    /* ── Remember me checkbox ── */
+    .auth-checkbox {
+        @apply w-4 h-4 rounded cursor-pointer;
+        accent-color: var(--brand-600);
+        border: 1.5px solid #cbd5e1;
+    }
+
+    /* ── Mobile logo strip ── */
+    .login-mobile-logo {
+        @apply flex lg:hidden items-center justify-center mb-6;
+    }
+    .login-mobile-logo-badge {
+        @apply inline-flex items-center gap-2.5 px-4 py-2 rounded-full;
+        background: linear-gradient(135deg, #e11d48, #9f1239);
+        box-shadow: 0 4px 14px rgba(225,29,72,0.35);
+    }
+    .login-mobile-logo-text {
+        @apply text-white font-bold text-base;
+    }
+
+    /* ── Trust badges ── */
+    .auth-trust {
+        @apply flex items-center justify-center gap-4 mt-5;
+    }
+    .auth-trust-item {
+        @apply flex items-center gap-1.5 text-xs text-gray-400;
+    }
+    .auth-trust-icon {
+        @apply w-3.5 h-3.5 text-brand-600 flex-shrink-0;
+    }
+}
+
+/* ============================================================
+   GLOBAL SMOOTH TRANSITIONS
+   ============================================================ */
+@layer utilities {
+    .transition-premium {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
