@@ -1,0 +1,79 @@
+<aside class="w-72 min-h-screen bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
+
+    <div class="flex items-center gap-4 px-6 py-10">
+        <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain filter brightness-0 invert"
+                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDggMjJoNGwyLTNoMTJsNC00aC00TDQgMnptNiAxNUg5bDMtNiAzIDZ6Ii8+PC9zdmc+'">
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xl font-bold tracking-tight text-white leading-tight">ACCESS</span>
+            <span class="text-[#be2346] font-extrabold text-[10px] tracking-[0.4em] uppercase">Morocco</span>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-4">
+        <div class="px-4 mb-6">
+            <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
+                Gestion Interne
+            </p>
+        </div>
+
+        <nav class="space-y-1">
+            @php
+                $items = [
+                    ['Ressources Humaines', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+                    ['Département', 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z'],
+                    ['Pointage', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ['Gestion des tâches', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+                    ['Réunions', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                    ['Objectifs', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                    ['Congés', 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ['Réclamations', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z']
+                ];
+            @endphp
+
+            @foreach($items as $item)
+            <a href="#" class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 text-white/50 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:text-[#be2346] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item[1] }}" />
+                </svg>
+                <span class="font-medium text-sm">{{ $item[0] }}</span>
+            </a>
+            @endforeach
+        </nav>
+    </div>
+
+<div class="px-6 py-8 border-t border-white/5 mt-auto">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0">
+                {{ substr(Auth::user()->firstName, 0, 1) }}{{ substr(Auth::user()->lastName, 0, 1) }}
+            </div>
+            
+            <div class="flex flex-col min-w-0">
+                <p class="text-sm font-bold tracking-tight text-white leading-tight truncate">
+                    {{ Auth::user()->firstName }} {{ Auth::user()->lastName }}
+                </p>
+                <p class="text-[10px] text-[#be2346] uppercase font-black tracking-widest mt-0.5 opacity-80">
+                    {{ Auth::user()->role ?? 'Admin' }}
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('logout') }}" class="ml-2">
+            @csrf
+            <button type="submit" 
+                class="group p-2.5 rounded-lg bg-white/5 hover:bg-red-600/20 border border-white/5 hover:border-red-600/40 transition-all duration-300"
+                title="Quitter">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    class="w-5 h-5 text-white/40 group-hover:text-[#be2346] group-hover:scale-110 transition-all duration-300" 
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+</aside>
