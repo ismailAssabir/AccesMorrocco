@@ -1,21 +1,44 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| HOME = LOGIN (entry point)
+|--------------------------------------------------------------------------
+| A single / route handles both guests and authenticated users cleanly.
+| - Guest        → shows the login page (AuthenticatedSessionController@create)
+| - Authenticated → redirects to /dashboard
+*/
 Route::get('/', function () {
-    return view('welcome');
-});
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return app(AuthenticatedSessionController::class)->create(request());
+})->name('home');
 
+/*
+|--------------------------------------------------------------------------
+| Dashboard
+|--------------------------------------------------------------------------
+*/
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 #user Routes
@@ -30,6 +53,12 @@ Route::post('/clients', [ClientController::class, 'store']);
 Route::get('/clients/{id}' , [ClientController::class , 'show' ]);
 Route::get('/clients/edit/{id}' , [ClientController::class , 'edit' ]);
 Route::put('/clients/edit/{id}' , [ClientController::class , 'update' ]);
-
+#Category Routes
+Route::get('/category' , [CategoryController::class , 'index' ]);
+Route::post('/category', [CategoryController::class, 'store']);
+// Route::get('/category/{id}' , [CategoryController::class , 'show' ]);
+Route::get('/category/edit/{id}' , [CategoryController::class , 'edit' ]);
+Route::put('/category/edit/{id}' , [CategoryController::class , 'update' ]);
+Route::delete('/category/delete/{id}' , [CategoryController::class , 'destroy' ]);
 
 require __DIR__.'/auth.php';
