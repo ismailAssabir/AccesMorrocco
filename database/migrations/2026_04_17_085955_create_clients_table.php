@@ -24,6 +24,7 @@ return new class extends Migration
             $table->date('dateNaissance')->nullable();
             $table->enum('status', ['actif','inactif'])->default('actif');
             $table->string('type')->nullable();
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }
