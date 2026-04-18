@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\PresentationItem;
 
 class Category extends Model
 {
@@ -12,4 +13,7 @@ class Category extends Model
         'nom',
         'desc',
     ];
+    function presentationItems(){
+        return $this->hasMany(PresentationItem::class, 'idCategory', 'idCategory');
+    }
 }

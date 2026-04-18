@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use App\Models\Lead;
+use App\Models\Dossier;
 use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
@@ -23,5 +24,8 @@ class Client extends Model
     ];
     function lead(){
         return $this->hasOne(Lead::class, 'idClient');
+    }
+    function dossiers(){
+        return $this->hasMany(Dossier::class, 'idClient', 'idClient');
     }
 }
