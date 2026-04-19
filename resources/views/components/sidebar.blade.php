@@ -11,90 +11,125 @@
         </div>
     </div>
 
-  <div class="flex-1 overflow-y-auto px-4">
-    <div class="px-4 mb-6">
-        <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
-            Gestion Interne
-        </p>
-    </div>
-
+  <div class="px-4 mb-2">
     <nav class="space-y-1">
-        
-        <a href="{{ Route::has('ressources-humaines') ? route('ressources-humaines') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('ressources-humaines') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('ressources-humaines') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Ressources Humaines</span>
+        <a href="{{ route('dashboard') }}" 
+           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+           {{ request()->routeIs('dashboard') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+            
+            <div class="transition-transform duration-300 {{ request()->routeIs('dashboard') ? '' : 'group-hover:rotate-12' }}">
+                <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" 
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
+                          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+            <span class="font-medium text-sm">Accueil</span>
         </a>
-
-        <a href="{{ Route::has('departement') ? route('departement') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('departement') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('departement') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Département</span>
-        </a>
-
-        <a href="{{ Route::has('pointage') ? route('pointage') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('pointage') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('pointage') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Pointage</span>
-        </a>
-
-        <a href="{{ Route::has('taches') ? route('taches') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('taches') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('taches') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Gestion des tâches</span>
-        </a>
-
-        <a href="{{ Route::has('reunions') ? route('reunions') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('reunions') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('reunions') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Réunions</span>
-        </a>
-
-        <a href="{{ Route::has('objectifs') ? route('objectifs') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('objectifs') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('objectifs') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Objectifs</span>
-        </a>
-
-        <a href="{{ Route::has('conges') ? route('conges') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('conges') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('conges') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Congés</span>
-        </a>
-
-        <a href="{{ Route::has('reclamations') ? route('reclamations') : '#' }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 
-           {{ request()->routeIs('reclamations') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('reclamations') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span class="font-medium text-sm">Réclamations</span>
-        </a>
-
     </nav>
 </div>
+
+    <div class="flex-1 overflow-y-auto px-4">
+        <div class="px-4 mb-6">
+            <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
+                Gestion Interne
+            </p>
+        </div>
+
+        <nav class="space-y-1">
+            
+      <a href="{{ url('/users') }}" 
+   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+   {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+    
+    <div class="transition-transform duration-300 {{ request()->is('users*') ? '' : 'group-hover:rotate-12' }}">
+        <svg class="w-5 h-5 {{ request()->is('users*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </div>
+    <span class="font-medium text-sm">Ressources Humaines</span>
+</a>
+
+            <a href="{{ Route::has('departement') ? route('departement') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('departement') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('departement') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('departement') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Département</span>
+            </a>
+
+            <a href="{{ Route::has('pointage') ? route('pointage') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('pointage') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('pointage') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('pointage') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Pointage</span>
+            </a>
+
+            <a href="{{ Route::has('taches') ? route('taches') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('taches') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('taches') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('taches') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Gestion des tâches</span>
+            </a>
+
+            <a href="{{ Route::has('reunions') ? route('reunions') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('reunions') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('reunions') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('reunions') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Réunions</span>
+            </a>
+
+            <a href="{{ Route::has('objectifs') ? route('objectifs') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('objectifs') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('objectifs') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('objectifs') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Objectifs</span>
+            </a>
+
+            <a href="{{ Route::has('conges') ? route('conges') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('conges') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('conges') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('conges') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Congés</span>
+            </a>
+
+            <a href="{{ Route::has('reclamations') ? route('reclamations') : '#' }}" 
+               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+               {{ request()->routeIs('reclamations') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('reclamations') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('reclamations') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="font-medium text-sm">Réclamations</span>
+            </a>
+
+        </nav>
+    </div>
 
     <div class="px-6 py-8 border-t border-white/5 mt-auto">
         <div class="flex items-center justify-between">
