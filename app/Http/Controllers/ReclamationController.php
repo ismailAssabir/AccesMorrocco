@@ -6,7 +6,7 @@ use App\Models\Reclamation;
 class ReclamationController extends Controller
 {
      public function index(){
-        $Reclamations = Reclamation::All();
+        $Reclamations = Reclamation::with('user')->get();
         return view('AllReclamations' , compact("Reclamations"));
     }
 
@@ -32,7 +32,7 @@ public function store(Request $request) {
 
 }
 public function show($id){
-    $Reclamation = Reclamation::findOrFail($id);
+    $Reclamation = Reclamation::with('user')->findOrFail($id);
     return view('showReclamation' , compact('Reclamation'));
 }
 
