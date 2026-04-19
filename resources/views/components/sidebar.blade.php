@@ -1,34 +1,34 @@
 <aside class="w-72 min-h-screen bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
-
-    <div class="flex items-center gap-4 px-6 py-10">
-        <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain filter brightness-0 invert"
-                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDggMjJoNGwyLTNoMTJsNC00aC00TDQgMnptNiAxNUg5bDMtNiAzIDZ6Ii8+PC9zdmc+'">
+    <div class="position-fixed top-0">
+        <div class="flex items-center gap-4 px-6 py-10">
+            <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain filter brightness-0 invert"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDggMjJoNGwyLTNoMTJsNC00aC00TDQgMnptNiAxNUg5bDMtNiAzIDZ6Ii8+PC9zdmc+'">
+            </div>
+            <div class="flex flex-col">
+                <span class="text-xl font-bold tracking-tight text-white leading-tight">ACCESS</span>
+                <span class="text-[#be2346] font-extrabold text-[10px] tracking-[0.4em] uppercase">Morocco</span>
+            </div>
         </div>
-        <div class="flex flex-col">
-            <span class="text-xl font-bold tracking-tight text-white leading-tight">ACCESS</span>
-            <span class="text-[#be2346] font-extrabold text-[10px] tracking-[0.4em] uppercase">Morocco</span>
+
+        <div class="px-4 mb-2">
+            <nav class="space-y-1">
+                <a href="{{ route('dashboard') }}" 
+                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                {{ request()->routeIs('dashboard') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    
+                    <div class="transition-transform duration-300 {{ request()->routeIs('dashboard') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" 
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Accueil</span>
+                </a>
+            </nav>
         </div>
     </div>
-
-  <div class="px-4 mb-2">
-    <nav class="space-y-1">
-        <a href="{{ route('dashboard') }}" 
-           class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-           {{ request()->routeIs('dashboard') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-            
-            <div class="transition-transform duration-300 {{ request()->routeIs('dashboard') ? '' : 'group-hover:rotate-12' }}">
-                <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" 
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
-                          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </div>
-            <span class="font-medium text-sm">Accueil</span>
-        </a>
-    </nav>
-</div>
-
     <div class="flex-1 overflow-y-auto px-4">
         <div class="px-4 mb-6">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
