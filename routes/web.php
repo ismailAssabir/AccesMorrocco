@@ -37,28 +37,82 @@ Route::get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile',  [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 #user Routes
-Route::get('/users' , [UserController::class , 'index' ]);
+Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{id}' , [UserController::class , 'show' ]);
-Route::get('/users/edit/{id}' , [UserController::class , 'edit' ]);
-Route::put('/users/edit/{id}' , [UserController::class , 'update' ]);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::get('/users/edit/{id}', [UserController::class, 'edit']);
+Route::put('/users/edit/{id}', [UserController::class, 'update']);
 #Client Routes
-Route::get('/clients' , [ClientController::class , 'index' ]);
+Route::get('/clients', [ClientController::class, 'index']);
 Route::post('/clients', [ClientController::class, 'store']);
-Route::get('/clients/{id}' , [ClientController::class , 'show' ]);
-Route::get('/clients/edit/{id}' , [ClientController::class , 'edit' ]);
-Route::put('/clients/edit/{id}' , [ClientController::class , 'update' ]);
+Route::get('/clients/{id}', [ClientController::class, 'show']);
+Route::get('/clients/edit/{id}', [ClientController::class, 'edit']);
+Route::put('/clients/edit/{id}', [ClientController::class, 'update']);
 #Category Routes
-Route::get('/category' , [CategoryController::class , 'index' ]);
+Route::get('/category', [CategoryController::class, 'index']);
 Route::post('/category', [CategoryController::class, 'store']);
 // Route::get('/category/{id}' , [CategoryController::class , 'show' ]);
-Route::get('/category/edit/{id}' , [CategoryController::class , 'edit' ]);
-Route::put('/category/edit/{id}' , [CategoryController::class , 'update' ]);
-Route::delete('/category/delete/{id}' , [CategoryController::class , 'destroy' ]);
+Route::get('/category/edit/{id}', [CategoryController::class, 'edit']);
+Route::put('/category/edit/{id}', [CategoryController::class, 'update']);
+Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy']);
 
-require __DIR__.'/auth.php';
+/*
+|--------------------------------------------------------------------------
+| Départements Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/departements', function () {
+    $departements = collect([
+        (object) [
+            'idDepartement' => 1,
+            'title' => 'Technologie & IT',
+            'description' => 'Infrastructure, développement et support technique',
+            'manager_name' => 'Youssef Amrani',
+            'presence' => 99,
+            'tasks' => 78,
+            'count' => 14,
+        ],
+        (object) [
+            'idDepartement' => 2,
+            'title' => 'Marketing Digital',
+            'description' => 'Stratégie digitale, SEO et campagnes publicitaires',
+            'manager_name' => 'Sara Bennis',
+            'presence' => 69,
+            'tasks' => 65,
+            'count' => 8,
+        ],
+        (object) [
+            'idDepartement' => 3,
+            'title' => 'Ressources Humaines',
+            'description' => 'Recrutement, formation et gestion des talents',
+            'manager_name' => null,
+            'presence' => 30,
+            'tasks' => 90,
+            'count' => 5,
+        ],
+    ]);
+
+    $users = \App\Models\User::orderBy('firstName')->get();
+
+    return view('departements.index', compact('departements', 'users'));
+})->middleware('auth')->name('departements.index');
+
+Route::post('/departements', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'title' => 'required|string|max:50',
+        'description' => 'nullable|string',
+        'idUser' => 'nullable',
+    ]);
+
+    \App\Models\Departement::create($validated);
+
+    return redirect()->route('departements.index')
+        ->with('success', 'Département créé avec succès !');
+})->middleware('auth')->name('departements.store');
+
+require __DIR__ . '/auth.php';
