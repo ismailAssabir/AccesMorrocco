@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
+use App\Http\Controllers\DepartementController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
