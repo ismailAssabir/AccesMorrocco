@@ -28,4 +28,7 @@ class Departement extends Model
     function reunions(){
         return $this->hasMany(Reunion::class, 'idDepartement', 'idDepartement');
     }
+    function dossiers(){
+        return $this->hasMany(Dossier::class, 'idDepartement', 'idDepartement');
+    }
 }
