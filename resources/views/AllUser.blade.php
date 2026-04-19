@@ -78,8 +78,8 @@
                 setTimeout(() => {
                     el.style.opacity = '0';
                     el.style.transform = 'translateY(-10px)';
-                    setTimeout(() => el.remove(), 500); // كيمسحو من الـ DOM بعد ما تسالي الـ animation
-                }, 2000); // كيتسنى 4 ثواني عاد كيبدا يخفى
+                    setTimeout(() => el.remove(), 500); 
+                }, 2000); 
             }
         }
 
@@ -183,6 +183,8 @@
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input type="text" name="firstName" required placeholder="Prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="hidden" name="fichier" value="placeholder">
+                            <input type="hidden" name="rip" value="placeholder">
                             <input type="text" name="lastName" required placeholder="Nom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
                             <input type="email" name="email" required placeholder="Email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2">
                             <input type="password" name="password" required placeholder="Mot de passe" value="12345678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
