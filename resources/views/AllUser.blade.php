@@ -1,4 +1,7 @@
 <x-app-layout>
+    @php
+        $departements = \App\Models\Departement::all();
+    @endphp
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -177,9 +180,9 @@
                             <select name="idDepartement" required
                                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none">
                                 <option value="" disabled selected>Sélectionner le département</option>
-                                <option value="1">Informatique</option>
-                                <option value="2">Marketing</option>
-                                <option value="3">Ressources Humaines</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                                @endforeach
                             </select>
                             <input type="hidden" name="fichier" value="default.pdf">
                             <input type="hidden" name="rip" value="0000000000000000">
@@ -288,9 +291,9 @@
                             <select name="idDepartement" id="edit_idDepartement" required
                                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2 outline-none">
                                 <option value="" disabled selected>Sélectionner le département</option>
-                                <option value="1">Informatique</option>
-                                <option value="2">Marketing</option>
-                                <option value="3">Ressources Humaines</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <button type="submit"
