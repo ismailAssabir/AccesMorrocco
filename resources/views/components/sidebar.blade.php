@@ -1,4 +1,4 @@
-<aside class="w-72 h-screen sticky top-0 bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
+<aside class="sidebar-wrapper w-72 h-screen sticky top-0 bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
     {{-- ═══════════════ TOP SECTION (fixed) ═══════════════ --}}
     <div class="flex-shrink-0">
         <div class="flex items-center gap-4 px-6 py-10">
@@ -31,7 +31,7 @@
         </div>
     </div>
     {{-- ═══════════════ MIDDLE SECTION (scrollable) ═══════════════ --}}
-    <div class="flex-1 overflow-y-auto min-h-0 px-4">
+    <div class="flex-1 overflow-y-auto custom-scrollbar min-h-0 px-4">
         <div class="px-4 mb-6">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
