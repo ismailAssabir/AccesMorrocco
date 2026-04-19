@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReclamationController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,5 +62,11 @@ Route::post('/category', [CategoryController::class, 'store']);
 Route::get('/category/edit/{id}' , [CategoryController::class , 'edit' ]);
 Route::put('/category/edit/{id}' , [CategoryController::class , 'update' ]);
 Route::delete('/category/delete/{id}' , [CategoryController::class , 'destroy' ]);
-
+#Reclamation Routes
+Route::get('/reclamations' , [ReclamationController::class , 'index' ]);
+Route::post('/reclamations', [ReclamationController::class, 'store']);
+Route::get('/reclamation/{id}' , [CategoryController::class , 'show' ]);
+// Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
+// Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
+Route::delete('/reclamation/delete/{id}' , [ReclamationController::class , 'destroy' ]);
 require __DIR__.'/auth.php';
