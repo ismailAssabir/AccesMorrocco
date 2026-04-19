@@ -21,7 +21,10 @@
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-
+        @php
+            // هاد السطر كيجيب المستخدمين مرتبين بالاسم الأول
+            $users = \App\Models\User::orderBy('firstName')->get();
+        @endphp
         {{-- Form --}}
         <div class="overflow-y-auto">
             <form action="{{ route('departements.store') }}" method="POST" class="p-7 space-y-5">
@@ -64,7 +67,9 @@
                                         $uid   = $user->idUser ?? $user->id;
                                         $uName = trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) ?: 'Utilisateur';
                                     @endphp
-                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>{{ $uName }}</option>
+                                    <option value="{{ $user->idUser }}" {{ old('idUser') == $user->idUser ? 'selected' : '' }}>
+                                        {{ $user->firstName }} {{ $user->lastName }}
+                                    </option>
                                 @endforeach
                             @endif
                         </select>

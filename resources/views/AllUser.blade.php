@@ -1,4 +1,7 @@
 <x-app-layout>
+    @php
+        $departements = \App\Models\Departement::all();
+    @endphp
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -23,10 +26,7 @@
                 <div class="flex items-center justify-between">
                     <p class="text-slate-400 text-[10px] uppercase font-black tracking-widest">Effectif Total</p>
                     <span class="p-2 bg-slate-50 rounded-lg text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     </span>
                 </div>
                 <h3 class="text-3xl font-bold mt-2 text-slate-800">{{ $users->count() }}</h3>
@@ -44,25 +44,49 @@
             </div>
         </div>
 
-        @if(session('msg'))
-            <div
-                class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                {{ session('msg') }}
-            </div>
-        @endif
+        <div class="px-7 pt-6">
+    {{-- Success Message --}}
+    @if(session('msg'))
+        <div id="success-alert" 
+             class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500 ease-in-out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ session('msg') }}
+        </div>
+    @endif
 
-        @if($errors->any())
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    {{-- Error Messages --}}
+    @if($errors->any())
+        <div id="error-alert" 
+             class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500 ease-in-out">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // دالة باش نخفيو العنصر بسلاسة
+        function fadeAndRemove(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                setTimeout(() => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-10px)';
+                    setTimeout(() => el.remove(), 500); // كيمسحو من الـ DOM بعد ما تسالي الـ animation
+                }, 2000); // كيتسنى 4 ثواني عاد كيبدا يخفى
+            }
+        }
+
+        fadeAndRemove('success-alert');
+        fadeAndRemove('error-alert');
+    });
+</script>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
             <div class="overflow-x-auto">
@@ -82,38 +106,30 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($users as $user)
-                            <tr class="hover:bg-slate-50/80 transition-colors group">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-xl bg-[#be2346]/10 flex items-center justify-center font-bold text-xs text-[#be2346]">
-                                            {{ strtoupper(substr($user->firstName, 0, 1)) }}{{ strtoupper(substr($user->lastName, 0, 1)) }}
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-bold text-slate-700">{{ $user->firstName }}
-                                                {{ $user->lastName }}</span>
-                                            <span class="text-[11px] text-slate-400">{{ $user->email }}</span>
-                                        </div>
+                        <tr class="hover:bg-slate-50/80 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-[#be2346]/10 flex items-center justify-center font-bold text-xs text-[#be2346]">
+                                        {{ strtoupper(substr($user->firstName, 0, 1)) }}{{ strtoupper(substr($user->lastName, 0, 1)) }}
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ $user->post ?? 'Non défini' }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span
-                                        class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat }}</span>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button onclick='openEditModal(@json($user))'
-                                            class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" />
-                                            </svg>
-                                        </button>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-slate-700">{{ $user->firstName }} {{ $user->lastName }}</span>
+                                        <span class="text-[11px] text-slate-400">{{ $user->email }}</span>
                                     </div>
-                                </td>
-                            </tr>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ $user->post ?? 'Non défini' }}</td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button onclick='openEditModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                         @empty
                             <tr>
                                 <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-sm">Aucun collaborateur
@@ -155,7 +171,7 @@
                 <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden p-8">
                     <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                         <div>
-                            <h2 class="text-lg font-black text-slate-800" id="deptModalTitle">Ajouter un collaborateur</h2>
+                            <h2 class="text-lg font-black text-slate-800" id="deptModalTitle">Nouveau Collaborateur</h2>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Fiche de création · Access Morocco</p>
                         </div>
                         <button type="button" onclick="closeDeptModal()"
@@ -166,37 +182,81 @@
                     <form action="{{ url('/users') }}" method="POST" class="space-y-5">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-                            <input type="text" name="firstName" required placeholder="Prénom"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="text" name="lastName" required placeholder="Nom"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="hidden" name="fichier" value="placeholder">
-                            <input type="hidden" name="rip" value="placeholder">
-                            <input type="email" name="email" required placeholder="Email"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2">
-                            <input type="password" name="password" required placeholder="Mot de passe" value="12345678"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="text" name="cin" required placeholder="CIN"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="text" name="post" placeholder="Poste"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="text" name="phoneNumber" required placeholder="Téléphone"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="date" name="birthday" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="number" name="salaire" required placeholder="Salaire"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <select name="typeContrat"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="firstName" required placeholder="Prénom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="lastName" required placeholder="Nom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="email" name="email" required placeholder="Email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2">
+                            <input type="password" name="password" required placeholder="Mot de passe" value="12345678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="cin" required placeholder="CIN" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="post" placeholder="Poste" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="phoneNumber" required placeholder="Téléphone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="date" name="birthday" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="number" name="salaire" required placeholder="Salaire" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <select name="typeContrat" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
                                 <option value="CDI">CDI</option>
                                 <option value="CI">CI</option>
                                 <option value="freelance">Freelance</option>
                             </select>
+                            <select name="idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2 outline-none">
+                                <option value="" disabled selected>Sélectionner le département</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <button type="submit"
-                            class="w-full py-4 rounded-xl bg-[#be2346] text-white font-black">Confirmer l'ajout</button>
+                        <button type="submit" class="w-full py-4 rounded-xl bg-[#be2346] text-white font-black">Confirmer l'ajout</button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewUserModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('viewUserModal')"></div>
+            <div class="relative flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden relative">
+                    <button onclick="toggleModal('viewUserModal')"
+                        class="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/10 hover:bg-black/20 text-white transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div class="h-24 bg-gradient-to-r from-[#be2346] to-[#7a142b]"></div>
+                    <div class="px-8 pb-10">
+                        <div class="relative -mt-12 mb-6 flex flex-col items-center">
+                            <div id="view_avatar"
+                                class="w-24 h-24 rounded-[30px] bg-white shadow-xl flex items-center justify-center text-2xl font-black text-[#be2346] border-4 border-white mb-4">
+                            </div>
+                            <h2 id="view_fullName" class="text-2xl font-black text-slate-800"></h2>
+                            <p id="view_post" class="text-slate-400 font-bold text-xs uppercase tracking-widest"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <p class="text-[10px] text-slate-400 font-black uppercase mb-1">Email</p>
+                                <p id="view_email" class="text-sm font-bold text-slate-700 truncate"></p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <p class="text-[10px] text-slate-400 font-black uppercase mb-1">Téléphone</p>
+                                <p id="view_phone" class="text-sm font-bold text-slate-700"></p>
+                            </div>
+                            <div
+                                class="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] text-slate-400 font-black uppercase mb-1">Contrat & Salaire
+                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        <span id="view_contract"
+                                            class="px-2 py-0.5 bg-[#be2346]/10 text-[#be2346] rounded text-[10px] font-black uppercase"></span>
+                                        <p id="view_salaire" class="text-sm font-bold text-slate-700"></p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase mb-1">CIN</p>
+                                    <p id="view_cin" class="text-sm font-bold text-slate-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -204,42 +264,42 @@
         <div id="editUserModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editUserModal')"></div>
             <div class="relative flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden p-8">
+                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden p-8 relative">
+                    <button onclick="toggleModal('editUserModal')"
+                        class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
                     <h2 class="text-xl font-black text-slate-800 mb-6">Modifier collaborateur</h2>
                     <form id="editForm" method="POST" class="space-y-5">
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <input type="text" name="firstName" id="edit_firstName"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="text" name="lastName" id="edit_lastName"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <input type="email" name="email" id="edit_email"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2">
-                            <input type="text" name="post" id="edit_post"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2"
-                                placeholder="Poste">
-                            <input type="text" name="cin" id="edit_cin"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm"
-                                placeholder="CIN">
-                            <input type="number" name="salaire" id="edit_salaire"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm"
-                                placeholder="Salaire">
-                            <input type="text" name="phoneNumber" id="edit_phoneNumber"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm"
-                                placeholder="Téléphone">
-                            <input type="date" name="birthday" id="edit_birthday"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
-                            <select name="typeContrat" id="edit_typeContrat"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2 md:col-span-1">
+                            <input type="text" name="firstName" id="edit_firstName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="text" name="lastName" id="edit_lastName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <input type="email" name="email" id="edit_email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2">
+                            <input type="text" name="post" id="edit_post" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2" placeholder="Poste">
+                            <input type="text" name="cin" id="edit_cin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm" placeholder="CIN">
+                            <input type="number" name="salaire" id="edit_salaire" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm" placeholder="Salaire">
+                            <input type="text" name="phoneNumber" id="edit_phoneNumber" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm" placeholder="Téléphone">
+                            <input type="date" name="birthday" id="edit_birthday" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm">
+                            <select name="typeContrat" id="edit_typeContrat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2 md:col-span-1">
                                 <option value="CDI">CDI</option>
                                 <option value="CI">CI</option>
                                 <option value="freelance">Freelance</option>
                             </select>
+                            <select name="idDepartement" id="edit_idDepartement" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm col-span-2 outline-none">
+                                <option value="" disabled selected>Sélectionner le département</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <button type="submit"
-                            class="w-full py-4 rounded-xl bg-slate-800 text-white font-black">Sauvegarder les
-                            modifications</button>
+                        <button type="submit" class="w-full py-4 rounded-xl bg-slate-800 text-white font-black">Sauvegarder les modifications</button>
                     </form>
                 </div>
             </div>
@@ -247,7 +307,6 @@
     </div>
 
     <script>
-        // Updated to handle specific modal IDs
         function toggleModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
@@ -256,11 +315,26 @@
             }
         }
 
+        function openViewModal(user) {
+            document.getElementById('view_fullName').innerText = user.firstName + ' ' + user.lastName;
+            document.getElementById('view_post').innerText = user.post || 'Collaborateur';
+            document.getElementById('view_email').innerText = user.email;
+            document.getElementById('view_phone').innerText = user.phoneNumber;
+            document.getElementById('view_contract').innerText = user.typeContrat == 'CD' ? 'CDI' : user.typeContrat;
+            document.getElementById('view_salaire').innerText = user.salaire + ' MAD';
+            document.getElementById('view_cin').innerText = user.cin;
+
+            const initials = user.firstName.charAt(0).toUpperCase() + user.lastName.charAt(0).toUpperCase();
+            document.getElementById('view_avatar').innerText = initials;
+
+            toggleModal('viewUserModal');
+        }
+
         function openEditModal(user) {
             // Your friend's controller expects the ID to be passed to the route
             // Make sure your route in web.php is: Route::put('/users/edit/{id}', [UserController::class, 'update'])
             document.getElementById('editForm').action = '{{ url("/users/edit") }}/' + (user.idUser || user.id || user.id_user);
-
+            
             document.getElementById('edit_firstName').value = user.firstName || '';
             document.getElementById('edit_lastName').value = user.lastName || '';
             document.getElementById('edit_email').value = user.email || '';
@@ -268,10 +342,9 @@
             document.getElementById('edit_post').value = user.post || '';
             document.getElementById('edit_salaire').value = user.salaire || '';
             document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
-            document.getElementById('edit_birthday').value = user.birthday ? user.birthday.split(' ')[0] : '';
-            if (document.getElementById('edit_typeContrat')) {
-                document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
-            }
+            document.getElementById('edit_birthday').value = user.birthday || '';
+            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
+            document.getElementById('edit_idDepartement').value = user.idDepartement || '';
 
             toggleModal('editUserModal');
         }

@@ -53,11 +53,11 @@
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
 
-            <a href="{{ route('departements.index') }}" 
+            <a href="{{ url('/departements') }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('departements.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('departements.*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('departements.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->is('departements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>

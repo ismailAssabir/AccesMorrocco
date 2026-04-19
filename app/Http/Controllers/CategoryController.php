@@ -15,7 +15,7 @@ public function store(Request $request) {
     
 
     $newCategory = $request->validate([
-        'nom'     => 'required|string|max:55',
+        'title'     => 'required|string|max:55',
         'desc'    => 'nullable|string|max:255',
        
     ]);
