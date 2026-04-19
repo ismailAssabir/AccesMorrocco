@@ -1,5 +1,6 @@
-<aside class="w-72 min-h-screen bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
-    <div class="position-fixed top-0">
+<aside class="w-72 h-screen sticky top-0 bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl">
+    {{-- ═══════════════ TOP SECTION (fixed) ═══════════════ --}}
+    <div class="flex-shrink-0">
         <div class="flex items-center gap-4 px-6 py-10">
             <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain filter brightness-0 invert"
@@ -29,7 +30,8 @@
             </nav>
         </div>
     </div>
-    <div class="flex-1 overflow-y-auto px-4">
+    {{-- ═══════════════ MIDDLE SECTION (scrollable) ═══════════════ --}}
+    <div class="flex-1 overflow-y-auto min-h-0 px-4">
         <div class="px-4 mb-6">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
@@ -131,7 +133,8 @@
         </nav>
     </div>
 
-    <div class="px-6 py-8 border-t border-white/5 mt-auto">
+    {{-- ═══════════════ BOTTOM SECTION (fixed) ═══════════════ --}}
+    <div class="flex-shrink-0 px-6 py-8 border-t border-white/5">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0 active:scale-90 transition-transform cursor-pointer">
