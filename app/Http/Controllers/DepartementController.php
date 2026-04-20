@@ -25,7 +25,7 @@ class DepartementController extends Controller
         return $jours;
     }
     public function index(){
-
+        
 
         $state=[];
         $joursOuvrables = $this->getJoursOuvrables();
