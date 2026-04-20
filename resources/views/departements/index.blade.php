@@ -19,7 +19,7 @@
         {{-- ═══════════ KPI STRIP ═══════════ --}}
         @php
             $totalDepts = $departements->count();
-            $totalEmp   = $departements->sum('count');
+            $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
             $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
             $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
         @endphp
@@ -63,23 +63,62 @@
         </div>
 
         {{-- Flash --}}
-        @if(session('success'))
-            <div class="mb-6 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3.5 rounded-2xl text-sm font-semibold shadow-sm">
-                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                {{ session('success') }}
-            </div>
-        @endif
+        {{-- Success & Errors Messages --}}
+<div id="status-messages" class="px-7 pt-6">
+    @if(session('msg'))
+        <div class="msg-item mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ session('msg') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="msg-item mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+</div>
+
+<script>
+    // هاد الكود كيتنفذ فاش كتحل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.msg-item');
+        
+        messages.forEach(msg => {
+            // كيتسنى 3 ثواني (3000ms)
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-10px)';
+                
+                // كيمسح العنصر نهائياً بعد ما تسالي الـ Animation
+                setTimeout(() => {
+                    msg.remove();
+                }, 500);
+            }, 2000);
+        });
+    });
+</script>
+    
 
         {{-- ═══════════ GRID OF CARDS ═══════════ --}}
         @if($departements->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($departements as $dept)
                     @php
-                        $managerName    = $dept->manager_name;
+                        $managerName    = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
                         $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
                         $presence       = $dept->presence ?? 0;
                         $tasks          = $dept->tasks ?? 0;
-                        $empCount       = $dept->count ?? 0;
+                        
+                        // Dynamically count only Active employees using Collection methods
+                        $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);
+                        $empCount       = $activeEmployees->count();
 
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     @endphp
@@ -100,6 +139,20 @@
                                     <h3 class="text-base font-extrabold text-slate-800 truncate">{{ $dept->title }}</h3>
                                     <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ $dept->description ?? 'Aucune description' }}</p>
                                 </div>
+                                
+                                {{-- Edit Button --}}
+                                <button type="button" onclick="openEditDeptModal('{{ $dept->idDepartement ?? $dept->id }}', '{{ addslashes($dept->title) }}', '{{ addslashes($dept->description) }}', '{{ $dept->idUser }}')" class="shrink-0 text-slate-300 hover:text-[#b11d40] transition-colors p-1 mr-1" title="Modifier">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                
+                                {{-- Delete Button --}}
+                                <button type="button" onclick="confirmDelete('{{ route('departements.destroy', $dept->idDepartement ?? $dept->id) }}')" class="shrink-0 text-slate-300 hover:text-red-500 transition-colors p-1" title="Supprimer">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
 
                             {{-- Manager --}}
@@ -177,10 +230,10 @@
                             </div>
 
                             {{-- Gérer Button --}}
-                            <button class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200 active:scale-95">
+                            <a href="{{ route('departements.show', $dept->idDepartement ?? $dept->id) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200 active:scale-95">
                                 Gérer
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 @endforeach
@@ -203,6 +256,38 @@
 
     {{-- Include the create modal --}}
     @include('departements.create')
+    
+    {{-- Include the dynamically updating edit modal --}}
+    @include('departements.edit_modal')
+
+    {{-- Delete Confirmation Modal --}}
+    <div id="deleteConfirmModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-slate-800 mb-2">Supprimer !</h3>
+                <p class="text-sm text-slate-500 mb-6">Êtes-vous sûr de vouloir supprimer ce département ? Cette action est irréversible.</p>
+                
+                <form id="globalDeleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                            Annuler
+                        </button>
+                        <button type="submit" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-red-500/20 text-sm">
+                            Confirmer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         function openDeptModal() {
@@ -213,6 +298,22 @@
             document.getElementById('addDepartmentModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDeptModal(); });
+        document.addEventListener('keydown', e => { 
+            if (e.key === 'Escape') {
+                closeDeptModal(); 
+                closeDeleteModal();
+            }
+        });
+
+        function confirmDelete(url) {
+            document.getElementById('globalDeleteForm').action = url;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
     </script>
 </x-app-layout>

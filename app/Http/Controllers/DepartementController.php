@@ -8,8 +8,8 @@ use App\Models\Departement;
 class DepartementController extends Controller
 {
     public function index(){
-        $Departements = Departement::with('manager')->get();
-        return view('departements.index' , compact('Departements') );
+        $departements = Departement::with('manager')->get();
+        return view('departements.index' , compact('departements') );
     }
 
 public function store(Request $request) {
@@ -21,34 +21,34 @@ public function store(Request $request) {
         'idUser'  =>  'nullable|exists:users,idUser'
        
     ]);
-    $Departement = Departement::create($newDepartement);
+    $departement = Departement::create($newDepartement);
     return redirect()->back()->with('msg' , "Le département a été ajouté avec succès");
 
 }
 public function show($id){
-    $Departement = Departement::with('manager')->findOrFail($id);
-    return view('showDepartement' , compact('Departement'));
+    $departement = Departement::with('manager')->findOrFail($id);
+    return view('showDepartement' , compact('departement'));
 }
 public function destroy($id)
-{   $Departement = Departement::findOrFail($id);
-    $Departement->delete();
+{   $departement = Departement::findOrFail($id);
+    $departement->delete();
     return redirect()->back()->with('msg', 'Le département a été supprimée');
 }
 
 public function edit($id){
-    $Departement = Departement::with('manager')->findOrFail($id);
-    return view('editDepartement' , compact('Departement'));
+    $departement = Departement::with('manager')->findOrFail($id);
+    return view('editDepartement' , compact('departement'));
 }
 
 public function update(Request $request ,$id){
     
-    $DepartementUpdate = $request->validate([
+    $departementUpdate = $request->validate([
         'title'     => 'required|string|max:55',
         'description'    => 'nullable|string|max:255',
         'idUser'  =>  'nullable|exists:users,idUser'
     ]);
-    $Departement = Departement::findOrFail($id);
-   $Departement->update($DepartementUpdate);
+    $departement = Departement::findOrFail($id);
+   $departement->update($departementUpdate);
     return redirect()->back()->with('msg' , 'Le département été mises à jour avec succès');
 }
 }
