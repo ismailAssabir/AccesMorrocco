@@ -69,11 +69,11 @@ Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
 Route::delete('/reclamation/delete/{id}' , [ReclamationController::class , 'destroy' ]);
 #Departement Routes
-Route::get('/departements', [DepartementController::class, 'index']);
+Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
 Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
-Route::get('/departements/{id}', [DepartementController::class, 'show']);
-Route::get('/departements/edit/{id}', [DepartementController::class, 'edit']);
-Route::put('/departements/edit/{id}', [DepartementController::class, 'update']);
+Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('departements.show');
+Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
+Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
 Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
 
 

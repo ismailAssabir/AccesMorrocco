@@ -19,7 +19,7 @@
         {{-- ═══════════ KPI STRIP ═══════════ --}}
         @php
             $totalDepts = $departements->count();
-            $totalEmp   = $departements->sum('count');
+            $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
             $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
             $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
         @endphp
@@ -115,7 +115,10 @@
                         $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
                         $presence       = $dept->presence ?? 0;
                         $tasks          = $dept->tasks ?? 0;
-                        $empCount       = $dept->count ?? 0;
+                        
+                        // Dynamically count only Active employees using Collection methods
+                        $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);
+                        $empCount       = $activeEmployees->count();
 
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     @endphp
@@ -137,8 +140,15 @@
                                     <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ $dept->description ?? 'Aucune description' }}</p>
                                 </div>
                                 
+                                {{-- Edit Button --}}
+                                <button type="button" onclick="openEditDeptModal('{{ $dept->idDepartement ?? $dept->id }}', '{{ addslashes($dept->title) }}', '{{ addslashes($dept->description) }}', '{{ $dept->idUser }}')" class="shrink-0 text-slate-300 hover:text-[#b11d40] transition-colors p-1 mr-1" title="Modifier">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                
                                 {{-- Delete Button --}}
-                                <button type="button" onclick="confirmDelete('{{ route('departements.destroy', $dept->idDepartement ?? $dept->id) }}')" class="shrink-0 text-slate-300 hover:text-red-500 transition-colors p-1">
+                                <button type="button" onclick="confirmDelete('{{ route('departements.destroy', $dept->idDepartement ?? $dept->id) }}')" class="shrink-0 text-slate-300 hover:text-red-500 transition-colors p-1" title="Supprimer">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -220,10 +230,10 @@
                             </div>
 
                             {{-- Gérer Button --}}
-                            <button class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200 active:scale-95">
+                            <a href="{{ route('departements.show', $dept->idDepartement ?? $dept->id) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200 active:scale-95">
                                 Gérer
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 @endforeach
@@ -246,6 +256,9 @@
 
     {{-- Include the create modal --}}
     @include('departements.create')
+    
+    {{-- Include the dynamically updating edit modal --}}
+    @include('departements.edit_modal')
 
     {{-- Delete Confirmation Modal --}}
     <div id="deleteConfirmModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
