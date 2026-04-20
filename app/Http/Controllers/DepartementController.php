@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Departement;
 use App\Models\User;
+use App\Models\Pointage;
 use Carbon\Carbon;
 class DepartementController extends Controller
 {
@@ -24,6 +25,7 @@ class DepartementController extends Controller
         return $jours;
     }
     public function index(){
+
         $state=[];
         $joursOuvrables = $this->getJoursOuvrables();
         $depts =  Departement::with('manager')->get();
@@ -53,6 +55,7 @@ class DepartementController extends Controller
             'presenceMoyenne'   => round($depts->avg('presencePourcentage')),
        ];
         return view('departements.index' , ['departements'=>$depts, 'state'=> $state] );
+
     }
 
 public function store(Request $request) {
@@ -64,34 +67,34 @@ public function store(Request $request) {
         'idUser'  =>  'nullable|exists:users,idUser'
        
     ]);
-    $Departement = Departement::create($newDepartement);
+    $departement = Departement::create($newDepartement);
     return redirect()->back()->with('msg' , "Le département a été ajouté avec succès");
 
 }
 public function show($id){
-    $Departement = Departement::with('manager')->findOrFail($id);
-    return view('showDepartement' , compact('Departement'));
+    $departement = Departement::with('manager')->findOrFail($id);
+    return view('showDepartement' , compact('departement'));
 }
 public function destroy($id)
-{   $Departement = Departement::findOrFail($id);
-    $Departement->delete();
+{   $departement = Departement::findOrFail($id);
+    $departement->delete();
     return redirect()->back()->with('msg', 'Le département a été supprimée');
 }
 
 public function edit($id){
-    $Departement = Departement::with('manager')->findOrFail($id);
-    return view('editDepartement' , compact('Departement'));
+    $departement = Departement::with('manager')->findOrFail($id);
+    return view('editDepartement' , compact('departement'));
 }
 
 public function update(Request $request ,$id){
     
-    $DepartementUpdate = $request->validate([
+    $departementUpdate = $request->validate([
         'title'     => 'required|string|max:55',
         'description'    => 'nullable|string|max:255',
         'idUser'  =>  'nullable|exists:users,idUser'
     ]);
-    $Departement = Departement::findOrFail($id);
-   $Departement->update($DepartementUpdate);
+    $departement = Departement::findOrFail($id);
+   $departement->update($departementUpdate);
     return redirect()->back()->with('msg' , 'Le département été mises à jour avec succès');
 }
 }

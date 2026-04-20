@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
 
+use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +68,7 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
+
 Route::delete('/reclamation/delete/{id}' , [ReclamationController::class , 'destroy' ]);
 #Departement Routes
 Route::get('/departements', [DepartementController::class, 'index']);
@@ -85,7 +87,7 @@ Route::delete('/departements/delete/{id}', [DepartementController::class, 'destr
 | Départements Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
+// Route::middleware('auth')->group(function () {
 //     Route::get('/departements', function () {
 //         $departements = collect([
 //             (object) ['idDepartement' => 1, 'title' => 'Technologie & IT', 'manager_name' => 'Youssef Amrani', 'presence' => 99, 'tasks' => 78, 'count' => 14],
@@ -106,6 +108,86 @@ Route::middleware('auth')->group(function () {
         \App\Models\Departement::create($validated);
         return redirect()->route('departements.index')->with('success', 'Département créé avec succès !');
     })->name('departements.store');
+
+Route::delete('/reclamation/delete/{id}', function ($id) {
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->delete();
+    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
+
 });
+
+Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
+    $request->validate([
+        'reponse' => 'required|string|max:1000',
+    ]);
+
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->update([
+        'reponse' => $request->reponse,
+        'status' => 'resolue',
+    ]);
+
+    return redirect()->back()->with('msg', 'Votre réponse a été envoyée et la réclamation est marquée comme résolue.');
+});
+#Departement Routes
+Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
+Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
+Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('departements.show');
+Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
+Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
+Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
+
+
+
+# Pointage Route
+Route::get('/pointage', function () {
+    $pointages = collect([
+        ['id' => 1, 'employe' => 'Karim Benali', 'checkin' => '08:00', 'checkout' => '17:00', 'status' => 'Présent'],
+        ['id' => 2, 'employe' => 'Sara Alaoui', 'checkin' => '08:15', 'checkout' => '17:05', 'status' => 'En retard'],
+        ['id' => 3, 'employe' => 'Youssef Nouri', 'checkin' => '--:--', 'checkout' => '--:--', 'status' => 'Absent'],
+        ['id' => 4, 'employe' => 'Hassan IDRISSI', 'checkin' => '07:55', 'checkout' => '16:50', 'status' => 'Présent']
+    ]);
+    return view('pointages.index', compact('pointages'));
+})->middleware(['auth', 'verified'])->name('pointages.index');
+
+# Tasks Route
+Route::get('/tasks', function () {
+    $tasks = collect([
+        ['id' => 1, 'title' => 'Préparer le rapport mensuel', 'deadline' => '2026-04-22', 'priority' => 'Haute', 'progress' => 80],
+        ['id' => 2, 'title' => 'Mise à jour du site web', 'deadline' => '2026-04-25', 'priority' => 'Moyenne', 'progress' => 45],
+        ['id' => 3, 'title' => 'Audit sécurité', 'deadline' => '2026-04-30', 'priority' => 'Critique', 'progress' => 10],
+    ]);
+    return view('taches.index', compact('tasks'));
+})->middleware(['auth', 'verified'])->name('tasks.index');
+
+# Meetings Route
+Route::get('/meetings', function () {
+    $meetings = collect([
+        ['id' => 1, 'title' => 'Sync Hebdomadaire', 'date' => '2026-04-21 10:00', 'type' => 'Interne'],
+        ['id' => 2, 'title' => 'Présentation Client', 'date' => '2026-04-22 14:30', 'type' => 'Externe'],
+        ['id' => 3, 'title' => 'Revue Stratégique', 'date' => '2026-04-24 09:00', 'type' => 'Direction'],
+    ]);
+    return view('reunions.index', compact('meetings'));
+})->middleware(['auth', 'verified'])->name('meetings.index');
+
+# Goals Route
+Route::get('/goals', function () {
+    $goals = collect([
+        ['id' => 1, 'title' => 'Augmenter le CA de 20%', 'progress' => 65, 'status' => 'En cours'],
+        ['id' => 2, 'title' => 'Lancer la nouvelle app', 'progress' => 90, 'status' => 'Presque terminé'],
+        ['id' => 3, 'title' => 'Réduire le taux de churn', 'progress' => 30, 'status' => 'En retard'],
+    ]);
+    return view('objectifs.index', compact('goals'));
+})->middleware(['auth', 'verified'])->name('goals.index');
+
+# Leaves Route
+Route::get('/leaves', function () {
+    $leaves = collect([
+        ['id' => 1, 'employe' => 'Mounia Zaid', 'start' => '2026-05-01', 'end' => '2026-05-15', 'type' => 'Annuel', 'status' => 'Approuvé'],
+        ['id' => 2, 'employe' => 'Tariq Naji', 'start' => '2026-04-22', 'end' => '2026-04-24', 'type' => 'Maladie', 'status' => 'En attente'],
+        ['id' => 3, 'employe' => 'Salma Radi', 'start' => '2026-06-10', 'end' => '2026-06-12', 'type' => 'Exceptionnel', 'status' => 'Refusé'],
+    ]);
+    return view('conges.index', compact('leaves'));
+})->middleware(['auth', 'verified'])->name('leaves.index');
 
 require __DIR__.'/auth.php';

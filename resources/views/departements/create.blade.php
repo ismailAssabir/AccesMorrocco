@@ -21,7 +21,10 @@
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-
+        @php
+            // هاد السطر كيجيب المستخدمين مرتبين بالاسم الأول
+            $users = \App\Models\User::orderBy('firstName')->get();
+        @endphp
         {{-- Form --}}
         <div class="overflow-y-auto">
             <form action="{{ route('departements.store') }}" method="POST" class="p-7 space-y-5">
@@ -59,12 +62,15 @@
                                 class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5 @error('idUser') border-red-400 @enderror">
                             <option value="">— Sans manager pour le moment —</option>
                             @if(isset($users))
-                                @foreach($users as $user)
+                                {{-- Filter users directly in Blade collection to only show Managers --}}
+                                @foreach($users->filter(fn($u) => strtolower($u->type ?? '') === 'manager') as $user)
                                     @php
                                         $uid   = $user->idUser ?? $user->id;
                                         $uName = trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) ?: 'Utilisateur';
                                     @endphp
-                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>{{ $uName }}</option>
+                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>
+                                        {{ $uName }}
+                                    </option>
                                 @endforeach
                             @endif
                         </select>
