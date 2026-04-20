@@ -86,6 +86,14 @@ Route::get('/demandeDocuments/edit/{id}', [DemandeController::class, 'edit']);
 Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
 Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
 
+// Objectif Routes
+Route::get('/objectifs', [DemandeController::class, 'index']);
+Route::post('/objectifs', [DemandeController::class, 'store']);
+Route::get('/objectifs/{id}', [DemandeController::class, 'show']);
+Route::get('/objectifs/edit/{id}', [DemandeController::class, 'edit']);
+Route::put('/objectifs/edit/{id}', [DemandeController::class, 'update']);
+Route::delete('/objectifs/delete/{id}', [DemandeController::class, 'destroy']);
+
 
 
 
