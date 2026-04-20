@@ -33,7 +33,7 @@ class DepartementController extends Controller
              $employes= User::where('idDepartement', $dept->idDepartement)->get();
              $employeIds = $employes->map(function($emp){return $emp->idUser;})->toArray();
 
-            if ($employeIds->isEmpty() || $joursOuvrables === 0) {
+            if (empty($employeIds) || $joursOuvrables === 0) {
                 $dept->presencePourcentage = 0;
             } else {
                 $totalPourcentages = 0;

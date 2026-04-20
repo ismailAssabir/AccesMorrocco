@@ -77,6 +77,14 @@ Route::get('/departements/{id}', [DepartementController::class, 'show']);
 Route::get('/departements/edit/{id}', [DepartementController::class, 'edit']);
 Route::put('/departements/edit/{id}', [DepartementController::class, 'update']);
 Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy']);
+// demandeDocument Routes 
+Route::get('/demandeDocuments', [DemandeController::class, 'index']);
+Route::post('/demandeDocuments', [DemandeController::class, 'store']);
+Route::get('/demandeDocuments/{id}', [DemandeController::class, 'show']);
+Route::get('/demandeDocuments/edit/{id}', [DemandeController::class, 'edit']);
+Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
+Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
+
 
 
 
