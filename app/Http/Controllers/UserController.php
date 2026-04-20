@@ -7,7 +7,7 @@ use App\Models\User;
 class UserController extends Controller
 {
     public function index(){
-        $users = User::all();
+        $users = User::with('departement')->get();
         return view('AllUser' , compact("users"));
     }
 
