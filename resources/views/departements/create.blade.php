@@ -62,13 +62,14 @@
                                 class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5 @error('idUser') border-red-400 @enderror">
                             <option value="">— Sans manager pour le moment —</option>
                             @if(isset($users))
-                                @foreach($users as $user)
+                                {{-- Filter users directly in Blade collection to only show Managers --}}
+                                @foreach($users->filter(fn($u) => strtolower($u->type ?? '') === 'manager') as $user)
                                     @php
                                         $uid   = $user->idUser ?? $user->id;
                                         $uName = trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) ?: 'Utilisateur';
                                     @endphp
-                                    <option value="{{ $user->idUser }}" {{ old('idUser') == $user->idUser ? 'selected' : '' }}>
-                                        {{ $user->firstName }} {{ $user->lastName }}
+                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>
+                                        {{ $uName }}
                                     </option>
                                 @endforeach
                             @endif

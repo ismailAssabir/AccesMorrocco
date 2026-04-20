@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
 
+use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,7 +68,25 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
-Route::delete('/reclamation/delete/{id}' , [ReclamationController::class , 'destroy' ]);
+Route::delete('/reclamation/delete/{id}', function ($id) {
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->delete();
+    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
+});
+
+Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
+    $request->validate([
+        'reponse' => 'required|string|max:1000',
+    ]);
+
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->update([
+        'reponse' => $request->reponse,
+        'status' => 'resolue',
+    ]);
+
+    return redirect()->back()->with('msg', 'Votre réponse a été envoyée et la réclamation est marquée comme résolue.');
+});
 #Departement Routes
 Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
 Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
