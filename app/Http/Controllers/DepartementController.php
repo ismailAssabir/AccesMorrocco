@@ -8,7 +8,7 @@ use App\Models\Departement;
 class DepartementController extends Controller
 {
     public function index(){
-        $departements = Departement::with('manager')->get();
+        $departements = Departement::with(['manager', 'taches'])->get();
         return view('departements.index' , compact('departements') );
     }
 
@@ -26,7 +26,7 @@ public function store(Request $request) {
 
 }
 public function show($id){
-    $departement = Departement::with('manager')->findOrFail($id);
+    $departement = Departement::with(['manager', 'taches', 'taches.users'])->findOrFail($id);
     return view('showDepartement' , compact('departement'));
 }
 public function destroy($id)

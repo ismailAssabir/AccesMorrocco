@@ -21,7 +21,12 @@
             $totalDepts = $departements->count();
             $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
             $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
-            $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
+            
+            $allTasksPercentages = $departements->map(function($d) {
+                $total = $d->taches->count();
+                return $total > 0 ? ($d->taches->where('status', 'termine')->count() / $total) * 100 : 0;
+            });
+            $avgTasks = $totalDepts ? round($allTasksPercentages->avg()) : 0;
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
@@ -114,7 +119,10 @@
                         $managerName    = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
                         $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
                         $presence       = $dept->presence ?? 0;
-                        $tasks          = $dept->tasks ?? 0;
+                        
+                        $totalTaches    = $dept->taches->count();
+                        $finishedTaches = $dept->taches->where('status', 'termine')->count();
+                        $tasks          = $totalTaches > 0 ? round(($finishedTaches / $totalTaches) * 100) : 0;
                         
                         // Dynamically count only Active employees using Collection methods
                         $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);

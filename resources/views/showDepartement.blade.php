@@ -24,12 +24,27 @@
             </button>
         </div>
 
+        @if(session('msg'))
+            <div x-data="{ show: true }" 
+                 x-show="show" 
+                 x-init="setTimeout(() => show = false, 3000)"
+                 x-transition:leave="transition ease-in duration-500"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-90"
+                 class="mb-6 p-4 bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl font-bold flex items-center gap-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                {{ session('msg') }}
+            </div>
+        @endif
+
         {{-- ═══════════ KPI STRIP ═══════════ --}}
         @php
             $managerName    = $departement->manager ? trim($departement->manager->firstName . ' ' . $departement->manager->lastName) : null;
             $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
             $presence       = $departement->presence ?? 0;
-            $tasks          = $departement->tasks ?? 0;
+            $totalTaches    = $departement->taches->count();
+            $finishedTaches = $departement->taches->where('status', 'termine')->count();
+            $tasksPercentage = $totalTaches > 0 ? round(($finishedTaches / $totalTaches) * 100) : 0;
             
             // Allow user relationship as requested, fallback to employes relationship or an empty array
             $employeesList  = $departement->users ?? $departement->employes ?? collect([]); 
@@ -81,7 +96,7 @@
                 </span>
                 <div>
                     <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Tâches Faites</p>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $tasks }}%</p>
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $tasksPercentage }}%</p>
                 </div>
             </div>
         </div>
@@ -166,6 +181,100 @@
             </div>
         </div>
 
+        {{-- ═══════════ TASKS SECTION ═══════════ --}}
+        <div class="mt-8 bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col mb-12">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    Tâches du Département
+                </h3>
+                <a href="{{ route('tasks.index') }}" class="text-[11px] font-black uppercase text-[#b11d40] hover:underline">Voir tout le board</a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-2/5">Tâche</th>
+                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5">Assignation</th>
+                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5 text-center">Durée</th>
+                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($departement->taches as $tache)
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-slate-800">{{ $tache->titre }}</p>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">{{ Str::limit($tache->description, 50) }}</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex flex-col gap-1.5 mt-1">
+                                            @foreach($tache->users as $u)
+                                                <div class="flex items-center gap-2 group/user bg-slate-50/50 hover:bg-red-50 px-2 py-1 rounded-lg border border-slate-100 hover:border-red-100 transition-all">
+                                                    <form action="{{ route('tasks.unassign') }}" method="POST" class="flex items-center">
+                                                        @csrf
+                                                        <input type="hidden" name="idTache" value="{{ $tache->idTache }}">
+                                                        <input type="hidden" name="idUser" value="{{ $u->idUser }}">
+                                                        <button type="submit" class="w-5 h-5 rounded-md bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Retirer">
+                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </form>
+                                                    <span class="text-[11px] font-bold text-slate-700">{{ $u->firstName }} {{ $u->lastName }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        
+                                        <form action="{{ route('tasks.assign') }}" method="POST" class="mt-1">
+                                            @csrf
+                                            <input type="hidden" name="idTache" value="{{ $tache->idTache }}">
+                                            <select name="idUser" onchange="this.form.submit()" class="text-[10px] bg-slate-50 border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-[#b11d40] transition-all">
+                                                <option value="">+ Assigner</option>
+                                                @foreach($employeesList as $emp)
+                                                    <option value="{{ $emp->idUser }}">{{ $emp->firstName }}</option>
+                                                @endforeach
+                                            </select>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($tache->dateDebut && $tache->duree)
+                                        @php
+                                            $start = \Carbon\Carbon::parse($tache->dateDebut);
+                                            $end = \Carbon\Carbon::parse($tache->duree);
+                                            $duration = $start->diffInDays($end);
+                                        @endphp
+                                        <span class="text-xs font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-lg">
+                                            {{ $duration }} jours
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-slate-400">--</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($tache->status == 'todo')
+                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-slate-100 text-slate-500">À Faire</span>
+                                    @elseif($tache->status == 'en_cours')
+                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-blue-50 text-blue-500">En Cours</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-50 text-emerald-500">Terminé</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-16 text-center text-slate-400 font-medium">
+                                    Aucune tâche assignée à ce département.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     {{-- Include the dynamically updating edit modal --}}
