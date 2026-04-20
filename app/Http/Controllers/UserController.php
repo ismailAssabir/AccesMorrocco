@@ -7,7 +7,7 @@ use App\Models\User;
 class UserController extends Controller
 {
     public function index(){
-        $users = User::All();
+        $users = User::all();
         return view('AllUser' , compact("users"));
     }
 
@@ -22,8 +22,8 @@ public function store(Request $request) {
         'cin'           => 'required|string|unique:users,cin',
         'birthday'      => "required|date",
         'address'       => 'nullable|string|max:100',
-        'phoneNumber'   => 'required|min:10|max:15',
-        'typeContrat'   => 'nullable|in:CDI,CI,freelance',
+        'phoneNumber'   => 'required|digits:10',
+        'typeContrat'   => 'nullable|in:CD,CI,freelance',
         'salaire'       => 'required|numeric',
         'post'          => 'nullable|string|max:40',
         'dateEmb'       => 'nullable|date',
@@ -53,13 +53,13 @@ public function update(Request $request ,$id){
     $userUpdate = $request->validate([
         'firstName'    => 'required|string|max:50',
         'lastName'      => 'required|string|max:50',
-        'email'         => 'required|email|unique:users,email,'.$id,
+        'email'         => 'required|email|unique:users,email,'.$id.',idUser',
         'password'      => 'nullable|min:8',
-        'cin'           => 'required|string|unique:users,cin,'.$id,
+        'cin'           => 'required|string|unique:users,cin,'.$id.',idUser',
         'birthday'      => "required|date",
         'address'       => 'nullable|string|max:100',
-        'phoneNumber'   => 'required|min:10|max:15',
-        'typeContrat'   => 'nullable|in:CDI,CI,freelance',
+        'phoneNumber'   => 'required|digits:10',
+        'typeContrat'   => 'nullable|in:CD,CI,freelance',
         'salaire'       => 'required|numeric',
         'post'          => 'nullable|string|max:40',
         'dateEmb'       => 'nullable|date',
