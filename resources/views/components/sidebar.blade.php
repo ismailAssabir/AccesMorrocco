@@ -108,11 +108,11 @@
                 <span class="font-medium text-sm">Objectifs</span>
             </a>
 
-            <a href="{{ Route::has('leaves.index') ? route('leaves.index') : '#' }}" 
+            <a href="{{ Route::has('conge.index') ? route('conge.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('leaves.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('leaves.index') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('leaves.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               {{ request()->routeIs('conge.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('conge.index') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('conge.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>

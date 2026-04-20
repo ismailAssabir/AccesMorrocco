@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\TacheController;
+use App\Http\Controllers\CongeController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -44,8 +45,8 @@ Route::middleware('auth')->group(function () {
 #user Routes
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-Route::get('/users/edit/{id}', [UserController::class, 'edit']);
+// Route::get('/users/{id}', [UserController::class, 'show']);
+// Route::get('/users/edit/{id}', [UserController::class, 'edit']);
 Route::put('/users/edit/{id}', [UserController::class, 'update']);
 
 #Client Routes
@@ -69,11 +70,16 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
-Route::delete('/reclamation/delete/{id}', function ($id) {
-    $reclamation = Reclamation::findOrFail($id);
-    $reclamation->delete();
-    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
-});
+Route::delete('/reclamation/delete/{id}',  [ReclamationController::class , 'delete' ]);
+
+#Conge Routes
+Route::get('/conge' , [CongeController::class , 'index' ])->name('conge.index');
+Route::post('/conge', [CongeController::class, 'store'])->name('conge.store');
+Route::get('/conge/{id}' , [CongeController::class , 'show' ])->name('conge.show'); 
+Route::put('/conge/update/{id}' , [CongeController::class , 'update' ])->name('conge.update');
+Route::delete('/conge/delete/{id}',  [CongeController::class , 'destroy' ])->name('conge.destroy');
+
+
 
 Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
     $request->validate([
@@ -95,8 +101,6 @@ Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('
 Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
 Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
 Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
-
-
 
 # Pointage Route
 Route::get('/pointage', function () {
@@ -142,14 +146,6 @@ Route::get('/goals', function () {
     return view('objectifs.index', compact('goals'));
 })->middleware(['auth', 'verified'])->name('goals.index');
 
-# Leaves Route
-Route::get('/leaves', function () {
-    $leaves = collect([
-        ['id' => 1, 'employe' => 'Mounia Zaid', 'start' => '2026-05-01', 'end' => '2026-05-15', 'type' => 'Annuel', 'status' => 'Approuvé'],
-        ['id' => 2, 'employe' => 'Tariq Naji', 'start' => '2026-04-22', 'end' => '2026-04-24', 'type' => 'Maladie', 'status' => 'En attente'],
-        ['id' => 3, 'employe' => 'Salma Radi', 'start' => '2026-06-10', 'end' => '2026-06-12', 'type' => 'Exceptionnel', 'status' => 'Refusé'],
-    ]);
-    return view('conges.index', compact('leaves'));
-})->middleware(['auth', 'verified'])->name('leaves.index');
+
 
 require __DIR__.'/auth.php';
