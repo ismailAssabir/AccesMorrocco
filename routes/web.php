@@ -58,7 +58,7 @@ Route::put('/clients/edit/{id}', [ClientController::class, 'update']);
 #Category Routes
 Route::get('/category', [CategoryController::class, 'index']);
 Route::post('/category', [CategoryController::class, 'store']);
-// Route::get('/category/{id}' , [CategoryController::class , 'show' ]); 
+Route::get('/category/{id}' , [CategoryController::class , 'show' ]); 
 Route::get('/category/edit/{id}' , [CategoryController::class , 'edit' ]);
 Route::put('/category/edit/{id}' , [CategoryController::class , 'update' ]);
 Route::delete('/category/delete/{id}' , [CategoryController::class , 'destroy' ]);

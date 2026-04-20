@@ -101,24 +101,39 @@
 </div>
 
 <script>
-    function openEditDeptModal(id, title, description, managerId) {
-        // Base URL for the update route, handling trailing slashes correctly
-        // Note: Used /departements/edit/ base as per actual web.php but can be easily changed to /departements/ 
-        let baseUrl = '{{ url("/departements/edit/") }}';
-        const url = `${baseUrl}/${id}`;
-        
-        // Update form action
-        document.getElementById('editDepartmentForm').action = url;
-        document.getElementById('edit_url_input').value = url;
-        
-        // Populate inputs gracefully 
-        document.getElementById('edit_dept_title').value = title || '';
-        document.getElementById('edit_dept_description').value = description || '';
-        document.getElementById('edit_dept_manager').value = managerId || '';
-        
-        // Open modal
-        document.getElementById('editDepartmentModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+    function openEditDeptModal(id) {
+        // Build the URLs
+        const url = '{{ url("/departements/edit") }}/' + id;
+
+        // Fetch data via AJAX
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Fetch failed');
+            return response.json();
+        })
+        .then(data => {
+            // Populate inputs
+            document.getElementById('edit_dept_title').value = data.title || '';
+            document.getElementById('edit_dept_description').value = data.description || '';
+            document.getElementById('edit_dept_manager').value = data.idUser || '';
+            
+            // Set form action and hidden URL input
+            document.getElementById('editDepartmentForm').action = url;
+            document.getElementById('edit_url_input').value = url;
+
+            // Open modal
+            document.getElementById('editDepartmentModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Impossible de charger les données du département.');
+        });
     }
 
     function closeEditDeptModal() {

@@ -35,10 +35,16 @@ public function destroy($id)
     return redirect()->back()->with('msg', 'Le département a été supprimée');
 }
 
-public function edit($id){
-    $departement = Departement::with('manager')->findOrFail($id);
-    return view('editDepartement' , compact('departement'));
-}
+    public function edit(Request $request, $id)
+    {
+        $departement = Departement::with('manager')->findOrFail($id);
+        
+        if ($request->ajax()) {
+            return response()->json($departement);
+        }
+
+        return view('editDepartement', compact('departement'));
+    }
 
 public function update(Request $request ,$id){
     
