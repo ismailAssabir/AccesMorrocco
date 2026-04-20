@@ -84,6 +84,17 @@
 
         fadeAndRemove('success-alert');
         fadeAndRemove('error-alert');
+
+        // Auto-open modal if userId is in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        if (userId) {
+            const users = @json($users);
+            const user = users.find(u => (u.idUser || u.id) == userId);
+            if (user) {
+                openViewModal(user);
+            }
+        }
     });
 </script>
 
