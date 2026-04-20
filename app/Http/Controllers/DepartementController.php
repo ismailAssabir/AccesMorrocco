@@ -4,12 +4,58 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Departement;
-
+use App\Models\User;
+use App\Models\Pointage;
+use Carbon\Carbon;
 class DepartementController extends Controller
 {
+    private function getJoursOuvrables()
+    {
+        $debut = Carbon::now()->startOfMonth();
+        $fin   = Carbon::now()->endOfMonth();
+        $jours = 0;
+
+        while ($debut<=$fin) {
+            if ($debut->isWeekday()) {
+                $jours++;
+            }
+            $debut->addDay();
+        }
+
+        return $jours;
+    }
     public function index(){
-        $departements = Departement::with(['manager', 'taches'])->get();
-        return view('departements.index' , compact('departements') );
+        
+
+        $state=[];
+        $joursOuvrables = $this->getJoursOuvrables();
+        $depts =  Departement::with('manager')->get();
+        foreach($depts as $dept){
+             $employes= User::where('idDepartement', $dept->idDepartement)->get();
+             $employeIds = $employes->map(function($emp){return $emp->idUser;})->toArray();
+
+            if (empty($employeIds) || $joursOuvrables === 0) {
+                $dept->presencePourcentage = 0;
+            } else {
+                $totalPourcentages = 0;
+
+            foreach ($employes as $employe) {
+                $presences = Pointage::where('idUser', $employe->idUser)
+                    ->where('status', 'present')
+                    ->whereMonth('date', now()->month)
+                    ->whereYear('date', now()->year)
+                    ->count();
+                     $totalPourcentages += round(($presences / $joursOuvrables) * 100);
+            }
+                $dept->presencePourcentage = round($totalPourcentages / count($employeIds));
+            }
+        }
+       $state =[
+            'totalDepartements' => $depts->count(),
+            'totalEmployes'     => User::whereNotNull('idDepartement')->count(),
+            'presenceMoyenne'   => round($depts->avg('presencePourcentage')),
+       ];
+        return view('departements.index' , ['departements'=>$depts, 'state'=> $state] );
     }
 
 public function store(Request $request) {

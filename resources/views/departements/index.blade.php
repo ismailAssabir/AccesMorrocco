@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
-
+   
         {{-- ═══════════ TOP BAR ═══════════ --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
@@ -18,15 +18,14 @@
 
         {{-- ═══════════ KPI STRIP ═══════════ --}}
         @php
+
+            $totalDepts = $state['totalDepartements'] ?? 0;
+            $totalEmp   = $state['totalEmployes'] ?? 0;
+            $avgPres    = $state['presenceMoyenne'] ?? 0;
             $totalDepts = $departements->count();
-            $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
-            $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
-            
-            $allTasksPercentages = $departements->map(function($d) {
-                $total = $d->taches->count();
-                return $total > 0 ? ($d->taches->where('status', 'termine')->count() / $total) * 100 : 0;
-            });
-            $avgTasks = $totalDepts ? round($allTasksPercentages->avg()) : 0;
+
+            $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
+
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
@@ -116,17 +115,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($departements as $dept)
                     @php
-                        $managerName    = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
+                        $managerName = $dept->manager->name ?? null;
                         $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
-                        $presence       = $dept->presence ?? 0;
-                        
-                        $totalTaches    = $dept->taches->count();
-                        $finishedTaches = $dept->taches->where('status', 'termine')->count();
-                        $tasks          = $totalTaches > 0 ? round(($finishedTaches / $totalTaches) * 100) : 0;
-                        
-                        // Dynamically count only Active employees using Collection methods
-                        $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);
-                        $empCount       = $activeEmployees->count();
+
+                        $presence = $dept->avgPres ?? 0;
+                        $tasks = $dept->tasks ?? 0;
+                        $empCount = $dept->totalEmployes ?? 0;
 
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     @endphp

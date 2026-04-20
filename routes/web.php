@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\TacheController;
+use App\Http\Controllers\ReunionController;
+
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +71,7 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
-Route::delete('/reclamation/delete/{id}',  [ReclamationController::class , 'delete' ]);
+// Route::delete('/reclamation/delete/{id}',  [ReclamationController::class , 'delete' ]);
 
 #Conge Routes
 Route::get('/conge' , [ReclamationController::class , 'index' ]);
@@ -79,6 +81,69 @@ Route::put('/conge/update/{id}' , [ReclamationController::class , 'update' ]);
 Route::delete('/conge/delete/{id}',  [ReclamationController::class , 'destroy' ]);
 
 
+
+Route::delete('/reclamation/delete/{id}' , [ReclamationController::class , 'destroy' ]);
+#Departement Routes
+Route::get('/departements', [DepartementController::class, 'index']);
+Route::post('/departements', [DepartementController::class, 'store']);
+Route::get('/departements/{id}', [DepartementController::class, 'show']);
+Route::get('/departements/edit/{id}', [DepartementController::class, 'edit']);
+Route::put('/departements/edit/{id}', [DepartementController::class, 'update']);
+Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy']);
+// demandeDocument Routes 
+Route::get('/demandeDocuments', [DemandeController::class, 'index']);
+Route::post('/demandeDocuments', [DemandeController::class, 'store']);
+Route::get('/demandeDocuments/{id}', [DemandeController::class, 'show']);
+Route::get('/demandeDocuments/edit/{id}', [DemandeController::class, 'edit']);
+Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
+Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
+// demandeDocument Routes 
+Route::get('/reunions', [ReunionController::class, 'index']);
+Route::post('/reunions', [ReunionController::class, 'store']);
+Route::get('/reunions/{id}', [ReunionController::class, 'show']);
+Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit']);
+Route::put('/reunions/edit/{id}', [ReunionController::class, 'update']);
+Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy']);
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Départements Routes
+|--------------------------------------------------------------------------
+*/
+// Route::middleware('auth')->group(function () {
+//     Route::get('/departements', function () {
+//         $departements = collect([
+//             (object) ['idDepartement' => 1, 'title' => 'Technologie & IT', 'manager_name' => 'Youssef Amrani', 'presence' => 99, 'tasks' => 78, 'count' => 14],
+//             (object) ['idDepartement' => 2, 'title' => 'Marketing Digital', 'manager_name' => 'Sara Bennis', 'presence' => 69, 'tasks' => 65, 'count' => 8],
+//             (object) ['idDepartement' => 3, 'title' => 'Ressources Humaines', 'manager_name' => null, 'presence' => 30, 'tasks' => 90, 'count' => 5],
+//         ]);
+
+//         $users = \App\Models\User::orderBy('firstName')->get();
+//         return view('departements.index', compact('departements', 'users'));
+//     })->name('departements.index');
+
+    Route::post('/departements', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'title' => 'required|string|max:50',
+            'description' => 'nullable|string',
+            'idUser' => 'nullable',
+        ]);
+        \App\Models\Departement::create($validated);
+        return redirect()->route('departements.index')->with('success', 'Département créé avec succès !');
+    })->name('departements.store');
+
+Route::delete('/reclamation/delete/{id}', function ($id) {
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->delete();
+    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
+
+});
 
 Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
     $request->validate([
