@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 class ReclamationController extends Controller
 {
      public function index(){
-        $Reclamations = Reclamation::All();
+        $Reclamations = Reclamation::with('user')->get();
         return view('AllReclamations' , compact("Reclamations"));
     }
 
@@ -36,6 +36,7 @@ public function store(Request $request) {
         $Reclamation = Reclamation::with('user')->findOrFail($id);
         return view('showReclamation' , compact('Reclamation'));
     }
+
 
 // public function destroy($id)
 // {   $Reclamation = Reclamation::findOrFail($id);

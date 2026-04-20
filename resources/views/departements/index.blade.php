@@ -23,7 +23,9 @@
             $totalEmp   = $state['totalEmployes'] ?? 0;
             $avgPres    = $state['presenceMoyenne'] ?? 0;
             $totalDepts = $departements->count();
+
             $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
+
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
@@ -119,7 +121,6 @@
                         $presence = $dept->avgPres ?? 0;
                         $tasks = $dept->tasks ?? 0;
                         $empCount = $dept->totalEmployes ?? 0;
-
 
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     @endphp

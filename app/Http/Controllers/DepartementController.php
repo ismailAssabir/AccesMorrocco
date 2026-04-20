@@ -26,6 +26,7 @@ class DepartementController extends Controller
     }
     public function index(){
 
+
         $state=[];
         $joursOuvrables = $this->getJoursOuvrables();
         $depts =  Departement::with('manager')->get();
@@ -55,7 +56,6 @@ class DepartementController extends Controller
             'presenceMoyenne'   => round($depts->avg('presencePourcentage')),
        ];
         return view('departements.index' , ['departements'=>$depts, 'state'=> $state] );
-
     }
 
 public function store(Request $request) {
@@ -72,7 +72,7 @@ public function store(Request $request) {
 
 }
 public function show($id){
-    $departement = Departement::with('manager')->findOrFail($id);
+    $departement = Departement::with(['manager', 'taches', 'taches.users'])->findOrFail($id);
     return view('showDepartement' , compact('departement'));
 }
 public function destroy($id)

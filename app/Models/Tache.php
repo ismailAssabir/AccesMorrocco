@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
 use App\Models\Prime;
 class Tache extends Model
@@ -11,6 +12,7 @@ class Tache extends Model
     protected $primaryKey = 'idTache';
     protected $fillable=[
         'idObjectif',
+        'idDepartement',
         'titre',
         'dateDebut',
         'duree',
@@ -20,6 +22,9 @@ class Tache extends Model
         'status',
         'description'
     ];
+    function departement(){
+        return $this->belongsTo(Departement::class, 'idDepartement', 'idDepartement');
+    }
     function objectif(){
         return $this->belongsTo(Objectif::class, 'idObjectif', 'idObjectif');
     }
