@@ -21,7 +21,12 @@
             $totalDepts = $departements->count();
             $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
             $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
-            $avgTasks   = $totalDepts ? round($departements->avg('tasks')) : 0;
+            
+            $allTasksPercentages = $departements->map(function($d) {
+                $total = $d->taches->count();
+                return $total > 0 ? ($d->taches->where('status', 'termine')->count() / $total) * 100 : 0;
+            });
+            $avgTasks = $totalDepts ? round($allTasksPercentages->avg()) : 0;
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
@@ -114,7 +119,10 @@
                         $managerName    = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
                         $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
                         $presence       = $dept->presence ?? 0;
-                        $tasks          = $dept->tasks ?? 0;
+                        
+                        $totalTaches    = $dept->taches->count();
+                        $finishedTaches = $dept->taches->where('status', 'termine')->count();
+                        $tasks          = $totalTaches > 0 ? round(($finishedTaches / $totalTaches) * 100) : 0;
                         
                         // Dynamically count only Active employees using Collection methods
                         $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);
@@ -141,6 +149,7 @@
                                 </div>
                                 
                                 {{-- Edit Button --}}
+                            
                                 <button type="button" onclick="openEditDeptModal('{{ $dept->idDepartement ?? $dept->id }}', '{{ addslashes($dept->title) }}', '{{ addslashes($dept->description) }}', '{{ $dept->idUser }}')" class="shrink-0 text-slate-300 hover:text-[#b11d40] transition-colors p-1 mr-1" title="Modifier">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

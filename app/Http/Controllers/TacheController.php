@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tache;
+use App\Models\User;
+use App\Models\Objectif;
+use App\Models\Departement;
+
 class TacheController extends Controller
 {
     public function index(){
-        $Taches = Tache::with(['users', 'objectif'])->get();
-        return view('Taches' , compact('Taches') );
+        $Taches = Tache::with(['users', 'objectif', 'departement'])->get();
+        $users = User::all();
+        $objectifs = Objectif::all();
+        $departements = Departement::all();
+        return view('taches.index' , compact('Taches', 'users', 'objectifs', 'departements') );
     }
 
 public function store(Request $request) {
@@ -24,7 +31,8 @@ public function store(Request $request) {
         'priorite'    => 'required|in:basse,moyenne,haute', 
         'status'      => 'required|in:todo,en_cours,termine',
         'description' => 'nullable',
-        'idUser'      => 'nullable|exists:users,idUser'
+        'idUser'      => 'nullable|exists:users,idUser',
+        'idDepartement' => 'nullable|exists:departements,idDepartement'
     ]);
 
     unset($newTache['idUser']);
@@ -64,7 +72,8 @@ public function update(Request $request ,$id){
         'priorite'    => 'required|in:basse,moyenne,haute', 
         'status'      => 'required|in:todo,en_cours,termine',
         'description' => 'nullable',
-        'idUser'      => 'nullable|exists:users,idUser'
+        'idUser'      => 'nullable|exists:users,idUser',
+        'idDepartement' => 'nullable|exists:departements,idDepartement'
     ]);
     unset($TacheUpdate['idUser']);
 
@@ -77,5 +86,29 @@ public function update(Request $request ,$id){
 
 
     return redirect()->back()->with('msg' , 'La tache été mises à jour avec succès');
+}
+
+public function assignUser(Request $request) {
+    $request->validate([
+        'idTache' => 'required|exists:taches,idTache',
+        'idUser'  => 'required|exists:users,idUser'
+    ]);
+
+    $tache = Tache::findOrFail($request->idTache);
+    $tache->users()->syncWithoutDetaching([$request->idUser]);
+
+    return redirect()->back()->with('msg', 'Employé assigné à la tâche avec succès');
+}
+
+public function unassignUser(Request $request) {
+    $request->validate([
+        'idTache' => 'required|exists:taches,idTache',
+        'idUser'  => 'required|exists:users,idUser'
+    ]);
+
+    $tache = Tache::findOrFail($request->idTache);
+    $tache->users()->detach($request->idUser);
+
+    return redirect()->back()->with('msg', 'Employé retiré de la tâche');
 }
 }

@@ -32,10 +32,14 @@ public function store(Request $request) {
     return redirect()->back()->with('msg' , "La Reclamation a été ajoutée avec succès");
 }
 
+
 public function show($id){
     $Reclamation = Reclamation::with('user')->findOrFail($id);
     return view('showReclamation' , compact('Reclamation'));
 }
+
+
+
 
 // public function destroy($id)
 // {   $Reclamation = Reclamation::findOrFail($id);

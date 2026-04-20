@@ -7,6 +7,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\TacheController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -43,8 +44,8 @@ Route::middleware('auth')->group(function () {
 #user Routes
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-Route::get('/users/edit/{id}', [UserController::class, 'edit']);
+// Route::get('/users/{id}', [UserController::class, 'show']);
+// Route::get('/users/edit/{id}', [UserController::class, 'edit']);
 Route::put('/users/edit/{id}', [UserController::class, 'update']);
 
 #Client Routes
@@ -68,11 +69,16 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
-Route::delete('/reclamation/delete/{id}', function ($id) {
-    $reclamation = Reclamation::findOrFail($id);
-    $reclamation->delete();
-    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
-});
+Route::delete('/reclamation/delete/{id}',  [ReclamationController::class , 'delete' ]);
+
+#Conge Routes
+Route::get('/conge' , [ReclamationController::class , 'index' ]);
+Route::post('/conge', [ReclamationController::class, 'store']);
+Route::get('/conge/{id}' , [ReclamationController::class , 'show' ]); 
+Route::put('/conge/update/{id}' , [ReclamationController::class , 'update' ]);
+Route::delete('/conge/delete/{id}',  [ReclamationController::class , 'destroy' ]);
+
+
 
 Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
     $request->validate([
@@ -95,8 +101,6 @@ Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->n
 Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
 Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
 
-
-
 # Pointage Route
 Route::get('/pointage', function () {
     $pointages = collect([
@@ -109,14 +113,17 @@ Route::get('/pointage', function () {
 })->middleware(['auth', 'verified'])->name('pointages.index');
 
 # Tasks Route
-Route::get('/tasks', function () {
-    $tasks = collect([
-        ['id' => 1, 'title' => 'Préparer le rapport mensuel', 'deadline' => '2026-04-22', 'priority' => 'Haute', 'progress' => 80],
-        ['id' => 2, 'title' => 'Mise à jour du site web', 'deadline' => '2026-04-25', 'priority' => 'Moyenne', 'progress' => 45],
-        ['id' => 3, 'title' => 'Audit sécurité', 'deadline' => '2026-04-30', 'priority' => 'Critique', 'progress' => 10],
-    ]);
-    return view('taches.index', compact('tasks'));
-})->middleware(['auth', 'verified'])->name('tasks.index');
+Route::get('/tasks', [TacheController::class, 'index'])->middleware(['auth', 'verified'])->name('tasks.index');
+Route::post('/tasks', [TacheController::class, 'store'])->middleware(['auth', 'verified'])->name('tasks.store');
+Route::delete('/tasks/{id}', [TacheController::class, 'destroy'])->middleware(['auth', 'verified'])->name('tasks.destroy');
+Route::post('/tasks/assign', [TacheController::class, 'assignUser'])->middleware(['auth', 'verified'])->name('tasks.assign');
+Route::post('/tasks/unassign', [TacheController::class, 'unassignUser'])->middleware(['auth', 'verified'])->name('tasks.unassign');
+Route::put('/tasks/{id}', [TacheController::class, 'update'])->middleware(['auth', 'verified'])->name('tasks.update');
+Route::patch('/tasks/{id}/status', function (Illuminate\Http\Request $request, $id) {
+    $tache = App\Models\Tache::findOrFail($id);
+    $tache->update(['status' => $request->status]);
+    return redirect()->back();
+})->middleware(['auth', 'verified'])->name('tasks.updateStatus');
 
 # Meetings Route
 Route::get('/meetings', function () {

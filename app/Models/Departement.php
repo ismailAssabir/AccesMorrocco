@@ -31,4 +31,7 @@ class Departement extends Model
     function dossiers(){
         return $this->hasMany(Dossier::class, 'idDepartement', 'idDepartement');
     }
+    function taches(){
+        return $this->hasMany(Tache::class, 'idDepartement', 'idDepartement');
+    }
 }

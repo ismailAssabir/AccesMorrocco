@@ -1,5 +1,20 @@
 <x-app-layout>
-    <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
+    <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900" 
+         x-data="{ 
+            showModal: {{ $errors->any() ? 'true' : 'false' }}, 
+            showEditModal: false,
+            showDeleteModal: false,
+            deleteUrl: '',
+            currentTask: { titre: '', idTache: '', description: '', priorite: 'moyenne', status: 'todo', dateDebut: '', duree: '', idDepartement: '', idObjectif: '' },
+            openEditModal(task) {
+                this.currentTask = task;
+                this.showEditModal = true;
+            },
+            confirmDelete(id) {
+                this.deleteUrl = '/tasks/' + id;
+                this.showDeleteModal = true;
+            }
+         }">
 
         {{-- ═══════════ TOP BAR ═══════════ --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -7,96 +22,294 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Gestion des Tâches</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Suivez l'avancement des projets et des assignations.</p>
             </div>
-            <button class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
+            <button @click="showModal = true" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
-                Ajouter
+                Ajouter une Tâche
             </button>
         </div>
 
-        {{-- ═══════════ KPI STRIP ═══════════ --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-blue-400 flex items-center gap-4">
-                <span class="p-2.5 rounded-xl bg-blue-50 text-blue-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                </span>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total Tâches</p>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $tasks->count() }}</p>
+        @if(session('msg'))
+            <div x-data="{ show: true }" 
+                 x-show="show" 
+                 x-init="setTimeout(() => show = false, 3000)"
+                 x-transition:leave="transition ease-in duration-500"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-90"
+                 class="mb-6 p-4 bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl font-bold flex items-center gap-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                {{ session('msg') }}
+            </div>
+        @endif
+
+        {{-- ═══════════ KANBAN BOARD ═══════════ --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {{-- À FAIRE --}}
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                        À FAIRE
+                    </h2>
+                    <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'todo')->count() }}</span>
+                </div>
+                <div class="flex flex-col gap-4 min-h-[500px]">
+                    @foreach($Taches->where('status', 'todo') as $tache)
+                        @include('taches.card', ['tache' => $tache])
+                    @endforeach
                 </div>
             </div>
-            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#b11d40] flex items-center gap-4">
-                <span class="p-2.5 rounded-xl bg-red-50 text-[#b11d40]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </span>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Critiques / Hautes</p>
-                    <p class="text-2xl font-extrabold text-[#b11d40]">{{ $tasks->whereIn('priority', ['Critique', 'Haute'])->count() }}</p>
+
+            {{-- EN COURS --}}
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-blue-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                        EN COURS
+                    </h2>
+                    <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'en_cours')->count() }}</span>
+                </div>
+                <div class="flex flex-col gap-4 min-h-[500px]">
+                    @foreach($Taches->where('status', 'en_cours') as $tache)
+                        @include('taches.card', ['tache' => $tache])
+                    @endforeach
                 </div>
             </div>
-            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-emerald-400 flex items-center gap-4">
-                <span class="p-2.5 rounded-xl bg-emerald-50 text-emerald-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </span>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Complétées</p>
-                    <p class="text-2xl font-extrabold text-emerald-500">{{ $tasks->where('progress', '>=', 100)->count() }}</p>
+
+            {{-- TERMINÉ --}}
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        TERMINÉ
+                    </h2>
+                    <span class="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'termine')->count() }}</span>
+                </div>
+                <div class="flex flex-col gap-4 min-h-[500px]">
+                    @foreach($Taches->where('status', 'termine') as $tache)
+                        @include('taches.card', ['tache' => $tache])
+                    @endforeach
                 </div>
             </div>
-            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-amber-400 flex items-center gap-4">
-                <span class="p-2.5 rounded-xl bg-amber-50 text-amber-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                </span>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Prog. Moyenne</p>
-                    <p class="text-2xl font-extrabold text-amber-500">{{ round($tasks->avg('progress')) }}%</p>
+
+        </div>
+
+        {{-- ═══════════ MODAL AJOUTER ═══════════ --}}
+        <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-cloak>
+            <div @click.away="showModal = false" class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="text-xl font-extrabold text-slate-800">Nouvelle Tâche</h2>
+                    <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
+                <form action="{{ route('tasks.store') }}" method="POST" class="p-6 space-y-5">
+                    @csrf
+                    
+                    @if ($errors->any())
+                        <div class="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-bold">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Titre de la tâche</label>
+                        <input type="text" name="titre" required value="{{ old('titre') }}" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] focus:border-[#b11d40] transition-all" placeholder="Ex: Rapport mensuel">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Priorité</label>
+                            <select name="priorite" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="basse" {{ old('priorite') == 'basse' ? 'selected' : '' }}>Basse</option>
+                                <option value="moyenne" {{ old('priorite') == 'moyenne' ? 'selected' : '' }}>Moyenne</option>
+                                <option value="haute" {{ old('priorite') == 'haute' ? 'selected' : '' }}>Haute</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Status Initial</label>
+                            <select name="status" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="todo" {{ old('status') == 'todo' ? 'selected' : '' }}>À Faire</option>
+                                <option value="en_cours" {{ old('status') == 'en_cours' ? 'selected' : '' }}>En Cours</option>
+                                <option value="termine" {{ old('status') == 'termine' ? 'selected' : '' }}>Terminé</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Département Responsable</label>
+                            <select name="idDepartement" required class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="">Choisir un département</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}" {{ old('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>{{ $dept->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Assigner à (Optionnel)</label>
+                            <select name="idUser" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="">Non assigné</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->idUser }}" {{ old('idUser') == $user->idUser ? 'selected' : '' }}>{{ $user->firstName }} {{ $user->lastName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Date début</label>
+                            <input type="date" name="dateDebut" value="{{ old('dateDebut') }}" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Échéance (Duree)</label>
+                            <input type="date" name="duree" value="{{ old('duree') }}" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                            <input type="hidden" name="typeDuree" value="jours">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Objectif lié</label>
+                        <select name="idObjectif" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                            <option value="">Aucun objectif</option>
+                            @foreach($objectifs as $objectif)
+                                <option value="{{ $objectif->idObjectif }}" {{ old('idObjectif') == $objectif->idObjectif ? 'selected' : '' }}>{{ $objectif->titre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Description</label>
+                        <textarea name="description" rows="3" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all" placeholder="Détails de la tâche...">{{ old('description') }}</textarea>
+                    </div>
+
+                    <div class="pt-4 flex gap-3">
+                        <button type="button" @click="showModal = false" class="flex-1 px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Annuler</button>
+                        <button type="submit" class="flex-1 px-6 py-3 rounded-xl font-bold bg-[#b11d40] text-white hover:bg-[#911633] shadow-lg shadow-[#b11d40]/20 transition-all">Créer la Tâche</button>
+                    </div>
+                </form>
+
             </div>
         </div>
 
-        {{-- ═══════════ MAIN CONTENT ═══════════ --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($tasks as $task)
-            <div class="bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden">
-                <div class="p-6 flex-1 flex flex-col gap-5">
-                    <div class="flex justify-between items-start gap-4 mb-2">
-                        <h3 class="text-base font-extrabold text-slate-800 leading-tight">{{ $task['title'] }}</h3>
-                        @if($task['priority'] == 'Critique')
-                            <span class="bg-red-100 text-red-600 border border-red-200 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider shrink-0">Critique</span>
-                        @elseif($task['priority'] == 'Haute')
-                            <span class="bg-orange-100 text-orange-600 border border-orange-200 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider shrink-0">Haute</span>
-                        @else
-                            <span class="bg-blue-100 text-blue-600 border border-blue-200 font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider shrink-0">{{ $task['priority'] }}</span>
-                        @endif
-                    </div>
-                    
-                    <div class="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span>Échéance: <span class="font-bold text-slate-700">{{ $task['deadline'] }}</span></span>
-                    </div>
-
-                    <div class="space-y-2 mt-auto">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="font-black text-slate-500 uppercase text-[10px] tracking-widest">Progression</span>
-                            <span class="font-extrabold text-slate-800">{{ $task['progress'] }}%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="h-2 rounded-full transition-all duration-700 bg-gradient-to-r from-[#b11d40] to-[#7c1233]" style="width: {{ $task['progress'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t border-slate-100 bg-slate-50/60 px-6 py-4 flex justify-between items-center">
-                    <div class="flex -space-x-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm">K</div>
-                        <div class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm">S</div>
-                    </div>
-                    <button class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] hover:text-[#7c1233]">
-                        Gérer <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        {{-- ═══════════ EDIT TASK MODAL ═══════════ --}}
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all" x-show="showEditModal" x-cloak x-transition>
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100" @click.away="showEditModal = false">
+                
+                <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Modifier la Tâche</h2>
+                    <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
+
+                <form :action="'/tasks/' + currentTask.idTache" method="POST" class="p-8 space-y-5">
+                    @csrf
+                    @method('PUT')
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Titre de la tâche</label>
+                        <input type="text" name="titre" required x-model="currentTask.titre" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Priorité</label>
+                            <select name="priorite" x-model="currentTask.priorite" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="basse">Basse</option>
+                                <option value="moyenne">Moyenne</option>
+                                <option value="haute">Haute</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Status</label>
+                            <select name="status" x-model="currentTask.status" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="todo">À Faire</option>
+                                <option value="en_cours">En Cours</option>
+                                <option value="termine">Terminé</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Département</label>
+                            <select name="idDepartement" x-model="currentTask.idDepartement" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="">Choisir un département</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Objectif lié</label>
+                            <select name="idObjectif" x-model="currentTask.idObjectif" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                                <option value="">Aucun objectif</option>
+                                @foreach($objectifs as $objectif)
+                                    <option value="{{ $objectif->idObjectif }}">{{ $objectif->titre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Date début</label>
+                            <input type="date" name="dateDebut" x-model="currentTask.dateDebut" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Échéance (Duree)</label>
+                            <input type="date" name="duree" x-model="currentTask.duree" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all">
+                            <input type="hidden" name="typeDuree" value="jours">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Description</label>
+                        <textarea name="description" rows="3" x-model="currentTask.description" class="w-full bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#b11d40] transition-all"></textarea>
+                    </div>
+
+                    <div class="pt-4 flex gap-3">
+                        <button type="button" @click="showEditModal = false" class="flex-1 px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Annuler</button>
+                        <button type="submit" class="flex-1 px-6 py-3 rounded-xl font-bold bg-[#b11d40] text-white hover:bg-[#911633] shadow-lg shadow-[#b11d40]/20 transition-all">Mettre à jour</button>
+                    </div>
+                </form>
+
             </div>
-            @endforeach
+        </div>
+        {{-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ --}}
+        <div class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all" x-show="showDeleteModal" x-cloak x-transition>
+            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-100 overflow-hidden" @click.away="showDeleteModal = false">
+                <div class="p-8 text-center">
+                    <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
+                        <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 mb-2">Supprimer la tâche ?</h3>
+                    <p class="text-sm text-slate-500 mb-8">Cette action est définitive. Êtes-vous sûr de vouloir retirer cette tâche du board ?</p>
+                    
+                    <form :action="deleteUrl" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="flex gap-3">
+                            <button type="button" @click="showDeleteModal = false" class="flex-1 py-3 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                Annuler
+                            </button>
+                            <button type="submit" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-red-500/20 text-sm">
+                                Supprimer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
     </div>
