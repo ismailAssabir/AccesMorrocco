@@ -39,7 +39,10 @@ public function store(Request $request) {
 
 }
 public function show($id){
-    $user = User::findOrFail($id);
+    $user = User::with('departement')->findOrFail($id);
+    if (request()->ajax()) {
+        return response()->json($user);
+    }
     return view('show' , compact('user'));
 }
 
