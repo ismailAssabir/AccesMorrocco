@@ -69,34 +69,7 @@
     @endif
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        function fadeAndRemove(elementId) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                setTimeout(() => {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateY(-10px)';
-                    setTimeout(() => el.remove(), 500); 
-                }, 2000); 
-            }
-        }
 
-        fadeAndRemove('success-alert');
-        fadeAndRemove('error-alert');
-
-        // Auto-open modal if userId is in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('userId');
-        if (userId) {
-            const users = @json($users);
-            const user = users.find(u => (u.idUser || u.id) == userId);
-            if (user) {
-                openViewModal(user);
-            }
-        }
-    });
-</script>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
             <div class="overflow-x-auto">
@@ -130,16 +103,22 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ $user->post ?? 'Non défini' }}</td>
                             <td class="px-6 py-4">
-                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat }}</span>
+                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat == 'CD' ? 'CDI' : $user->typeContrat }}</span>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button onclick='openViewModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    </button>
-                                    <button onclick='openEditModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                    </button>
+                                    <a href="{{ route('users.show', $user->idUser) }}" onclick="event.preventDefault();" class="transition-all" title="Voir les détails">
+                                        <button type="button" onclick='openViewModal(@json($user))' 
+                                           class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        </button>
+                                    </a>
+                                    <a href="{{ route('users.edit', $user->idUser) }}" onclick="event.preventDefault();" class="transition-all" title="Modifier">
+                                        <button type="button" onclick='openEditModal(@json($user))' 
+                                           class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                                        </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -191,7 +170,7 @@
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <form action="{{ url('/users') }}" method="POST" class="space-y-5">
+                    <form action="{{ route('users.store') }}" method="POST" class="space-y-5">
     @csrf
     <input type="hidden" name="fichier" value="placeholder">
     <input type="hidden" name="rip" value="placeholder">
@@ -256,7 +235,7 @@
         <div class="flex flex-col">
             <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Type de Contrat *</label>
             <select name="typeContrat" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="CDI">CDI</option>
+                <option value="CD">CDI</option>
                 <option value="CI">CI</option>
                 <option value="freelance">Freelance</option>
             </select>
@@ -465,7 +444,7 @@
         <div class="flex flex-col">
             <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Type de Contrat</label>
             <select name="typeContrat" id="edit_typeContrat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="CDI">CDI</option>
+                <option value="CD">CDI</option>
                 <option value="CI">CI</option>
                 <option value="freelance">Freelance</option>
             </select>
@@ -492,16 +471,45 @@
     </div>
 
     <script>
+        function updateUrl(params) {
+            let baseUrl = "{{ route('users.index') }}";
+            let newUrl = baseUrl;
+            
+            if (params.userId) {
+                if (params.action === 'edit') {
+                    newUrl = baseUrl + '/edit/' + params.userId;
+                } else {
+                    newUrl = baseUrl + '/' + params.userId;
+                }
+            }
+            
+            window.history.pushState(null, '', newUrl);
+        }
+
+        function resetUrl() {
+            updateUrl({});
+        }
+
         function toggleModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
+                const isOpening = modal.classList.contains('hidden');
                 modal.classList.toggle('hidden');
                 document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
+                
+                // Reset URL when closing user modals
+                if (!isOpening && (id === 'viewUserModal' || id === 'editUserModal')) {
+                    resetUrl();
+                }
             }
         }
 
-        function openViewModal(user) {
+        function openViewModal(user, skipPush = false) {
             console.log("Viewing user:", user);
+            
+            if (!skipPush) {
+                updateUrl({ userId: (user.idUser || user.id) });
+            }
             
             // Full Name and Avatar
             document.getElementById('view_fullName').innerText = user.firstName + ' ' + user.lastName;
@@ -511,7 +519,7 @@
             // Professional Details
             document.getElementById('view_post').innerText = user.post || 'Collaborateur';
             document.getElementById('view_dept').innerText = user.departement ? user.departement.title : 'Non assigné';
-            document.getElementById('view_contract').innerText = user.typeContrat || 'CDI';
+            document.getElementById('view_contract').innerText = user.typeContrat === 'CD' ? 'CDI' : (user.typeContrat || 'CDI');
             document.getElementById('view_salaire').innerText = user.salaire ? new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(user.salaire) : '0,00 MAD';
             document.getElementById('view_dateEmb').innerText = user.dateEmb ? new Date(user.dateEmb).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non renseignée';
             
@@ -557,8 +565,14 @@
             toggleModal('viewUserModal');
         }
 
-        function openEditModal(user) {
-            document.getElementById('editForm').action = '{{ url("/users/edit") }}/' + (user.idUser || user.id || user.id_user);
+        function openEditModal(user, skipPush = false) {
+            if (!skipPush) {
+                updateUrl({ userId: (user.idUser || user.id), action: 'edit' });
+            }
+
+            // Construct the update URL using the named route
+            const updateUrlPattern = "{{ route('users.update', ':id') }}";
+            document.getElementById('editForm').action = updateUrlPattern.replace(':id', (user.idUser || user.id || user.id_user));
             
             document.getElementById('edit_firstName').value = user.firstName || '';
             document.getElementById('edit_lastName').value = user.lastName || '';
@@ -568,13 +582,48 @@
             document.getElementById('edit_salaire').value = user.salaire || '';
             document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
             document.getElementById('edit_birthday').value = user.birthday || '';
-            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
+            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CD';
             document.getElementById('edit_idDepartement').value = user.idDepartement || '';
             
             // CHARGEMENT DU ROLE DANS LE SELECT
-            document.getElementById('edit_role').value = user.role || 'employee';
+            document.getElementById('edit_role').value = user.type || user.role || 'employee';
 
             toggleModal('editUserModal');
         }
+
+        // --- Auto-open and UI initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            function fadeAndRemove(elementId) {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    setTimeout(() => {
+                        el.style.opacity = '0';
+                        el.style.transform = 'translateY(-10px)';
+                        setTimeout(() => el.remove(), 500); 
+                    }, 2000); 
+                }
+            }
+
+            fadeAndRemove('success-alert');
+            fadeAndRemove('error-alert');
+
+            // Server-side auto-open (When data is received from routes)
+            @if(isset($openModal) && isset($selectedUser))
+                const selectedUser = @json($selectedUser);
+                const openModal = "{{ $openModal }}";
+                if (openModal === 'view') {
+                    openViewModal(selectedUser, true);
+                } else if (openModal === 'edit') {
+                    openEditModal(selectedUser, true);
+                }
+            @endif
+
+            // Handle back button
+            window.onpopstate = function() {
+                document.getElementById('viewUserModal').classList.add('hidden');
+                document.getElementById('editUserModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            };
+        });
     </script>
 </x-app-layout>

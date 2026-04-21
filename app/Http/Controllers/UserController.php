@@ -39,13 +39,15 @@ public function store(Request $request) {
 
 }
 public function show($id){
-    $user = User::findOrFail($id);
-    return view('show' , compact('user'));
+    $users = User::with('departement')->get();
+    $selectedUser = User::with('departement')->findOrFail($id);
+    return view('AllUser' , compact('users', 'selectedUser'))->with('openModal', 'view');
 }
 
 public function edit($id){
-    $user = User::findOrFail($id);
-    return view('edit' , compact('user'));
+    $users = User::with('departement')->get();
+    $selectedUser = User::with('departement')->findOrFail($id);
+    return view('AllUser' , compact('users', 'selectedUser'))->with('openModal', 'edit');
 }
 
 public function update(Request $request ,$id){
@@ -75,6 +77,6 @@ public function update(Request $request ,$id){
         unset($userUpdate['password']);
     }
     $user->update($userUpdate);
-    return redirect()->back()->with('msg' , 'Les informations utilisateur ont été mises à jour avec succès');
+    return redirect()->route('users.index')->with('msg' , 'Les informations utilisateur ont été mises à jour avec succès');
 }
 }
