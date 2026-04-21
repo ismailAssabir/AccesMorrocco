@@ -96,6 +96,39 @@
             }
         }
     });
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed bottom-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-red-50 border-red-200 text-red-600';
+        const icon = type === 'success' 
+            ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+            : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            
+        toast.className = `p-4 ${bgColor} border rounded-2xl shadow-xl font-bold text-sm flex items-center gap-3 transition-all duration-500 transform translate-x-20 opacity-0 pointer-events-auto`;
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        
+        document.getElementById('toast-container').appendChild(toast);
+        
+        // Appear
+        setTimeout(() => {
+            toast.classList.remove('translate-x-20', 'opacity-0');
+        }, 100);
+        
+        // Disappear
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-[-10px]');
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+    }
 </script>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
@@ -134,10 +167,10 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button onclick='openViewModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
+                                    <button onclick="openShowUserModal('{{ $user->idUser }}')" class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                     </button>
-                                    <button onclick='openEditModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
+                                    <button onclick="openEditModal('{{ $user->idUser }}')" class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                                     </button>
                                 </div>
@@ -492,6 +525,27 @@
     </div>
 
     <script>
+        function openShowUserModal(id) {
+            // Add a light loading state to the table if needed, here we just fetch
+            fetch(`/users/${id}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(user => {
+                openViewModal(user);
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                showToast("Impossible de charger les informations de l'utilisateur.", 'error');
+            });
+        }
+
         function toggleModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
@@ -557,24 +611,48 @@
             toggleModal('viewUserModal');
         }
 
-        function openEditModal(user) {
-            document.getElementById('editForm').action = '{{ url("/users/edit") }}/' + (user.idUser || user.id || user.id_user);
-            
-            document.getElementById('edit_firstName').value = user.firstName || '';
-            document.getElementById('edit_lastName').value = user.lastName || '';
-            document.getElementById('edit_email').value = user.email || '';
-            document.getElementById('edit_cin').value = user.cin || '';
-            document.getElementById('edit_post').value = user.post || '';
-            document.getElementById('edit_salaire').value = user.salaire || '';
-            document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
-            document.getElementById('edit_birthday').value = user.birthday || '';
-            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
-            document.getElementById('edit_idDepartement').value = user.idDepartement || '';
-            
-            // CHARGEMENT DU ROLE DANS LE SELECT
-            document.getElementById('edit_role').value = user.role || 'employee';
+        async function openEditModal(id) {
+            try {
+                const response = await fetch(`{{ url('/') }}/users/edit/${id}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
 
-            toggleModal('editUserModal');
+                // Debugging: Affichage du contenu brut de la réponse
+                const rawText = await response.text();
+                console.log("Raw Response:", rawText);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const user = JSON.parse(rawText);
+                
+                // Dynamically update the form action
+                document.getElementById('editForm').action = `{{ url("/users/edit") }}/${id}`;
+                
+                // Form Mapping with null check
+                document.getElementById('edit_firstName').value = user.firstName || '';
+                document.getElementById('edit_lastName').value = user.lastName || '';
+                document.getElementById('edit_email').value = user.email || '';
+                document.getElementById('edit_cin').value = user.cin || '';
+                document.getElementById('edit_post').value = user.post || '';
+                document.getElementById('edit_salaire').value = user.salaire || '';
+                document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
+                document.getElementById('edit_birthday').value = user.birthday || '';
+                document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
+                document.getElementById('edit_idDepartement').value = user.idDepartement || '';
+                
+                // Loading role into select (field name 'type' or 'role' depending on model)
+                document.getElementById('edit_role').value = user.type || user.role || 'employee';
+
+                toggleModal('editUserModal');
+            } catch (error) {
+                console.error("Fetch error details:", error);
+                showToast(`Erreur (${error.message}): Impossible de charger les données pour la modification.`, 'error');
+            }
         }
     </script>
 </x-app-layout>
