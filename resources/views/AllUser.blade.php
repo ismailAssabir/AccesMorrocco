@@ -611,21 +611,29 @@
             toggleModal('viewUserModal');
         }
 
-        function openEditModal(id) {
-            // Show loading toast or state if desired
-            fetch(`/users/edit/${id}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+        async function openEditModal(id) {
+            try {
+                const response = await fetch(`{{ url('/') }}/users/edit/${id}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                // Debugging: Affichage du contenu brut de la réponse
+                const rawText = await response.text();
+                console.log("Raw Response:", rawText);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(user => {
+
+                const user = JSON.parse(rawText);
+                
+                // Dynamically update the form action
                 document.getElementById('editForm').action = `{{ url("/users/edit") }}/${id}`;
                 
+                // Form Mapping with null check
                 document.getElementById('edit_firstName').value = user.firstName || '';
                 document.getElementById('edit_lastName').value = user.lastName || '';
                 document.getElementById('edit_email').value = user.email || '';
@@ -637,15 +645,14 @@
                 document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
                 document.getElementById('edit_idDepartement').value = user.idDepartement || '';
                 
-                // Loading role into select
-                document.getElementById('edit_role').value = user.type || 'employee';
+                // Loading role into select (field name 'type' or 'role' depending on model)
+                document.getElementById('edit_role').value = user.type || user.role || 'employee';
 
                 toggleModal('editUserModal');
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
-                showToast("Impossible de charger les données pour la modification.", 'error');
-            });
+            } catch (error) {
+                console.error("Fetch error details:", error);
+                showToast(`Erreur (${error.message}): Impossible de charger les données pour la modification.`, 'error');
+            }
         }
     </script>
 </x-app-layout>

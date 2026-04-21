@@ -48,6 +48,9 @@ public function show($id){
 
 public function edit($id){
     $user = User::findOrFail($id);
+    if (request()->ajax()) {
+        return response()->json($user);
+    }
     return view('edit' , compact('user'));
 }
 
