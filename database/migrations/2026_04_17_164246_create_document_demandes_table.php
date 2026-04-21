@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('idUser')->references('idUser')->on('users')->cascadeOnDelete();
             $table->string('titre');
             $table->text('description')->nullable();
-            $table->timestamps('dateDemande')->current();
+            $table->timestamp('dateDemande')->current();
             $table->enum('status', ['en_attente','approuve','refuse'])->default('en_attente');
             $table->enum('type', ['attestation','contrat','autre'])->nullable();
             $table->string('fichiers')->nullable();

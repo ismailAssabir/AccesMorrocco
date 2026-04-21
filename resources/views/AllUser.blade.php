@@ -558,7 +558,7 @@
         }
 
         function openEditModal(user) {
-            document.getElementById('editForm').action = '{{ url("/users/edit") }}/' + (user.idUser || user.id || user.id_user);
+            document.getElementById('editForm').action = '{{ url("/users/n") }}/' + (user.idUser || user.id || user.id_user);
             
             document.getElementById('edit_firstName').value = user.firstName || '';
             document.getElementById('edit_lastName').value = user.lastName || '';

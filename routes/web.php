@@ -8,6 +8,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\TacheController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ObjectifController;
+use App\Http\Controllers\DemandeController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -44,7 +47,7 @@ Route::middleware('auth')->group(function () {
 #user Routes
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{id}', [UserController::class, 'show']);
+// Route::get('/users/{id}', [UserController::class, 'show']);
 Route::get('/users/edit/{id}', [UserController::class, 'edit']);
 Route::put('/users/edit/{id}', [UserController::class, 'update']);
 
@@ -93,7 +96,12 @@ Route::get('/objectifs/{id}', [DemandeController::class, 'show']);
 Route::get('/objectifs/edit/{id}', [DemandeController::class, 'edit']);
 Route::put('/objectifs/edit/{id}', [DemandeController::class, 'update']);
 Route::delete('/objectifs/delete/{id}', [DemandeController::class, 'destroy']);
-
+// Permission Route 
+// Route::middleware(['auth', 'type:admin'])->group(function () {
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions/{id}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+    Route::put('/permissions/{id}', [PermissionController::class, 'update'])->name('permissions.update');
+// });
 
 
 
