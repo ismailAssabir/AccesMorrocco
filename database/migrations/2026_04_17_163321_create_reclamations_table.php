@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('idUser')->nullable();
             $table->foreign('idUser')->references('idUser')->on('users')->nullOnDelete();
             $table->text('description');
-            $table->date('dateEnvoi')->nullable();
+            $table->timestamp('dateEnvoi')->current();
             $table->enum('status', ['ouverte','en_cours','resolue'])->default('ouverte');
             $table->enum('priorite', ['basse','moyenne','haute'])->default('moyenne');
             $table->text('reponse')->nullable();

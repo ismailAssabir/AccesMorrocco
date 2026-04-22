@@ -22,7 +22,7 @@
             </button>
         </div>
         @php
-            $users = \App\Models\User::orderBy('firstName')->get();
+            $users = \App\Models\User::with('departementManager')->orderBy('firstName')->get();
         @endphp
         {{-- Form --}}
         <div class="overflow-y-auto">
@@ -68,8 +68,9 @@
                                     @php
                                         $uid   = $user->idUser ?? $user->id;
                                         $uName = trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) ?: 'Utilisateur';
+                                        $managedDept = $user->departementManager ? $user->departementManager->title : '';
                                     @endphp
-                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>
+                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }} data-current-department="{{ htmlspecialchars($managedDept, ENT_QUOTES) }}">
                                         {{ $uName }}
                                     </option>
                                 @endforeach
@@ -140,4 +141,36 @@
         document.getElementById('editDepartmentModal').classList.add('hidden');
         document.body.style.overflow = 'auto';
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editForm = document.getElementById('editDepartmentForm');
+        
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                const select = document.getElementById('edit_dept_manager');
+                if (!select.value) return; // No manager selected, let it submit
+                
+                const selectedOption = select.options[select.selectedIndex];
+                const managedDept = selectedOption.getAttribute('data-current-department');
+                const managerName = selectedOption.text.trim();
+                
+                // Get the current department name being edited
+                const currentEditDeptName = document.getElementById('edit_dept_title').value.trim();
+                
+                // If the user already manages a department and it's not the one we are editing
+                if (managedDept && managedDept !== '' && managedDept !== currentEditDeptName) {
+                    e.preventDefault();
+                    
+                    window.showConfirmModal({
+                        title: 'Conflit Manager',
+                        text: `${managerName} est déjà manager du département ${managedDept}. Voulez-vous le transférer ici ?`,
+                        confirmButtonText: 'Oui, transférer',
+                        onConfirm: () => {
+                            editForm.submit();
+                        }
+                    });
+                }
+            });
+        }
+    });
 </script>

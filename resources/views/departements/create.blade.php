@@ -22,8 +22,8 @@
             </button>
         </div>
         @php
-            // هاد السطر كيجيب المستخدمين مرتبين بالاسم الأول
-            $users = \App\Models\User::orderBy('firstName')->get();
+            // هاد السطر كيجيب المستخدمين مرتبين بالاسم الأول مع القسم اللي كيجيريوه
+            $users = \App\Models\User::with('departementManager')->orderBy('firstName')->get();
         @endphp
         {{-- Form --}}
         <div class="overflow-y-auto">
@@ -67,8 +67,9 @@
                                     @php
                                         $uid   = $user->idUser ?? $user->id;
                                         $uName = trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) ?: 'Utilisateur';
+                                        $managedDept = $user->departementManager ? $user->departementManager->title : '';
                                     @endphp
-                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }}>
+                                    <option value="{{ $uid }}" {{ old('idUser') == $uid ? 'selected' : '' }} data-current-department="{{ htmlspecialchars($managedDept, ENT_QUOTES) }}">
                                         {{ $uName }}
                                     </option>
                                 @endforeach
@@ -99,9 +100,34 @@
     </div>
 </div>
 
-<style>
-    @keyframes modalIn {
-        from { opacity: 0; transform: translateY(16px) scale(0.98); }
-        to   { opacity: 1; transform: translateY(0)   scale(1);    }
-    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const createForm = document.querySelector('#addDepartmentModal form');
+        
+        if (createForm) {
+            createForm.addEventListener('submit', function(e) {
+                const select = document.getElementById('dept_manager');
+                if (!select.value) return; // No manager selected, let it submit
+                
+                const selectedOption = select.options[select.selectedIndex];
+                const managedDept = selectedOption.getAttribute('data-current-department');
+                const managerName = selectedOption.text.trim();
+                
+                if (managedDept && managedDept !== '') {
+                    e.preventDefault();
+                    
+                    window.showConfirmModal({
+                        title: 'Conflit Manager',
+                        text: `${managerName} est déjà manager du département ${managedDept}. Voulez-vous le transférer ici ?`,
+                        confirmButtonText: 'Oui, transférer',
+                        onConfirm: () => {
+                            createForm.submit();
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>

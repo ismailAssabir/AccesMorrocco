@@ -41,6 +41,7 @@
 
         <nav class="space-y-1">
             
+@if(auth()->user()->role !== 'employee')
       <a href="{{ url('/users') }}" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
    {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -52,8 +53,12 @@
     </div>
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
+@endif
 
-            <a href="{{ url('/departements') }}" 
+
+@if(auth()->user()->role !== 'employee')
+            <a href="/departements" 
+
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
@@ -63,6 +68,7 @@
                 </div>
                 <span class="font-medium text-sm">Département</span>
             </a>
+@endif
 
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95

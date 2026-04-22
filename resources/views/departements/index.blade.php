@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
-
+   
         {{-- ═══════════ TOP BAR ═══════════ --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
@@ -18,15 +18,14 @@
 
         {{-- ═══════════ KPI STRIP ═══════════ --}}
         @php
+
+            $totalDepts = $state['totalDepartements'] ?? 0;
+            $totalEmp   = $state['totalEmployes'] ?? 0;
+            $avgPres    = $state['presenceMoyenne'] ?? 0;
             $totalDepts = $departements->count();
-            $totalEmp   = \App\Models\User::whereIn('status', ['Actif', 'actif', 'Active', 'active'])->count();
-            $avgPres    = $totalDepts ? round($departements->avg('presence')) : 0;
-            
-            $allTasksPercentages = $departements->map(function($d) {
-                $total = $d->taches->count();
-                return $total > 0 ? ($d->taches->where('status', 'termine')->count() / $total) * 100 : 0;
-            });
-            $avgTasks = $totalDepts ? round($allTasksPercentages->avg()) : 0;
+
+            $avgTasks   = $state['tachesMoyenne'] ?? 0;
+
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
@@ -100,7 +99,7 @@
                 msg.style.opacity = '0';
                 msg.style.transform = 'translateY(-10px)';
                 
-                // كيمسح العنصر نهائياً بعد ما تسالي الـ Animation
+                // كيمسح العنصر نهائياً après la fin de l'Animation
                 setTimeout(() => {
                     msg.remove();
                 }, 500);
@@ -115,17 +114,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($departements as $dept)
                     @php
-                        $managerName    = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
-                        $managerInitials = $managerName ? strtoupper(mb_substr($managerName, 0, 1)) : '?';
-                        $presence       = $dept->presence ?? 0;
-                        
-                        $totalTaches    = $dept->taches->count();
-                        $finishedTaches = $dept->taches->where('status', 'termine')->count();
-                        $tasks          = $totalTaches > 0 ? round(($finishedTaches / $totalTaches) * 100) : 0;
-                        
-                        // Dynamically count only Active employees using Collection methods
-                        $activeEmployees = $dept->employes ? $dept->employes->whereIn('status', ['Actif', 'actif', 'Active', 'active']) : collect([]);
-                        $empCount       = $activeEmployees->count();
+                        $isManager = $dept->manager && $dept->manager->type === 'manager';
+                        $managerName = $isManager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : null;
+                        $managerInitials = $managerName ? strtoupper(mb_substr($dept->manager->firstName, 0, 1) . mb_substr($dept->manager->lastName, 0, 1)) : '?';
+
+                        $presence = round($dept->avg_presence ?? 0);
+                        $tasks = $dept->tasks_count > 0 ? round(($dept->completed_tasks_count / $dept->tasks_count) * 100) : 0;
+                        $empCount = $dept->users_count ?? 0;
 
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     @endphp
@@ -178,7 +173,7 @@
                                     </div>
                                     <div>
                                         <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Manager</p>
-                                        <p class="text-sm text-slate-400 italic">Non assigné</p>
+                                        <p class="text-sm text-slate-400 italic">Aucun manager assigné</p>
                                     </div>
                                 @endif
                             </div>
@@ -267,35 +262,6 @@
     {{-- Include the dynamically updating edit modal --}}
     @include('departements.edit_modal')
 
-    {{-- Delete Confirmation Modal --}}
-    <div id="deleteConfirmModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
-        <div class="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-black text-slate-800 mb-2">Supprimer !</h3>
-                <p class="text-sm text-slate-500 mb-6">Êtes-vous sûr de vouloir supprimer ce département ? Cette action est irréversible.</p>
-                
-                <form id="globalDeleteForm" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                            Annuler
-                        </button>
-                        <button type="submit" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-red-500/20 text-sm">
-                            Confirmer
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script>
         function openDeptModal() {
             document.getElementById('addDepartmentModal').classList.remove('hidden');
@@ -308,19 +274,26 @@
         document.addEventListener('keydown', e => { 
             if (e.key === 'Escape') {
                 closeDeptModal(); 
-                closeDeleteModal();
             }
         });
 
         function confirmDelete(url) {
-            document.getElementById('globalDeleteForm').action = url;
-            document.getElementById('deleteConfirmModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteConfirmModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            window.showConfirmModal({
+                title: 'Supprimer !',
+                text: 'Êtes-vous sûr de vouloir supprimer ce département ? Cette action est irréversible.',
+                confirmButtonText: 'Confirmer',
+                onConfirm: () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
     </script>
 </x-app-layout>

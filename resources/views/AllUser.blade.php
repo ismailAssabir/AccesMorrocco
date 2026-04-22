@@ -1,6 +1,6 @@
 <x-app-layout>
     @php
-        $departements = \App\Models\Departement::all();
+        $departements = \App\Models\Departement::with('manager')->get();
     @endphp
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
@@ -140,6 +140,9 @@
                                     <button onclick='openEditModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                                     </button>
+                                    <button onclick="confirmDeleteUser('{{ route('users.destroy', $user->idUser ) }}')" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all" title="Supprimer">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -267,7 +270,8 @@
             <select name="idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#be2346]/50 transition-all">
                 <option value="" disabled selected>— Choisir un département —</option>
                 @foreach($departements as $dept)
-                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                    @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                    <option value="{{ $dept->idDepartement }}" data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">{{ $dept->title }}</option>
                 @endforeach
             </select>
         </div>
@@ -476,7 +480,8 @@
             <select name="idDepartement" id="edit_idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#be2346]/50 transition-all">
                 <option value="" disabled>Sélectionner le département</option>
                 @foreach($departements as $dept)
-                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                    @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                    <option value="{{ $dept->idDepartement }}" data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">{{ $dept->title }}</option>
                 @endforeach
             </select>
         </div>
@@ -586,28 +591,26 @@
             toggleModal('viewUserModal');
         }
 
-        function openEditModal(user, skipPush = false) {
-            if (!skipPush) {
-                updateUrl({ userId: (user.idUser || user.id), action: 'edit' });
-            }
-            
-            document.getElementById('editForm').action = '{{ url("/users/edit") }}/' + (user.idUser || user.id || user.id_user);
-            
-            document.getElementById('edit_firstName').value = user.firstName || '';
-            document.getElementById('edit_lastName').value = user.lastName || '';
-            document.getElementById('edit_email').value = user.email || '';
-            document.getElementById('edit_cin').value = user.cin || '';
-            document.getElementById('edit_post').value = user.post || '';
-            document.getElementById('edit_salaire').value = user.salaire || '';
-            document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
-            document.getElementById('edit_birthday').value = user.birthday || '';
-            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
-            document.getElementById('edit_idDepartement').value = user.idDepartement || '';
-            
-            // CHARGEMENT DU ROLE DANS LE SELECT
-            document.getElementById('edit_role').value = user.type || user.role || 'employee';
-
             toggleModal('editUserModal');
+        }
+
+        function confirmDeleteUser(url) {
+            window.showConfirmModal({
+                title: 'Supprimer !',
+                text: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+                confirmButtonText: 'Confirmer',
+                onConfirm: () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
 
         // --- Auto-open and UI initialization ---
@@ -643,6 +646,41 @@
                 document.getElementById('editUserModal').classList.add('hidden');
                 document.body.style.overflow = 'auto';
             };
+        });
+
+        // Add SweetAlert2 Validation
+        function bindManagerValidation(formSelector, roleSelector, deptSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+            
+            form.addEventListener('submit', function(e) {
+                const typeSelect = form.querySelector(roleSelector);
+                const deptSelect = form.querySelector(deptSelector);
+                
+                if (typeSelect && deptSelect && typeSelect.value === 'manager' && deptSelect.value) {
+                    const selectedOption = deptSelect.options[deptSelect.selectedIndex];
+                    const currentManager = selectedOption.getAttribute('data-current-manager');
+                    
+                    // If editing, skip if the current manager is the user being edited. We don't have the current user name easily, but we can assume conflict if any name is there. Actually, the backend handles demotion. The prompt just says to alert.
+                    if (currentManager && currentManager !== '') {
+                        e.preventDefault();
+                        
+                        window.showConfirmModal({
+                            title: 'Conflit Département',
+                            text: `Ce département a déjà un manager (${currentManager}). Voulez-vous le remplacer ?`,
+                            confirmButtonText: 'Oui, remplacer',
+                            onConfirm: () => {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            bindManagerValidation('#addUserModal form', 'select[name="type"]', 'select[name="idDepartement"]');
+            bindManagerValidation('#editForm', '#edit_role', '#edit_idDepartement');
         });
     </script>
 </x-app-layout>

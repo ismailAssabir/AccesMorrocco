@@ -3,16 +3,28 @@
          x-data="{ 
             showModal: {{ $errors->any() ? 'true' : 'false' }}, 
             showEditModal: false,
-            showDeleteModal: false,
-            deleteUrl: '',
             currentTask: { titre: '', idTache: '', description: '', priorite: 'moyenne', status: 'todo', dateDebut: '', duree: '', idDepartement: '', idObjectif: '' },
             openEditModal(task) {
                 this.currentTask = task;
                 this.showEditModal = true;
             },
             confirmDelete(id) {
-                this.deleteUrl = '/tasks/' + id;
-                this.showDeleteModal = true;
+                window.showConfirmModal({
+                    title: 'Supprimer !',
+                    text: 'Êtes-vous sûr de vouloir supprimer cette tâche ? Cette action est irréversible.',
+                    confirmButtonText: 'Supprimer',
+                    onConfirm: () => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/tasks/' + id;
+                        form.innerHTML = `
+                            @csrf
+                            @method('DELETE')
+                        `;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             }
          }">
 
@@ -284,33 +296,7 @@
 
             </div>
         </div>
-        {{-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ --}}
-        <div class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all" x-show="showDeleteModal" x-cloak x-transition>
-            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-100 overflow-hidden" @click.away="showDeleteModal = false">
-                <div class="p-8 text-center">
-                    <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
-                        <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-black text-slate-800 mb-2">Supprimer la tâche ?</h3>
-                    <p class="text-sm text-slate-500 mb-8">Cette action est définitive. Êtes-vous sûr de vouloir retirer cette tâche du board ?</p>
-                    
-                    <form :action="deleteUrl" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <div class="flex gap-3">
-                            <button type="button" @click="showDeleteModal = false" class="flex-1 py-3 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                                Annuler
-                            </button>
-                            <button type="submit" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-red-500/20 text-sm">
-                                Supprimer
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+
 
     </div>
 </x-app-layout>

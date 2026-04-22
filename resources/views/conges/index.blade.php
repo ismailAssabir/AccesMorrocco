@@ -98,7 +98,13 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($conges as $conge)
+                        @php
+                            $filteredConges = auth()->user()->role === 'employee' 
+                                ? $conges->where('idUser', auth()->user()->idUser) 
+                                : $conges;
+                        @endphp
+
+                        @forelse($filteredConges as $conge)
                         @php
                             $empName = $conge->user ? trim(($conge->user->firstName ?? '') . ' ' . ($conge->user->lastName ?? '')) : 'Employé';
                         @endphp
@@ -141,7 +147,7 @@
                                     </button>
 
                                     {{-- Admin actions: Accept/Reject --}}
-                                    @if(auth()->check() && optional(auth()->user())->isAdmin())
+                                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'manager')
                                         @if($conge->status != 'approuve')
                                             <form action="{{ route('conge.update', $conge->idConge) }}" method="POST" class="inline">
                                                 @csrf
@@ -173,7 +179,7 @@
                                     @endif
 
                                     {{-- Delete restriction (Admin OR (Owner + En attente)) --}}
-                                    @if(auth()->check() && (optional(auth()->user())->isAdmin() || ((auth()->user()->idUser == $conge->idUser || auth()->id() == $conge->idUser) && $conge->status == 'en_attente')))
+                                    @if(auth()->user()->role === 'admin' || ((auth()->user()->idUser == $conge->idUser || auth()->id() == $conge->idUser) && $conge->status == 'en_attente'))
                                         <button type="button" onclick="openDeleteModal('{{ $conge->idConge }}', '{{ route('conge.destroy', $conge->idConge) }}')" class="text-slate-500 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 p-2 rounded-lg transition-colors shadow-sm" title="Supprimer">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
@@ -375,27 +381,7 @@
     </div>
 
 
-    {{-- Delete Confirmation Modal --}}
-    <div id="deleteCongeModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
-        <div class="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-10 text-center" style="animation: modalIn .2s ease-out">
-            <div class="p-7 pt-8">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5 text-[#b11d40]">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                </div>
-                <h3 class="text-xl font-black text-slate-800 mb-2">Supprimer la demande ?</h3>
-                <p class="text-sm text-slate-500 font-medium">Êtes-vous sûr de vouloir supprimer la demande de congé <strong id="delete-id-text" class="text-slate-800"></strong> ? Cette action est irréversible.</p>
-            </div>
-            <div class="px-7 py-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-white hover:text-slate-700 transition-all text-sm shadow-sm bg-slate-50">Annuler</button>
-                <form id="deleteCongeForm" method="POST" class="flex-1 m-0">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="w-full py-3 px-4 rounded-xl bg-[#b11d40] hover:bg-[#911633] active:scale-95 font-extrabold text-white transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">Oui, supprimer</button>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
     <script>
         // Modals Toggle Functions
@@ -416,14 +402,22 @@
             document.body.style.overflow = 'auto';
         }
         function openDeleteModal(id, url) {
-            document.getElementById('deleteCongeModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            document.getElementById('delete-id-text').innerText = '#' + id;
-            document.getElementById('deleteCongeForm').action = url;
-        }
-        function closeDeleteModal() {
-            document.getElementById('deleteCongeModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            window.showConfirmModal({
+                title: 'Supprimer !',
+                text: `Êtes-vous sûr de vouloir supprimer la demande de congé #${id} ? Cette action est irréversible.`,
+                confirmButtonText: 'Oui, supprimer',
+                onConfirm: () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
 
         // JS Logic for Editing
