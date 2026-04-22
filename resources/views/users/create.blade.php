@@ -94,7 +94,7 @@
                         <div>
                             <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-1.5">Type de Contrat</label>
                             <select name="typeContrat" class="w-full bg-slate-50 border border-slate-200 focus:border-[#be2346] focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-all">
-                                <option value="CDI" {{ old('typeContrat') == 'CDI' ? 'selected' : '' }}>CDI</option>
+                                <option value="CD" {{ old('typeContrat') == 'CD' ? 'selected' : '' }}>CDI</option>
                                 <option value="CI" {{ old('typeContrat') == 'CI' ? 'selected' : '' }}>CI</option>
                                 <option value="freelance" {{ old('typeContrat') == 'freelance' ? 'selected' : '' }}>Freelance</option>
                             </select>

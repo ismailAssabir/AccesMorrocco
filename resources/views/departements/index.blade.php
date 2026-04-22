@@ -67,7 +67,6 @@
             </div>
         </div>
 
-        {{-- Flash --}}
         {{-- Success & Errors Messages --}}
 <div id="status-messages" class="px-7 pt-6">
     @if(session('msg'))
