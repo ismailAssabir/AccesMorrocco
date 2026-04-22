@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('idDepartement')->references('idDepartement')->on('departements')->cascadeOnDelete();
             $table->string('reference')->unique();
             $table->string('distination')->nullable();
-            $table->date('dateCreation')->nullable();
+            $table->timestamp('dateCreation')->current();
             $table->date('dateVoyage')->nullable();
             $table->integer('nombrePersonnes')->default(1);
             $table->decimal('montant', 10, 2)->default(0);

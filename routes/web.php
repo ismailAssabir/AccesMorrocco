@@ -7,8 +7,11 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
-use App\Http\Controllers\TacheController;
 use App\Http\Controllers\CongeController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ObjectifController;
+use App\Http\Controllers\DemandeController;
+use App\Http\Controllers\TacheController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -70,16 +73,47 @@ Route::post('/reclamations', [ReclamationController::class, 'store']);
 Route::get('/reclamation/{id}' , [ReclamationController::class , 'show' ]); 
 // Route::get('/category/edit/{id}' , [ReclamationController::class , 'edit' ]);
 // Route::put('/category/edit/{id}' , [ReclamationController::class , 'update' ]);
-Route::delete('/reclamation/delete/{id}',  [ReclamationController::class , 'delete' ]);
+Route::delete('/reclamation/delete/{id}', function ($id) {
+    $reclamation = Reclamation::findOrFail($id);
+    $reclamation->delete();
+    return redirect('/reclamations')->with('msg', 'La réclamation a été supprimée avec succès.');
+});
 
 #Conge Routes
-Route::get('/conge' , [CongeController::class , 'index' ])->name('conge.index');
+Route::get('/conge', [CongeController::class, 'index'])->name('conge.index');
 Route::post('/conge', [CongeController::class, 'store'])->name('conge.store');
-Route::get('/conge/{id}' , [CongeController::class , 'show' ])->name('conge.show'); 
-Route::put('/conge/update/{id}' , [CongeController::class , 'update' ])->name('conge.update');
-Route::delete('/conge/delete/{id}',  [CongeController::class , 'destroy' ])->name('conge.destroy');
+Route::get('/conge/{id}', [CongeController::class, 'show'])->name('conge.show');
+Route::put('/conge/update/{id}', [CongeController::class, 'update'])->name('conge.update');
+Route::delete('/conge/delete/{id}', [CongeController::class, 'destroy'])->name('conge.destroy');
 
+#Departement Routes
+Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
+Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
+Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('departements.show');
+Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
+Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
+Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
 
+#Demande Routes
+Route::get('/demandeDocuments', [DemandeController::class, 'index']);
+Route::post('/demandeDocuments', [DemandeController::class, 'store']);
+Route::get('/demandeDocuments/{id}', [DemandeController::class, 'show']);
+Route::get('/demandeDocuments/edit/{id}', [DemandeController::class, 'edit']);
+Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
+Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
+
+#Objectif Routes
+Route::get('/objectifs', [ObjectifController::class, 'index']);
+Route::post('/objectifs', [ObjectifController::class, 'store']);
+Route::get('/objectifs/{id}', [ObjectifController::class, 'show']);
+Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit']);
+Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update']);
+Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy']);
+
+#Permission Routes
+Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+Route::get('/permissions/{id}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+Route::put('/permissions/{id}', [PermissionController::class, 'update'])->name('permissions.update');
 
 Route::patch('/reclamation/reponse/{id}', function (Illuminate\Http\Request $request, $id) {
     $request->validate([

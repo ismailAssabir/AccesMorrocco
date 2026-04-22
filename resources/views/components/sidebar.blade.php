@@ -53,7 +53,9 @@
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
 
-            <a href="{{ url('/departements') }}" 
+
+            <a href="/departements" 
+
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
