@@ -12,6 +12,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\TacheController;
+use App\Http\Controllers\ReunionController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -103,12 +104,13 @@ Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
 Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
 
 #Objectif Routes
-Route::get('/objectifs', [ObjectifController::class, 'index']);
-Route::post('/objectifs', [ObjectifController::class, 'store']);
-Route::get('/objectifs/{id}', [ObjectifController::class, 'show']);
-Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit']);
-Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update']);
-Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy']);
+Route::get('/objectifs', [ObjectifController::class, 'index'])->name('goals.index');
+Route::get('/objectifs/create', [ObjectifController::class, 'create'])->name('goals.create');
+Route::post('/objectifs', [ObjectifController::class, 'store'])->name('goals.store');
+Route::get('/objectifs/{id}', [ObjectifController::class, 'show'])->name('goals.show');
+Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit'])->name('goals.edit');
+Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update'])->name('goals.update');
+Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy'])->name('goals.destroy');
 
 #Permission Routes
 Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
@@ -161,24 +163,18 @@ Route::patch('/tasks/{id}/status', function (Illuminate\Http\Request $request, $
 })->middleware(['auth', 'verified'])->name('tasks.updateStatus');
 
 # Meetings Route
-Route::get('/meetings', function () {
-    $meetings = collect([
-        ['id' => 1, 'title' => 'Sync Hebdomadaire', 'date' => '2026-04-21 10:00', 'type' => 'Interne'],
-        ['id' => 2, 'title' => 'Présentation Client', 'date' => '2026-04-22 14:30', 'type' => 'Externe'],
-        ['id' => 3, 'title' => 'Revue Stratégique', 'date' => '2026-04-24 09:00', 'type' => 'Direction'],
-    ]);
-    return view('reunions.index', compact('meetings'));
-})->middleware(['auth', 'verified'])->name('meetings.index');
+Route::get('/meetings', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('meetings.index');
+
+# Reunion Routes (mapping to the same controller but using /reunions prefix as per views)
+Route::get('/reunions', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('reunions.index');
+Route::get('/reunions/create', [ReunionController::class, 'create'])->middleware(['auth', 'verified'])->name('reunions.create');
+Route::post('/reunions', [ReunionController::class, 'store'])->middleware(['auth', 'verified'])->name('reunions.store');
+Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middleware(['auth', 'verified'])->name('reunions.edit');
+Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
+Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
 
 # Goals Route
-Route::get('/goals', function () {
-    $goals = collect([
-        ['id' => 1, 'title' => 'Augmenter le CA de 20%', 'progress' => 65, 'status' => 'En cours'],
-        ['id' => 2, 'title' => 'Lancer la nouvelle app', 'progress' => 90, 'status' => 'Presque terminé'],
-        ['id' => 3, 'title' => 'Réduire le taux de churn', 'progress' => 30, 'status' => 'En retard'],
-    ]);
-    return view('objectifs.index', compact('goals'));
-})->middleware(['auth', 'verified'])->name('goals.index');
+Route::get('/goals', [ObjectifController::class, 'index'])->middleware(['auth', 'verified'])->name('goals.index');
 
 
 

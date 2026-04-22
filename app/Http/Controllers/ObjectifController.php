@@ -14,7 +14,9 @@ class ObjectifController extends Controller
     {
         Gate::authorize('objectif.view');
         $objs = Objectif::with('taches')->get();
-        return view('objectif.index', compact('objs'));
+        // Fetch departements for the add modal if we implement it
+        $departements = \App\Models\Departement::all();
+        return view('objectifs.index', compact('objs', 'departements'));
     }
 
     /**
@@ -23,7 +25,8 @@ class ObjectifController extends Controller
     public function create()
     {
         Gate::authorize('objectif.create');
-        return view('objectif.create');
+        $departements = \App\Models\Departement::all();
+        return view('objectifs.create', compact('departements'));
     }
 
     /**
@@ -54,7 +57,7 @@ class ObjectifController extends Controller
     {
         Gate::authorize('objectif.view');
         $obj = Objectif::with('taches')->findOrFail($id);
-        return view('objectif.show', compact('obj'));
+        return view('objectifs.show', compact('obj'));
     }
 
     /**
@@ -64,7 +67,8 @@ class ObjectifController extends Controller
     {
         Gate::authorize('objectif.edit');
         $obj = Objectif::with('taches')->findOrFail($id);
-        return view('objectif.update' , compact('obj'));
+        $departements = \App\Models\Departement::all();
+        return view('objectifs.edit' , compact('obj', 'departements'));
     }
 
     /**
@@ -78,13 +82,13 @@ class ObjectifController extends Controller
                 'description' => 'nullable|string|max:255',
                 'dateFin' => 'nullable|date',
                 'status' => 'nullable|string',
-                'avancement' => 'required|string',
+                'avancement' => 'required|integer|min:0|max:100',
                 'dateDebut' => 'nullable|date',
                 'idDepartement'=> 'nullable|exists:departements,idDepartement'
             ]);
         $obj = Objectif::findOrFail($id);
         $obj->update($data);
-        return redirect()->back()->with('msg' , "l'objectf  été mises à jour avec succès");
+        return redirect()->route('goals.index')->with('msg' , "L'objectif a été mis à jour avec succès");
     }
 
     /**
@@ -95,6 +99,6 @@ class ObjectifController extends Controller
         Gate::authorize('objectif.delete');
         $obj = Objectif::findOrFail($id);
         $obj->delete();
-        return redirect()->back()->with('msg', "L'objectif a été supprimée");
+        return redirect()->route('goals.index')->with('msg', "L'objectif a été supprimé");
     }
 }
