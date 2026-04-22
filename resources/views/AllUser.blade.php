@@ -51,54 +51,11 @@
         </div>
 
         <div class="px-7 pt-6">
-            {{-- Success Message via SweetAlert2 --}}
-            @if(session('msg'))
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Succès',
-                            text: "{{ session('msg') }}",
-                            timer: 3000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    });
-                </script>
-            @endif
-
-            {{-- Error Messages via SweetAlert2 --}}
-            @if($errors->any())
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Erreur de validation',
-                            html: '<ul class="text-left">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
-                            confirmButtonColor: '#be2346'
-                        });
-                    });
-                </script>
-            @endif
+            <x-status-messages />
         </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        function fadeAndRemove(elementId) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                setTimeout(() => {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateY(-10px)';
-                    setTimeout(() => el.remove(), 500); 
-                }, 2000); 
-            }
-        }
-
-        fadeAndRemove('success-alert');
-        fadeAndRemove('error-alert');
-
         // Auto-open modal if userId is in URL
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
@@ -814,20 +771,6 @@
 
         // --- Auto-open and UI initialization ---
         document.addEventListener('DOMContentLoaded', function() {
-            function fadeAndRemove(elementId) {
-                const el = document.getElementById(elementId);
-                if (el) {
-                    setTimeout(() => {
-                        el.style.opacity = '0';
-                        el.style.transform = 'translateY(-10px)';
-                        setTimeout(() => el.remove(), 500); 
-                    }, 2000); 
-                }
-            }
-
-            fadeAndRemove('success-alert');
-            fadeAndRemove('error-alert');
-
             // Server-side auto-open (When data is received from routes)
             @if(isset($openModal) && isset($selectedUser))
                 const selectedUser = @json($selectedUser);
@@ -847,7 +790,7 @@
             };
         });
 
-        // Add SweetAlert2 Validation
+        // Add Global-Modal based Validation
         function bindManagerValidation(formSelector, roleSelector, deptSelector) {
             const form = document.querySelector(formSelector);
             if (!form) return;
@@ -860,18 +803,29 @@
                     const selectedOption = deptSelect.options[deptSelect.selectedIndex];
                     const currentManager = selectedOption.getAttribute('data-current-manager');
                     
-                    // If editing, skip if the current manager is the user being edited. We don't have the current user name easily, but we can assume conflict if any name is there. Actually, the backend handles demotion. The prompt just says to alert.
                     if (currentManager && currentManager !== '') {
                         e.preventDefault();
                         
-                        window.showConfirmModal({
-                            title: 'Conflit Département',
-                            text: `Ce département a déjà un manager (${currentManager}). Voulez-vous le remplacer ?`,
-                            confirmButtonText: 'Oui, remplacer',
-                            onConfirm: () => {
-                                form.submit();
-                            }
-                        });
+                        window.confirmDelete = window.confirmDelete || function(){}; // Safety
+                        
+                        // Use openGlobalDeleteModal for custom text and theme
+                        openGlobalDeleteModal(
+                            null, 
+                            'Remplacer le Manager ?', 
+                            `Ce département a déjà un manager (${currentManager}). En confirmant, il sera rétrogradé en employé pour laisser la place au nouveau manager.`,
+                            'Confirmer le remplacement',
+                            'info',
+                            'switch'
+                        );
+                        
+                        // Override the form submission logic for this specific case
+                        const confirmBtn = document.querySelector('#globalDeleteForm button[type="submit"]');
+                        const originalOnclick = confirmBtn.onclick;
+                        
+                        confirmBtn.onclick = function(event) {
+                            event.preventDefault();
+                            form.submit();
+                        };
                     }
                 }
             });

@@ -16,26 +16,7 @@
         </div>
 
         {{-- Section des messages et erreurs --}}
-        <div class="mb-6">
-            @if(session('msg'))
-                <div id="success-alert" class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {{ session('msg') }}
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div id="error-alert" class="p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500">
-                    <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        <x-status-messages />
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
             <table class="w-full text-left border-collapse">
@@ -68,7 +49,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </a>
                             
-                            <button onclick="openDeleteModal('{{ $rec->idReclamation }}')" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all">
+                            <button onclick="confirmDeleteReclamation('{{ $rec->idReclamation }}')" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                         </td>
@@ -87,45 +68,63 @@
         <div id="addReclamationModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('addReclamationModal')"></div>
             <div class="relative flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white w-full max-w-lg rounded-[32px] shadow-2xl p-8 relative">
-                    <button onclick="toggleModal('addReclamationModal')" class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-
-                    <h2 class="text-xl font-black text-slate-800 mb-6">Soumettre une réclamation</h2>
+                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
                     
-                    <form action="/reclamations" method="POST" enctype="multipart/form-data" class="space-y-4">
-                        @csrf
-                        {{-- On ajoute idUser car il est requis par le contrôleur --}}
-                        <input type="hidden" name="idUser" value="{{ Auth::user()->idUser }}">
-                        
+                    {{-- Header --}}
+                    <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                         <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Sujet de la demande (Max 20 car.)</label>
-                            <input type="text" name="titre" required maxlength="20" placeholder="Ex: Problème badge" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#be2346]/20 outline-none transition-all">
+                            <h2 class="text-lg font-black text-slate-800">Soumettre une réclamation</h2>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Nouveau · Access Morocco</p>
                         </div>
-                        
-                        <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Priorité</label>
-                            {{-- On utilise des valeurs en minuscules pour correspondre à la validation du contrôleur --}}
-                            <select name="priorite" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none">
-                                <option value="basse">Basse</option>
-                                <option value="moyenne">Moyenne</option>
-                                <option value="haute">Haute</option>
-                            </select>
-                        </div>
+                        <button type="button" onclick="toggleModal('addReclamationModal')"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
 
-                        <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description détaillée</label>
-                            <textarea name="description" rows="4" required placeholder="Expliquez votre problème ici..." class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#be2346]/20 outline-none transition-all"></textarea>
-                        </div>
+                    {{-- Form Content --}}
+                    <div class="overflow-y-auto">
+                        <form action="/reclamations" method="POST" enctype="multipart/form-data" class="p-7 space-y-5">
+                            @csrf
+                            {{-- On ajoute idUser car il est requis par le contrôleur --}}
+                            <input type="hidden" name="idUser" value="{{ Auth::user()->idUser }}">
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Sujet de la demande (Max 20 car.)</label>
+                                <input type="text" name="titre" required maxlength="20" placeholder="Ex: Problème badge" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Priorité</label>
+                                {{-- On utilise des valeurs en minuscules pour correspondre à la validation du contrôleur --}}
+                                <select name="priorite" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="basse">Basse</option>
+                                    <option value="moyenne" selected>Moyenne</option>
+                                    <option value="haute">Haute</option>
+                                </select>
+                            </div>
 
-                        <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Pièce jointe (Optionnel)</label>
-                            <input type="file" name="fichier" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none">
-                        </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description détaillée</label>
+                                <textarea name="description" rows="4" required placeholder="Expliquez votre problème ici..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                            </div>
 
-                        <button type="submit" class="w-full py-4 rounded-xl bg-[#be2346] hover:bg-[#a01d3a] text-white font-black transition-all shadow-lg shadow-[#be2346]/20 mt-2">Envoyer maintenant</button>
-                    </form>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Pièce jointe (Optionnel)</label>
+                                <input type="file" name="fichier" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-[#be2346]/10 file:text-[#be2346] hover:file:bg-[#be2346]/20">
+                            </div>
+
+                            <div class="flex gap-3 pt-4">
+                                <button type="button" onclick="toggleModal('addReclamationModal')"
+                                    class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] text-white font-black transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                    Sauvegarder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,23 +138,9 @@
             }
         }
 
-        function openDeleteModal(id) {
+        function confirmDeleteReclamation(id) {
             window.confirmDelete(`/reclamation/delete/${id}`, 'réclamation');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            function fadeAndRemove(elementId) {
-                const el = document.getElementById(elementId);
-                if (el) {
-                    setTimeout(() => {
-                        el.style.opacity = '0';
-                        el.style.transform = 'translateY(-10px)';
-                        setTimeout(() => el.remove(), 500);
-                    }, 3000);
-                }
-            }
-            fadeAndRemove('success-alert');
-            fadeAndRemove('error-alert');
-        });
     </script>
 </x-app-layout>

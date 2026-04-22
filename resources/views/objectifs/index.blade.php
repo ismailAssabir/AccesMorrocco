@@ -18,23 +18,7 @@
         </div>
 
         {{-- Alert Messages --}}
-        <div class="mb-6">
-            @if(session('msg'))
-                <div id="success-alert" class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500 ease-in-out shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    {{ session('msg') }}
-                </div>
-            @endif
-            @if($errors->any())
-                <div id="error-alert" class="p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500 ease-in-out shadow-sm">
-                    <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        <x-status-messages />
 
         {{-- ═══════════ MAIN CONTENT ═══════════ --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -102,127 +86,165 @@
 
     {{-- Add Objectif Modal --}}
     <div id="addObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('addObjectifModal')"></div>
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addObjectifModal')"></div>
         <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+                
+                {{-- Header --}}
+                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                     <div>
                         <h2 class="text-lg font-black text-slate-800">Nouvel Objectif Stratégique</h2>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Planification · Access Morocco</p>
                     </div>
-                    <button type="button" onclick="toggleModal('addObjectifModal')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] transition-all">
+                    <button type="button" onclick="toggleModal('addObjectifModal')"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <form action="{{ url('/objectifs') }}" method="POST" class="p-8 space-y-5">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Titre de l'objectif *</label>
-                            <input type="text" name="titre" required placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
+
+                {{-- Form Content --}}
+                <div class="overflow-y-auto">
+                    <form action="{{ url('/objectifs') }}" method="POST" class="p-7 space-y-5">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif <span class="text-[#be2346]">*</span></label>
+                                <input type="text" name="titre" required placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                                <textarea name="description" rows="3" placeholder="Détails de l'objectif..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
+                                <input type="date" name="dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
+                                <input type="date" name="dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut <span class="text-[#be2346]">*</span></label>
+                                <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="en_cours">En cours</option>
+                                    <option value="termine">Terminé</option>
+                                    <option value="retard">En retard</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-[#be2346]">*</span></label>
+                                <input type="number" name="avancement" required min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
+                                <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="">-- Global --</option>
+                                    @foreach($departements as $dept)
+                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Description</label>
-                            <textarea name="description" rows="3" placeholder="Détails de l'objectif..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all"></textarea>
+
+                        {{-- Footer Buttons --}}
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" onclick="toggleModal('addObjectifModal')"
+                                class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                Sauvegarder
+                            </button>
                         </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date de début</label>
-                            <input type="date" name="dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date d'échéance</label>
-                            <input type="date" name="dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Statut *</label>
-                            <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                                <option value="en_cours">En cours</option>
-                                <option value="termine">Terminé</option>
-                                <option value="retard">En retard</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Avancement (%) *</label>
-                            <input type="number" name="avancement" required min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Département responsable</label>
-                            <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                                <option value="">-- Global --</option>
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full py-4 mt-4 rounded-xl bg-[#b11d40] hover:bg-[#911633] text-white font-black shadow-lg shadow-[#b11d40]/20 transition-all active:scale-[0.98]">
-                        Créer l'objectif
-                    </button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
     {{-- Edit Objectif Modal --}}
     <div id="editObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editObjectifModal')"></div>
         <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+                
+                {{-- Header --}}
+                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                     <div>
                         <h2 class="text-lg font-black text-slate-800">Modifier l'Objectif</h2>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
                     </div>
-                    <button type="button" onclick="toggleModal('editObjectifModal')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] transition-all">
+                    <button type="button" onclick="toggleModal('editObjectifModal')"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <form id="editObjectifForm" method="POST" class="p-8 space-y-5">
-                    @csrf
-                    @method('PUT')
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Titre de l'objectif *</label>
-                            <input type="text" name="titre" id="edit_titre" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
+
+                {{-- Form Content --}}
+                <div class="overflow-y-auto">
+                    <form id="editObjectifForm" method="POST" class="p-7 space-y-5">
+                        @csrf
+                        @method('PUT')
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif *</label>
+                                <input type="text" name="titre" id="edit_titre" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                                <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
+                                <input type="date" name="dateDebut" id="edit_dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
+                                <input type="date" name="dateFin" id="edit_dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut *</label>
+                                <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="en_cours">En cours</option>
+                                    <option value="termine">Terminé</option>
+                                    <option value="retard">En retard</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) *</label>
+                                <input type="number" name="avancement" id="edit_avancement" required min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+
+                            <div class="md:col-span-2 space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
+                                <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="">-- Global --</option>
+                                    @foreach($departements as $dept)
+                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Description</label>
-                            <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all"></textarea>
+
+                        {{-- Footer Buttons --}}
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" onclick="toggleModal('editObjectifModal')"
+                                class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                Sauvegarder
+                            </button>
                         </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date de début</label>
-                            <input type="date" name="dateDebut" id="edit_dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date d'échéance</label>
-                            <input type="date" name="dateFin" id="edit_dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Statut *</label>
-                            <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                                <option value="en_cours">En cours</option>
-                                <option value="termine">Terminé</option>
-                                <option value="retard">En retard</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Avancement (%) *</label>
-                            <input type="number" name="avancement" id="edit_avancement" required min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Département responsable</label>
-                            <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-indigo-500/50 outline-none transition-all">
-                                <option value="">-- Global --</option>
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full py-4 mt-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black shadow-lg transition-all active:scale-[0.98]">
-                        Enregistrer les modifications
-                    </button>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -235,28 +257,24 @@
                 document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
             }
         }
-
+        function openEditModal(obj) {
+            const form = document.getElementById('editObjectifForm');
+            form.action = '/objectifs/edit/' + obj.idObjectif;
+            
+            document.getElementById('edit_titre').value = obj.titre || '';
+            document.getElementById('edit_description').value = obj.description || '';
+            document.getElementById('edit_dateDebut').value = obj.dateDebut || '';
+            document.getElementById('edit_dateFin').value = obj.dateFin || '';
+            document.getElementById('edit_status').value = obj.status || 'en_cours';
+            document.getElementById('edit_avancement').value = obj.avancement || 0;
+            document.getElementById('edit_idDepartement').value = obj.idDepartement || '';
+            
             toggleModal('editObjectifModal');
         }
 
         function confirmDeleteObjectif(id) {
             window.confirmDelete('/objectifs/delete/' + id, 'objectif');
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            function fadeAndRemove(elementId) {
-                const el = document.getElementById(elementId);
-                if (el) {
-                    setTimeout(() => {
-                        el.style.opacity = '0';
-                        el.style.transform = 'translateY(-10px)';
-                        setTimeout(() => el.remove(), 500);
-                    }, 3000);
-                }
-            }
-            fadeAndRemove('success-alert');
-            fadeAndRemove('error-alert');
-        });
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {

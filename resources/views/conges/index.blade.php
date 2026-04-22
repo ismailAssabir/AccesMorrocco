@@ -16,23 +16,7 @@
         </div>
 
         {{-- Flash Messages --}}
-        <div id="status-messages">
-            @if(session('msg'))
-                <div class="msg-item mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    {{ session('msg') }}
-                </div>
-            @endif
-            @if($errors->any())
-                <div class="msg-item mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500">
-                    <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        <x-status-messages />
         {{-- ═══════════ STATISTICS HEADER ═══════════ --}}
         @php
             $totalConges = $conges->count();
@@ -180,7 +164,7 @@
 
                                     {{-- Delete restriction (Admin OR (Owner + En attente)) --}}
                                     @if(auth()->user()->role === 'admin' || ((auth()->user()->idUser == $conge->idUser || auth()->id() == $conge->idUser) && $conge->status == 'en_attente'))
-                                        <button type="button" onclick="openDeleteModal('{{ $conge->idConge }}', '{{ route('conge.destroy', $conge->idConge) }}')" class="text-slate-500 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 p-2 rounded-lg transition-colors shadow-sm" title="Supprimer">
+                                        <button type="button" onclick="confirmDeleteConge('{{ $conge->idConge }}', '{{ route('conge.destroy', $conge->idConge) }}')" class="text-slate-500 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 p-2 rounded-lg transition-colors shadow-sm" title="Supprimer">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
                                     @endif
@@ -204,13 +188,13 @@
     {{-- Modal Nouvelle Demande --}}
     <div id="addCongeModal" class="fixed inset-0 z-[100] {{ $errors->any() ? '' : 'hidden' }} flex items-center justify-center p-4" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeCongeModal()"></div>
-        <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-lg font-black text-slate-800">Nouvelle Demande</h2>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Congé · Access Morocco</p>
                 </div>
-                <button type="button" onclick="closeCongeModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] hover:border-[#b11d40]/30 transition-all">
+                <button type="button" onclick="closeCongeModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -220,38 +204,38 @@
                     @csrf
                     
                     <div class="space-y-1.5">
-                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Congé <span class="text-[#b11d40]">*</span></label>
-                        <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Congé <span class="text-[#be2346]">*</span></label>
+                        <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             <option value="annuel" {{ old('type') == 'annuel' ? 'selected' : '' }}>Annuel</option>
                             <option value="maladie" {{ old('type') == 'maladie' ? 'selected' : '' }}>Maladie</option>
                             <option value="sans_solde" {{ old('type') == 'sans_solde' ? 'selected' : '' }}>Sans Solde</option>
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Début <span class="text-[#b11d40]">*</span></label>
-                            <input type="date" name="dateDebut" required value="{{ old('dateDebut') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Début <span class="text-[#be2346]">*</span></label>
+                            <input type="date" name="dateDebut" required value="{{ old('dateDebut') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Fin <span class="text-[#b11d40]">*</span></label>
-                            <input type="date" name="dateFin" required value="{{ old('dateFin') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Fin <span class="text-[#be2346]">*</span></label>
+                            <input type="date" name="dateFin" required value="{{ old('dateFin') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Raison (Motif)</label>
-                        <textarea name="motif" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">{{ old('motif') }}</textarea>
+                        <textarea name="motif" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">{{ old('motif') }}</textarea>
                     </div>
                     
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Justification (Fichier)</label>
-                        <input type="file" name="justification" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                        <input type="file" name="justification" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                     </div>
 
-                    <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="closeCongeModal()" class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
-                        <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-[#b11d40] hover:bg-[#911633] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#b11d40]/20 text-sm">Soumettre</button>
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeCongeModal()" class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
+                        <button type="submit" class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">Soumettre</button>
                     </div>
                 </form>
             </div>
@@ -261,13 +245,13 @@
     {{-- Modal Edit Demande --}}
     <div id="editCongeModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeEditCongeModal()"></div>
-        <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-lg font-black text-slate-800">Modifier la Demande</h2>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Demande #<span id="edit-id-text"></span></p>
                 </div>
-                <button type="button" onclick="closeEditCongeModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] hover:border-[#b11d40]/30 transition-all">
+                <button type="button" onclick="closeEditCongeModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -278,33 +262,33 @@
                     @method('PUT')
                     
                     <div class="space-y-1.5">
-                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Congé <span class="text-[#b11d40]">*</span></label>
-                        <select name="type" id="edit-type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Congé <span class="text-[#be2346]">*</span></label>
+                        <select name="type" id="edit-type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             <option value="annuel">Annuel</option>
                             <option value="maladie">Maladie</option>
                             <option value="sans_solde">Sans Solde</option>
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Début <span class="text-[#b11d40]">*</span></label>
-                            <input type="date" name="dateDebut" id="edit-dateDebut" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Début <span class="text-[#be2346]">*</span></label>
+                            <input type="date" name="dateDebut" id="edit-dateDebut" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Fin <span class="text-[#b11d40]">*</span></label>
-                            <input type="date" name="dateFin" id="edit-dateFin" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date Fin <span class="text-[#be2346]">*</span></label>
+                            <input type="date" name="dateFin" id="edit-dateFin" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Raison (Motif)</label>
-                        <textarea name="motif" id="edit-motif" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5"></textarea>
+                        <textarea name="motif" id="edit-motif" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
                     </div>
 
-                    <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="closeEditCongeModal()" class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
-                        <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-[#b11d40] hover:bg-[#911633] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#b11d40]/20 text-sm">Mettre à jour</button>
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeEditCongeModal()" class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
+                        <button type="submit" class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">Mettre à jour</button>
                     </div>
                 </form>
             </div>
@@ -401,7 +385,7 @@
             document.getElementById('editCongeModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
-        function openDeleteModal(id, url) {
+        function confirmDeleteConge(id, url) {
             window.confirmDelete(url, 'demande de congé');
         }
 
@@ -507,16 +491,5 @@
             });
         }
         
-        // Auto-dismiss Flash Messages
-        document.addEventListener('DOMContentLoaded', function() {
-            const messages = document.querySelectorAll('.msg-item');
-            messages.forEach(msg => {
-                setTimeout(() => {
-                    msg.style.opacity = '0';
-                    msg.style.transform = 'translateY(-10px)';
-                    setTimeout(() => msg.remove(), 500);
-                }, 3000);
-            });
-        });
     </script>
 </x-app-layout>

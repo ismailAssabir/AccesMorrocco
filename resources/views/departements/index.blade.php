@@ -67,47 +67,7 @@
         </div>
 
         {{-- Success & Errors Messages --}}
-<div id="status-messages" class="px-7 pt-6">
-    @if(session('msg'))
-        <div class="msg-item mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            {{ session('msg') }}
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="msg-item mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-</div>
-
-<script>
-    // هاد الكود كيتنفذ فاش كتحل الصفحة
-    document.addEventListener('DOMContentLoaded', function() {
-        const messages = document.querySelectorAll('.msg-item');
-        
-        messages.forEach(msg => {
-            // كيتسنى 3 ثواني (3000ms)
-            setTimeout(() => {
-                msg.style.opacity = '0';
-                msg.style.transform = 'translateY(-10px)';
-                
-                // كيمسح العنصر نهائياً après la fin de l'Animation
-                setTimeout(() => {
-                    msg.remove();
-                }, 500);
-            }, 2000);
-        });
-    });
-</script>
-    
+        <x-status-messages />
 
         {{-- ═══════════ GRID OF CARDS ═══════════ --}}
         @if($departements->count() > 0)

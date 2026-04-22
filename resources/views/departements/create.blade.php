@@ -7,7 +7,7 @@
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeDeptModal()"></div>
 
     {{-- Panel --}}
-    <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] z-10"
+    <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10"
          style="animation: modalIn .2s ease-out">
 
         {{-- Header --}}
@@ -17,12 +17,11 @@
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Fiche de création · Access Morocco</p>
             </div>
             <button type="button" onclick="closeDeptModal()"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] hover:border-[#b11d40]/30 transition-all">
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
         @php
-            // هاد السطر كيجيب المستخدمين مرتبين بالاسم الأول مع القسم اللي كيجيريوه
             $users = \App\Models\User::with('departementManager')->orderBy('firstName')->get();
         @endphp
         {{-- Form --}}
@@ -33,11 +32,11 @@
                 {{-- Title --}}
                 <div class="space-y-1.5">
                     <label for="dept_title" class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                        Nom du département <span class="text-[#b11d40]">*</span>
+                        Nom du département <span class="text-[#be2346]">*</span>
                     </label>
                     <input type="text" name="title" id="dept_title" required value="{{ old('title') }}"
                            placeholder="Ex: Ressources Humaines"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5 @error('title') border-red-400 @enderror">
+                           class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('title') border-red-400 @enderror">
                     @error('title')
                         <p class="text-xs text-red-500 font-semibold ml-1 mt-1">{{ $message }}</p>
                     @enderror
@@ -48,7 +47,7 @@
                     <label for="dept_description" class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
                     <textarea name="description" id="dept_description" rows="3"
                               placeholder="Missions et objectifs de ce département..."
-                              class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5 @error('description') border-red-400 @enderror">{{ old('description') }}</textarea>
+                              class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('description') border-red-400 @enderror">{{ old('description') }}</textarea>
                     @error('description')
                         <p class="text-xs text-red-500 font-semibold ml-1 mt-1">{{ $message }}</p>
                     @enderror
@@ -59,7 +58,7 @@
                     <label for="dept_manager" class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Manager / Responsable</label>
                     <div class="relative">
                         <select name="idUser" id="dept_manager"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/5 @error('idUser') border-red-400 @enderror">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('idUser') border-red-400 @enderror">
                             <option value="">— Sans manager pour le moment —</option>
                             @if(isset($users))
                                 {{-- Filter users directly in Blade collection to only show Managers --}}
@@ -91,8 +90,8 @@
                         Annuler
                     </button>
                     <button type="submit"
-                        class="flex-1 py-3.5 rounded-2xl bg-[#b11d40] hover:bg-[#911633] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#b11d40]/20 text-sm">
-                        Enregistrer
+                        class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                        Sauvegarder
                     </button>
                 </div>
             </form>
@@ -109,7 +108,7 @@
         if (createForm) {
             createForm.addEventListener('submit', function(e) {
                 const select = document.getElementById('dept_manager');
-                if (!select.value) return; // No manager selected, let it submit
+                if (!select.value) return; 
                 
                 const selectedOption = select.options[select.selectedIndex];
                 const managedDept = selectedOption.getAttribute('data-current-department');
@@ -118,14 +117,22 @@
                 if (managedDept && managedDept !== '') {
                     e.preventDefault();
                     
-                    window.showConfirmModal({
-                        title: 'Conflit Manager',
-                        text: `${managerName} est déjà manager du département ${managedDept}. Voulez-vous le transférer ici ?`,
-                        confirmButtonText: 'Oui, transférer',
-                        onConfirm: () => {
-                            createForm.submit();
-                        }
-                    });
+                    // Use openGlobalDeleteModal for custom text and theme
+                    openGlobalDeleteModal(
+                        null, 
+                        'Remplacer le Manager ?', 
+                        `${managerName} est déjà manager du département "${managedDept}". En confirmant, il sera transféré à ce nouveau département.`,
+                        'Confirmer le transfert',
+                        'info',
+                        'switch'
+                    );
+                    
+                    // Override the form submission logic
+                    const confirmBtn = document.getElementById('deleteModalConfirmBtn');
+                    confirmBtn.onclick = function(event) {
+                        event.preventDefault();
+                        createForm.submit();
+                    };
                 }
             });
         }
