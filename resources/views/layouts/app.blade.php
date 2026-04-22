@@ -92,6 +92,17 @@
                 font-size: 44px !important;
                 font-family: inherit !important;
             }
+            /* New Trash Icon Style */
+            .swal2-trash-container {
+                width: 100px;
+                height: 100px;
+                background: #fef2f2;
+                border-radius: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+            }
         </style>
         <script>
             window.showConfirmModal = function(options) {
@@ -105,9 +116,54 @@
                     buttonsStyling: false,
                     reverseButtons: false,
                     allowOutsideClick: true,
+                    customClass: {
+                        popup: 'rounded-[32px] p-10',
+                        title: 'text-2xl font-black text-slate-800',
+                        htmlContainer: 'text-slate-500',
+                        confirmButton: 'bg-[#f84444] text-white px-8 py-3.5 rounded-2xl font-extrabold shadow-lg shadow-red-500/20 mx-2 transition-all hover:bg-red-600',
+                        cancelButton: 'bg-[#f1f5f9] text-slate-700 px-8 py-3.5 rounded-2xl font-bold mx-2 transition-all hover:bg-slate-200'
+                    }
                 }).then((result) => {
                     if (result.isConfirmed && options.onConfirm) {
                         options.onConfirm();
+                    }
+                });
+            }
+
+            window.confirmDelete = function(url, entityName) {
+                Swal.fire({
+                    title: 'Confirmer la suppression',
+                    text: `Êtes-vous sûr de vouloir supprimer cette ${entityName} ? Cette action est irréversible.`,
+                    iconHtml: `
+                        <div class="swal2-trash-container">
+                            <svg class="w-12 h-12 text-[#d32f2f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Supprimer',
+                    cancelButtonText: 'Annuler',
+                    buttonsStyling: false,
+                    reverseButtons: false,
+                    customClass: {
+                        popup: 'rounded-[32px] p-10',
+                        title: 'text-2xl font-black text-slate-800 mt-6',
+                        htmlContainer: 'text-slate-500 mt-4 px-4 leading-relaxed',
+                        confirmButton: 'bg-[#d32f2f] text-white px-10 py-4 rounded-2xl font-extrabold shadow-lg shadow-red-500/20 mx-2 transition-all hover:bg-red-700',
+                        cancelButton: 'bg-[#f1f5f9] text-slate-700 px-10 py-4 rounded-2xl font-bold mx-2 transition-all hover:bg-slate-200'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = url;
+                        form.innerHTML = `
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                            <input type="hidden" name="_method" value="DELETE">
+                        `;
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 });
             }

@@ -278,22 +278,7 @@
         });
 
         function confirmDelete(url) {
-            window.showConfirmModal({
-                title: 'Supprimer !',
-                text: 'Êtes-vous sûr de vouloir supprimer ce département ? Cette action est irréversible.',
-                confirmButtonText: 'Confirmer',
-                onConfirm: () => {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
+            window.confirmDelete(url, 'département');
         }
     </script>
 </x-app-layout>

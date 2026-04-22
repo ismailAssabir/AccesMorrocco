@@ -240,22 +240,7 @@
         }
 
         function confirmDeleteObjectif(id) {
-            window.showConfirmModal({
-                title: 'Supprimer !',
-                text: 'Êtes-vous sûr de vouloir supprimer cet objectif ? Cette action est irréversible.',
-                confirmButtonText: 'Supprimer',
-                onConfirm: () => {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/objectifs/delete/' + id;
-                    form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
+            window.confirmDelete('/objectifs/delete/' + id, 'objectif');
         }
 
         document.addEventListener('DOMContentLoaded', function() {

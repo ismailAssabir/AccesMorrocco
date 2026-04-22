@@ -70,15 +70,15 @@ public function show($id){
     return view('AllUser' , compact('users', 'selectedUser'))->with('openModal', 'view');
 }
 
-public function edit($id){
-    if (request()->ajax()) {
+    public function edit($id){
+        if (request()->ajax()) {
+            $user = User::findOrFail($id);
+            return response()->json($user);
+        }
         $user = User::findOrFail($id);
-        return response()->json($user);
+        $departements = Departement::all();
+        return view('users.edit', compact('user', 'departements'));
     }
-    $users = User::with('departement')->get();
-    $selectedUser = User::with('departement')->findOrFail($id);
-    return view('AllUser' , compact('users', 'selectedUser'))->with('openModal', 'edit');
-}
 
     public function update(Request $request ,$id){
         $user = User::findOrFail($id);

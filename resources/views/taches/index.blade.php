@@ -9,22 +9,7 @@
                 this.showEditModal = true;
             },
             confirmDelete(id) {
-                window.showConfirmModal({
-                    title: 'Supprimer !',
-                    text: 'Êtes-vous sûr de vouloir supprimer cette tâche ? Cette action est irréversible.',
-                    confirmButtonText: 'Supprimer',
-                    onConfirm: () => {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '/tasks/' + id;
-                        form.innerHTML = `
-                            @csrf
-                            @method('DELETE')
-                        `;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                });
+                window.confirmDelete('/tasks/' + id, 'tâche');
             }
          }">
 

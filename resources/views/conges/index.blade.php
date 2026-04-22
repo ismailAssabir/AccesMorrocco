@@ -402,22 +402,7 @@
             document.body.style.overflow = 'auto';
         }
         function openDeleteModal(id, url) {
-            window.showConfirmModal({
-                title: 'Supprimer !',
-                text: `Êtes-vous sûr de vouloir supprimer la demande de congé #${id} ? Cette action est irréversible.`,
-                confirmButtonText: 'Oui, supprimer',
-                onConfirm: () => {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
+            window.confirmDelete(url, 'demande de congé');
         }
 
         // JS Logic for Editing

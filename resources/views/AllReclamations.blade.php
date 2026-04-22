@@ -129,40 +129,6 @@
                 </div>
             </div>
         </div>
-        {{-- Delete Confirmation Modal --}}
-        <div id="deleteReclamationModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('deleteReclamationModal')"></div>
-            <div class="relative flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white w-full max-w-md rounded-[32px] shadow-2xl p-8 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
-                    
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-6">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                        
-                        <h2 class="text-xl font-black text-slate-800 mb-2">Confirmer la suppression</h2>
-                        <p class="text-slate-500 text-sm font-medium mb-8">Êtes-vous sûr de vouloir supprimer cette réclamation ? Cette action est irréversible.</p>
-                        
-                        <div class="flex w-full gap-3">
-                            <button onclick="toggleModal('deleteReclamationModal')" class="flex-1 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black transition-all">
-                                Annuler
-                            </button>
-                            <form id="deleteForm" method="POST" class="flex-1">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black transition-all shadow-lg shadow-red-200">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         function toggleModal(id) {
@@ -174,11 +140,7 @@
         }
 
         function openDeleteModal(id) {
-            const form = document.getElementById('deleteForm');
-            if (form) {
-                form.action = `/reclamation/delete/${id}`;
-                toggleModal('deleteReclamationModal');
-            }
+            window.confirmDelete(`/reclamation/delete/${id}`, 'réclamation');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
