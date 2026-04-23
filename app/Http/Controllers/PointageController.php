@@ -27,7 +27,7 @@ class PointageController extends Controller
             ->whereIn('status', ['retard', 'absent'])
             ->orderBy('date', 'desc')
             ->get();
-        return view('user_infractions', compact('infractions'));
+        return view('pointages.index', compact('infractions'));
     }
     
     

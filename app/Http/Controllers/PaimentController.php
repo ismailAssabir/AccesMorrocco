@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Paiement;
 use App\Models\Dossier;
 
-class PaiementController extends Controller
+class PaimentController extends Controller
 {
    
     public function index()

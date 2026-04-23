@@ -1,0 +1,301 @@
+<x-app-layout>
+<div class="p-6 md:p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
+
+    {{-- ═══════════ TOP BAR ═══════════ --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Tableau de Pointage</h1>
+            <p class="text-slate-500 text-sm mt-1 font-medium">Suivi des présences, retards et absences de l'équipe.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('pointages.index') }}"
+               class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Mon Pointage
+            </a>
+            <button onclick="openSettingsModal()"
+                class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                Paramètres
+            </button>
+        </div>
+    </div>
+
+    <x-status-messages />
+
+    {{-- ═══════════ KPI STATS ═══════════ --}}
+    @php
+        $total    = $pointages->count();
+        $presents = $pointages->where('status', 'present')->count();
+        $retards  = $pointages->where('status', 'retard')->count();
+        $absents  = $pointages->where('status', 'absent')->count();
+        $withJustif = $pointages->whereNotNull('justification')->count();
+    @endphp
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+            <span class="p-2.5 rounded-xl bg-slate-100 text-slate-500 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total</p>
+                <p class="text-2xl font-extrabold text-slate-800">{{ $total }}</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-emerald-400">
+            <span class="p-2.5 rounded-xl bg-emerald-50 text-emerald-500 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Présents</p>
+                <p class="text-2xl font-extrabold text-emerald-500">{{ $presents }}</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-amber-400">
+            <span class="p-2.5 rounded-xl bg-amber-50 text-amber-500 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Retards</p>
+                <p class="text-2xl font-extrabold text-amber-500">{{ $retards }}</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-[#b11d40]">
+            <span class="p-2.5 rounded-xl bg-red-50 text-[#b11d40] shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Absents</p>
+                <p class="text-2xl font-extrabold text-[#b11d40]">{{ $absents }}</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-indigo-400">
+            <span class="p-2.5 rounded-xl bg-indigo-50 text-indigo-500 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Justifiés</p>
+                <p class="text-2xl font-extrabold text-indigo-500">{{ $withJustif }}</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══════════ FILTER ROW ═══════════ --}}
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3 items-center">
+        <input type="text" id="search-input" oninput="filterTable()" placeholder="🔍 Rechercher un employé, une date..."
+            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all">
+        <select id="status-filter" onchange="filterTable()"
+            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all appearance-none min-w-[160px]">
+            <option value="">Tous les statuts</option>
+            <option value="present">Présent</option>
+            <option value="retard">Retard</option>
+            <option value="absent">Absent</option>
+        </select>
+        <button onclick="document.getElementById('search-input').value='';document.getElementById('status-filter').value='';filterTable()"
+            class="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">
+            Réinitialiser
+        </button>
+    </div>
+
+    {{-- ═══════════ MAIN TABLE ═══════════ --}}
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600" id="pointage-table">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">Employé</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Entrée</th>
+                        <th class="px-6 py-4">Sortie</th>
+                        <th class="px-6 py-4">Durée</th>
+                        <th class="px-6 py-4">GPS</th>
+                        <th class="px-6 py-4">Statut</th>
+                        <th class="px-6 py-4">Justification</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="pointage-tbody">
+                    @forelse($pointages as $pointage)
+                    @php
+                        $user = $pointage->user;
+                        $empName = $user ? trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) : 'Employé inconnu';
+                        $initial = $user ? strtoupper(substr($user->firstName ?? 'E', 0, 1)) : 'E';
+
+                        // Calculate duration
+                        $duree = '--';
+                        if ($pointage->heureEntree && $pointage->heureSortie) {
+                            $entry = \Carbon\Carbon::parse($pointage->heureEntree);
+                            $exit  = \Carbon\Carbon::parse($pointage->heureSortie);
+                            $mins  = $entry->diffInMinutes($exit);
+                            $duree = intdiv($mins, 60) . 'h ' . ($mins % 60) . 'min';
+                        }
+                    @endphp
+                    <tr class="hover:bg-slate-50 transition-colors pointage-row"
+                        data-name="{{ strtolower($empName) }}"
+                        data-date="{{ $pointage->date }}"
+                        data-status="{{ $pointage->status }}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c1233] to-[#be2346] flex items-center justify-center text-white font-black text-xs shrink-0">
+                                    {{ $initial }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">{{ $empName }}</p>
+                                    @if($user)
+                                    <p class="text-xs text-slate-400">{{ $user->email ?? '' }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-700">
+                            {{ $pointage->date ? \Carbon\Carbon::parse($pointage->date)->translatedFormat('d M Y') : '--' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-bold">
+                                {{ $pointage->heureEntree ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i') : '--:--' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-bold">
+                                {{ $pointage->heureSortie ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i') : '--:--' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-500 font-medium text-xs">{{ $duree }}</td>
+                        <td class="px-6 py-4 text-xs text-slate-400 font-mono">
+                            {{ $pointage->gps ? substr($pointage->gps, 0, 12) . '...' : '—' }}
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($pointage->status === 'present')
+                                <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200">Présent</span>
+                            @elseif($pointage->status === 'retard')
+                                <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">Retard</span>
+                            @else
+                                <span class="bg-red-50 text-[#b11d40] font-bold px-3 py-1 rounded-full text-xs border border-red-200">Absent</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 max-w-xs">
+                            @if($pointage->justification)
+                                <div class="space-y-1">
+                                    <p class="text-xs text-slate-600 truncate max-w-[200px]" title="{{ $pointage->justification }}">
+                                        {{ $pointage->justification }}
+                                    </p>
+                                    @if($pointage->typejustif)
+                                        <span class="inline-block text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">{{ $pointage->typejustif }}</span>
+                                    @endif
+                                    @if($pointage->fichier)
+                                        <a href="{{ Storage::url($pointage->fichier) }}" target="_blank"
+                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-[#be2346] hover:underline">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                            Voir fichier
+                                        </a>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="text-slate-300 text-xs italic">—</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="px-6 py-20 text-center text-slate-400 font-medium">
+                            Aucun enregistrement de pointage trouvé.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{-- ═══════════ SETTINGS MODAL ═══════════ --}}
+<div id="settingsModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+    <div class="relative bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
+
+        <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+            <div>
+                <h2 class="text-lg font-black text-slate-800">Paramètres de l'Entreprise</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Configuration · Access Morocco</p>
+            </div>
+            <button type="button" onclick="closeSettingsModal()"
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('admin.settings.update') }}" method="POST" class="p-7 space-y-5">
+            @csrf
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">GPS de l'entreprise</label>
+                <input type="text" name="companyGps" placeholder="Ex: 32.9348,-6.0234"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 font-mono">
+                <p class="text-[10px] text-slate-400 ml-1">Format: latitude,longitude</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure d'Entrée</label>
+                    <input type="time" name="companyEntryTime"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de Sortie</label>
+                    <input type="time" name="companyExitTime"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (mètres)</label>
+                <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                <p class="text-[10px] text-slate-400 ml-1">Rayon autorisé autour de l'entreprise pour le pointage GPS.</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeSettingsModal()"
+                    class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                    Annuler
+                </button>
+                <button type="submit"
+                    class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                    Sauvegarder
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.95) translateY(8px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+</style>
+
+<script>
+    function openSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettingsModal(); });
+
+    function filterTable() {
+        const query  = document.getElementById('search-input').value.toLowerCase();
+        const status = document.getElementById('status-filter').value.toLowerCase();
+        document.querySelectorAll('.pointage-row').forEach(row => {
+            const name   = row.dataset.name || '';
+            const date   = row.dataset.date || '';
+            const rowSts = row.dataset.status || '';
+            const matchQ = name.includes(query) || date.includes(query);
+            const matchS = !status || rowSts === status;
+            row.style.display = (matchQ && matchS) ? '' : 'none';
+        });
+    }
+</script>
+</x-app-layout>
