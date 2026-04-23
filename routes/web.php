@@ -11,12 +11,9 @@ use App\Http\Controllers\TacheController;
 use App\Http\Controllers\ReunionController;
 use App\Http\Controllers\CongeController;
 use App\Http\Controllers\PointageController;
-use App\Http\Controllers\CongeController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
-use App\Http\Controllers\TacheController;
-use App\Http\Controllers\ReunionController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
