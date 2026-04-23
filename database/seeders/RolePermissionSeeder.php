@@ -30,6 +30,7 @@ class RolePermissionSeeder extends Seeder
             'user.view',
             'user.create',
             'user.edit',
+            'user.delete',
 
             // --- Départements ---
             'departement.view',
@@ -132,7 +133,6 @@ class RolePermissionSeeder extends Seeder
         $manager = Role::firstOrCreate(['name' => 'manager']);
         $manager->syncPermissions([
             'user.view',
-            'departement.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
             'dossier.view', 'dossier.create', 'dossier.edit',
