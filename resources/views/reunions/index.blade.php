@@ -7,7 +7,7 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Planification des Réunions</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
-            @if(auth()->user()->role !== 'employee')
+            @if(auth()->user()->type !== 'employee')
             <button onclick="toggleModal('addReunionModal')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -57,7 +57,7 @@
                         <span class="{{ $typeColor }} font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider">{{ $reunion->type }}</span>
 
                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            @if(auth()->user()->role !== 'employee')
+                            @if(auth()->user()->type !== 'employee')
                             {{-- THE FIX: Escape the JSON to prevent HTML breakage --}}
                             <button type="button" onclick='openEditModal({!! e(json_encode($reunion)) !!})' class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

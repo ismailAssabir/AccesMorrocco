@@ -10,7 +10,17 @@ class ReunionController extends Controller
 {
     public function index()
     {
-        $reunions = Reunion::with('departement')->get();
+        $query = Reunion::with('departement');
+
+        if (auth()->user()->type === 'employee') {
+            $user = auth()->user();
+            $query->where(function($q) use ($user) {
+                $q->whereNull('idDepartement')
+                  ->orWhere('idDepartement', $user->idDepartement);
+            });
+        }
+
+        $reunions = $query->get();
         $departements = Departement::all();
         return view('reunions.index', compact('reunions', 'departements'));
     }
@@ -50,6 +60,14 @@ class ReunionController extends Controller
     public function show($id)
     {
         $reunion = Reunion::with('departement')->findOrFail($id);
+
+        if (auth()->user()->type === 'employee') {
+            $user = auth()->user();
+            if ($reunion->idDepartement !== null && $reunion->idDepartement !== $user->idDepartement) {
+                abort(403, "Vous n'êtes pas autorisé à voir cette réunion.");
+            }
+        }
+
         return view('reunions.show', compact('reunion'));
     }
 
