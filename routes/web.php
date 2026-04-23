@@ -10,6 +10,7 @@ use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\TacheController;
 use App\Http\Controllers\ReunionController;
 use App\Http\Controllers\CongeController;
+use App\Http\Controllers\PointageController;
 
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Route;
@@ -165,6 +166,22 @@ Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('
 Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
 Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
 Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
+
+#Pointage Routes 
+
+
+Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
+Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
+Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
+Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
+Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+#Paiment Routes
+Route::get('/paiements', [PaiementController::class, 'index'])->name('paiements.index');
+Route::post('/paiements/store', [PaiementController::class, 'store'])->name('paiements.store');
+Route::get('/paiements/{id}', [PaiementController::class, 'show'])->name('paiements.show');
+Route::get('/paiements/{id}/edit', [PaiementController::class, 'edit'])->name('paiements.edit');
+Route::put('/paiements/{id}', [PaiementController::class, 'update'])->name('paiements.update');
+Route::delete('/paiements/{id}', [PaiementController::class, 'destroy'])->name('paiements.destroy');
 
 # Pointage Route
 Route::get('/pointage', function () {

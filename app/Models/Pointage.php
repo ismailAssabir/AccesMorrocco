@@ -4,10 +4,10 @@ namespace App\Models;
 
 use App\Models\Prime;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\HasFactory;
 class Pointage extends Model
 {
-    use HasFactory;
+    
     protected $primaryKey = 'idPointage';
     protected $fillable = [
         'idUser',
