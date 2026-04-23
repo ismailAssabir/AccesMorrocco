@@ -29,7 +29,6 @@ class LeadController extends Controller
             'firstName'     => 'required|string|max:25',
             'lastName'      => 'required|string|max:25',
             'email'         => 'nullable|email|unique:leads,email',
-            'password'      => 'nullable|min:6',
             'adresse'       => 'nullable|string',
             'CNE'           => 'nullable|string',
             'phoneNumber'   => 'nullable|string',
@@ -42,31 +41,22 @@ class LeadController extends Controller
             'idDepartement' => 'nullable|exists:departements,idDepartement',
         ]);
 
-        // تعمير تاريخ الإنشاء أوتوماتيكياً
         $validatedData['dateCreation'] = now()->toDateString();
 
-        // تشفير كلمة السر إذا وُجدت
-        if ($request->filled('password')) {
-            $validatedData['password'] = Hash::make($request->password);
-        }
+    
 
         Lead::create($validatedData);
 
         return redirect()->back()->with('msg', 'Lead ajouté avec succès !');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $lead = Lead::with(['user', 'client', 'departements'])->findOrFail($id);
         return view('leads.show', compact('lead'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+ 
     public function update(Request $request, $id)
     {
         $lead = Lead::findOrFail($id);
@@ -75,7 +65,6 @@ class LeadController extends Controller
             'firstName'     => 'required|string|max:25',
             'lastName'      => 'required|string|max:25',
             'email'         => 'nullable|email|unique:leads,email,' . $id . ',idLead',
-            'password'      => 'nullable|min:6',
             'adresse'       => 'nullable|string',
             'CNE'           => 'nullable|string',
             'phoneNumber'   => 'nullable|string',
@@ -88,7 +77,6 @@ class LeadController extends Controller
             'idDepartement' => 'nullable|exists:departements,idDepartement',
         ]);
 
-        // تحديث كلمة السر فقط إذا تم إدخالها، وإلا كنحيدوها من الـ Array باش ما تمسحش القديمة
         if ($request->filled('password')) {
             $validatedData['password'] = Hash::make($request->password);
         } else {
@@ -100,9 +88,7 @@ class LeadController extends Controller
         return redirect()->back()->with('msg', 'Lead mis à jour avec succès !');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy($id)
     {
         $lead = Lead::findOrFail($id);

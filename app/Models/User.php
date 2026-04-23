@@ -78,6 +78,15 @@ class User extends Authenticatable
         return $this->hasMany(Reclamation::class, 'idUser', 'idUser');
     }
 
+    protected static function booted()
+    {
+        static::saved(function ($user) {
+            if ($user->isDirty('type') || !$user->roles()->exists()) {
+                $user->syncRoles([$user->type]);
+            }
+        });
+    }
+
     public function isAdmin(): bool { return $this->type === 'admin'; }
     public function isManager(): bool { return $this->type === 'manager'; }
 
