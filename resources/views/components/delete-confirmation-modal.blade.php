@@ -26,7 +26,7 @@
                     </button>
                     <form id="globalDeleteForm" method="POST" class="flex-1">
                         @csrf
-                        @method('DELETE')
+                        <div id="methodPlaceholder"></div>
                         <button type="submit" id="deleteModalConfirmBtn" class="w-full py-3.5 rounded-xl bg-red-600 text-white font-extrabold hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all active:scale-[0.98]">
                             Supprimer
                         </button>
@@ -38,7 +38,7 @@
 </div>
 
 <script>
-    function openGlobalDeleteModal(url, title, description, confirmBtnText = 'Supprimer', theme = 'danger', iconType = 'trash') {
+    function openGlobalDeleteModal(url, title, description, confirmBtnText = 'Supprimer', theme = 'danger', iconType = 'trash', method = 'DELETE') {
         const modal = document.getElementById('globalDeleteModal');
         const content = document.getElementById('globalDeleteModalContent');
         const form = document.getElementById('globalDeleteForm');
@@ -47,11 +47,15 @@
         const confirmBtnEl = document.getElementById('deleteModalConfirmBtn');
         const iconContainer = document.getElementById('deleteModalIconContainer');
         const iconWrapper = document.getElementById('deleteModalIcon');
+        const methodPlaceholder = document.getElementById('methodPlaceholder');
 
         form.action = url;
         if (title) titleEl.innerText = title;
         if (description) descEl.innerText = description;
         if (confirmBtnText) confirmBtnEl.innerText = confirmBtnText;
+
+        // Method handling
+        methodPlaceholder.innerHTML = method === 'DELETE' ? '<input type="hidden" name="_method" value="DELETE">' : '';
 
         // Theme handling
         if (theme === 'info' || theme === 'primary') {
@@ -64,7 +68,13 @@
         }
 
         // Icon handling
-        if (iconType === 'switch' || iconType === 'refresh') {
+        if (iconType === 'logout') {
+            iconWrapper.innerHTML = `
+                <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            `;
+        } else if (iconType === 'switch' || iconType === 'refresh') {
             iconWrapper.innerHTML = `
                 <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -132,5 +142,17 @@
         }
 
         openGlobalDeleteModal(url, title, description);
+    };
+
+    window.confirmLogout = function() {
+        openGlobalDeleteModal(
+            "{{ route('logout') }}", 
+            "Quitter la session ?", 
+            "Êtes-vous sûr de vouloir vous déconnecter de votre compte Access Morocco ?", 
+            "Se déconnecter", 
+            "danger", 
+            "logout", 
+            "POST"
+        );
     };
 </script>
