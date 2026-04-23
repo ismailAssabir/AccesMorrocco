@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
     public function index(){
+        Gate::authorize('category.view');
         $categories = Category::All();
         return view('AllCategories' , compact("categories"));
     }
 
 public function store(Request $request) {
     
-
+    Gate::authorize('category.create');
     $newCategory = $request->validate([
         'title'     => 'required|string|max:55',
         'desc'    => 'nullable|string|max:255',
@@ -29,17 +31,22 @@ public function store(Request $request) {
 // }
 
 public function destroy($id)
-{   $category = Category::findOrFail($id);
+{       Gate::authorize('category.delete');
+
+    $category = Category::findOrFail($id);
     $category->delete();
     return redirect()->back()->with('msg', 'La catégorie a été supprimée');
 }
 
 public function edit($id){
+        Gate::authorize('category.edit');
+
     $category = Category::findOrFail($id);
     return view('editCategory' , compact('category'));
 }
 
 public function update(Request $request ,$id){
+    Gate::authorize('category.edit');
     $category = Category::findOrFail($id);
     $categoryUpdate = $request->validate([
         'nom'     => 'required|string|max:55',

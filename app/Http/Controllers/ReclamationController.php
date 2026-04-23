@@ -3,11 +3,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+
 
 class ReclamationController extends Controller
 {
     public function index()
-    {
+         
+    {   
+                Gate::authorize('reclamation.view');
+
+        
         $query = Reclamation::with('user');
 
         if (auth()->user()->type === 'employee') {
@@ -19,7 +25,8 @@ class ReclamationController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {        Gate::authorize('reclamation.create');
+
         $data = $request->validate([
             'description' => 'nullable|string|min:10|max:255',
             'status'      => 'in:ouverte,en_cours,resolue',
@@ -42,7 +49,7 @@ class ReclamationController extends Controller
     }
 
     public function show($id)
-    {
+    {    Gate::authorize('reclamation.edit');
         $Reclamation = Reclamation::with('user')->findOrFail($id);
 
         if (auth()->user()->type === 'employee' && $Reclamation->idUser !== auth()->id()) {

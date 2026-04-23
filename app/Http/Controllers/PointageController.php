@@ -8,12 +8,25 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+
 
 class PointageController extends Controller
 {
+
+private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
+        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+    }
+
    
     public function index()
-    {
+    {   Gate::authorize('pointage.view');
+
         $today = now()->toDateString();
         $pointages = Pointage::with('user')->get();
         return view('Adminpointage', compact('pointages'));
@@ -21,7 +34,8 @@ class PointageController extends Controller
 
    
     public function userPointage()
-    {
+    {           Gate::authorize('pointage.view');
+
         $idUser = auth()->id();
         $infractions = Pointage::where('idUser', $idUser)
             ->whereIn('status', ['retard', 'absent'])
@@ -32,7 +46,8 @@ class PointageController extends Controller
     
     
     public function checkIn(Request $request)
-    {
+    {       Gate::authorize('pointage.create');
+
         $request->validate(['gps' => 'required|string']);
 
         
@@ -76,7 +91,7 @@ class PointageController extends Controller
 
     
     public function checkOut(Request $request) 
-    {
+    {     Gate::authorize('pointage.edit');
         $request->validate(['gps' => 'required|string']);
 
         $settings = Company::first();
@@ -117,18 +132,10 @@ class PointageController extends Controller
     }
 
     
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
-    {
-        $earthRadius = 6371000;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
-        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
-    }
-
+    
     
     public function submitJustification(Request $request)
-    {
+    {    Gate::authorize('pointage.edit');
         $validatedData = $request->validate([
             'idPointage'    => 'required|exists:pointages,idPointage',
             'justification' => 'required|string|max:500',
@@ -139,7 +146,7 @@ class PointageController extends Controller
         $pointage = Pointage::findOrFail($validatedData['idPointage']);
 
         if ($request->hasFile('fichier')) {        
-            $validatedData['fichier'] = $request->file('fichier')->store('pointages', 'public');
+            $validatedData['fichier'] = $request->file('fichier')->store('Justifpointages', 'public');
         }
 
         $pointage->update($validatedData);
@@ -148,7 +155,7 @@ class PointageController extends Controller
 
     
     public function updateSettings(Request $request)
-    {
+    {        Gate::authorize('pointage.create');
         $validatedData = $request->validate([
             'companyGps'       => 'nullable|string',
             'companyEntryTime' => 'nullable',

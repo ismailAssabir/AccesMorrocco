@@ -11,7 +11,8 @@ use App\Models\Departement;
 class TacheController extends Controller
 {
     public function index()
-    {
+    {   Gate::authorize('tache.view');
+
         $query = Tache::with(['users', 'objectif', 'departement']);
 
         if (auth()->user()->type === 'employee') {
@@ -30,6 +31,8 @@ class TacheController extends Controller
     }
 
 public function store(Request $request) {
+        Gate::authorize('tache.create');
+
     $request->validate([
         'titre'         => 'required|max:30',
         'start_date'    => 'nullable|date',
@@ -111,17 +114,22 @@ public function store(Request $request) {
         return view('showTache', compact('Tache'));
     }
 public function destroy($id)
-{   $Tache = Tache::findOrFail($id);
+
+{   
+    Gate::authorize('tache.delete');
+    $Tache = Tache::findOrFail($id);
     $Tache->delete();
     return redirect()->back()->with('msg', 'La tache a été supprimée');
 }
 
 public function edit($id){
+    Gate::authorize('tache.edit');
     $Tache = Tache::with('user')->findOrFail($id);
     return view('editTache' , compact('Tache'));
 }
 
 public function update(Request $request, $id) {
+     Gate::authorize('tache.edit');
     $request->validate([
         'titre'         => 'required|max:30',
         'start_date'    => 'nullable|date',
@@ -187,6 +195,7 @@ public function update(Request $request, $id) {
 }
 
 public function assignUser(Request $request) {
+    Gate::authorize('tache.edit');
     $request->validate([
         'idTache' => 'required|exists:taches,idTache',
         'idUser'  => 'required|exists:users,idUser'
@@ -199,6 +208,7 @@ public function assignUser(Request $request) {
 }
 
 public function unassignUser(Request $request) {
+    Gate::authorize('tache.edit');
     $request->validate([
         'idTache' => 'required|exists:taches,idTache',
         'idUser'  => 'required|exists:users,idUser'

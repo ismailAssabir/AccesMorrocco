@@ -4,19 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Conge;
+use Illuminate\Support\Facades\Gate;
 
 
 class CongeController extends Controller
 {
     public function index()
-    {
+    {   
+                Gate::authorize('conge.view');
+
         $conges = Conge::with('user')->get();
         return view('conges.index', compact('conges'));
     }
 
 
 public function store(Request $request)
-{
+{        Gate::authorize('conge.create');
+
     // Auto-assign the authenticated user if not provided
     if (!$request->has('idUser') && auth()->check()) {
         $request->merge(['idUser' => auth()->user()->idUser ?? auth()->id()]);
@@ -42,12 +46,15 @@ public function store(Request $request)
     
     public function show($id)
     {
+        Gate::authorize('conge.view');
         $conge = Conge::with('user')->findOrFail($id);
         return view('conges.show', compact('conge'));
     }
 
     public function update(Request $request, $id)
-    {
+    {   
+        Gate::authorize('conge.edit');
+
         $conge = Conge::findOrFail($id);
 
         // Check if this is an admin status update
@@ -84,7 +91,7 @@ public function store(Request $request)
     }
 
     public function destroy($id)
-    {
+    {   Gate::authorize('conge.delete');
         $conge = Conge::findOrFail($id);
         $conge->delete();
         return redirect()->back()->with('msg', 'Demande supprimée');
