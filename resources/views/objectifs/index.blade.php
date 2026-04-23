@@ -107,197 +107,225 @@
     {{-- ═══════════ MODALS ═══════════ --}}
 
     {{-- Add Objectif Modal --}}
-    <div id="addObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity" onclick="toggleObjectifModal('addObjectifModal')"></div>
-        <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto" style="animation: modalIn .2s ease-out">
-                
-                {{-- Header --}}
-                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800">Nouvel Objectif Stratégique</h2>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Planification · Access Morocco</p>
+    <div id="addObjectifModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 pointer-events-none">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity pointer-events-auto" onclick="toggleModal('addObjectifModal', 'close')"></div>
+        <div class="relative z-10 bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto animate-in fade-in zoom-in duration-200">
+            
+            {{-- Header --}}
+            <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="text-lg font-black text-slate-800">Nouvel Objectif Stratégique</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Planification · Access Morocco</p>
+                </div>
+                <button type="button" onclick="toggleModal('addObjectifModal', 'close')"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Form Content --}}
+            <div class="overflow-y-auto">
+                <form action="{{ url('/objectifs') }}" method="POST" class="p-7 space-y-5">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif <span class="text-[#be2346]">*</span></label>
+                            <input type="text" name="titre" required maxlength="55" placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                            <textarea name="description" rows="3" placeholder="Détails de l'objectif..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
+                            <input type="date" name="dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
+                            <input type="date" name="dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut <span class="text-[#be2346]">*</span></label>
+                            <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="en_cours">En cours</option>
+                                <option value="atteint">Atteint</option>
+                                <option value="echoue">Échoué</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-[#be2346]">*</span></label>
+                            <input type="number" name="avancement" required min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
+                            <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="">-- Global --</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <button type="button" onclick="toggleObjectifModal('addObjectifModal')"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
 
-                {{-- Form Content --}}
-                <div class="overflow-y-auto">
-                    <form action="{{ url('/objectifs') }}" method="POST" class="p-7 space-y-5">
-                        @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif <span class="text-[#be2346]">*</span></label>
-                                <input type="text" name="titre" required maxlength="55" placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
-                                <textarea name="description" rows="3" placeholder="Détails de l'objectif..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
-                                <input type="date" name="dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
-                                <input type="date" name="dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut <span class="text-[#be2346]">*</span></label>
-                                <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="en_cours">En cours</option>
-                                    <option value="atteint">Atteint</option>
-                                    <option value="echoue">Échoué</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-[#be2346]">*</span></label>
-                                <input type="number" name="avancement" required min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
-                                <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="">-- Global --</option>
-                                    @foreach($departements as $dept)
-                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- Footer Buttons --}}
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleObjectifModal('addObjectifModal')"
-                                class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
-                                Sauvegarder
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {{-- Footer Buttons --}}
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="toggleModal('addObjectifModal', 'close')"
+                            class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                            Annuler
+                        </button>
+                        <button type="submit"
+                            class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
     {{-- Edit Objectif Modal --}}
-    <div id="editObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity" onclick="toggleObjectifModal('editObjectifModal')"></div>
-        <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto" style="animation: modalIn .2s ease-out">
-                
-                {{-- Header --}}
-                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800">Modifier l'Objectif</h2>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
+    <div id="editObjectifModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 pointer-events-none">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity pointer-events-auto" onclick="toggleModal('editObjectifModal', 'close')"></div>
+        <div class="relative z-10 bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto animate-in fade-in zoom-in duration-200">
+            
+            {{-- Header --}}
+            <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="text-lg font-black text-slate-800">Modifier l'Objectif</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
+                </div>
+                <button type="button" onclick="toggleModal('editObjectifModal', 'close')"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Form Content --}}
+            <div class="overflow-y-auto">
+                <form id="editObjectifForm" method="POST" class="p-7 space-y-5">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif *</label>
+                            <input type="text" name="titre" id="edit_titre" required maxlength="55" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                            <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
+                            <input type="date" name="dateDebut" id="edit_dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
+                            <input type="date" name="dateFin" id="edit_dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut *</label>
+                            <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="en_cours">En cours</option>
+                                <option value="atteint">Atteint</option>
+                                <option value="echoue">Échoué</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) *</label>
+                            <input type="number" name="avancement" id="edit_avancement" required min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
+                            <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="">-- Global --</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <button type="button" onclick="toggleObjectifModal('editObjectifModal')"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
 
-                {{-- Form Content --}}
-                <div class="overflow-y-auto">
-                    <form id="editObjectifForm" method="POST" class="p-7 space-y-5">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif *</label>
-                                <input type="text" name="titre" id="edit_titre" required maxlength="55" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
-                                <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de début</label>
-                                <input type="date" name="dateDebut" id="edit_dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'échéance</label>
-                                <input type="date" name="dateFin" id="edit_dateFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut *</label>
-                                <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="en_cours">En cours</option>
-                                    <option value="atteint">Atteint</option>
-                                    <option value="echoue">Échoué</option>
-                                </select>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) *</label>
-                                <input type="number" name="avancement" id="edit_avancement" required min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
-                                <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="">-- Global --</option>
-                                    @foreach($departements as $dept)
-                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        {{-- Footer Buttons --}}
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleObjectifModal('editObjectifModal')"
-                                class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
-                                Sauvegarder
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {{-- Footer Buttons --}}
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="toggleModal('editObjectifModal', 'close')"
+                            class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                            Annuler
+                        </button>
+                        <button type="submit"
+                            id="edit_submit_btn"
+                            class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleObjectifModal(id) {
+        function toggleModal(id, action = 'toggle') {
             const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.toggle('hidden');
-                document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
+            if (!modal) return;
+            
+            const isHidden = modal.classList.contains('hidden');
+            const shouldOpen = action === 'open' || (action === 'toggle' && isHidden);
+            
+            if (shouldOpen) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
             }
         }
+
         function openEditModal(id) {
             const form = document.getElementById('editObjectifForm');
-            form.action = '/objectifs/edit/' + id;
+            form.action = `/objectifs/${id}`;
             
             // Show modal immediately for better UX
-            toggleObjectifModal('editObjectifModal');
+            toggleModal('editObjectifModal', 'open');
             
             // Temporary loading state
-            document.getElementById('edit_titre').value = 'Chargement...';
+            const titreInput = document.getElementById('edit_titre');
+            const submitBtn = document.getElementById('edit_submit_btn');
+            
+            const originalTitle = titreInput.value;
+            const originalBtnText = submitBtn.innerHTML;
+            
+            titreInput.value = 'Chargement...';
+            submitBtn.innerHTML = 'Chargement...';
+            submitBtn.disabled = true;
             
             // Fetch the data from the controller (AJAX)
-            fetch(`/objectifs/edit/${id}?_t=${new Date().getTime()}`, {
+            fetch(`/objectifs/${id}/edit?_t=${new Date().getTime()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
             })
             .then(response => {
-                if(!response.ok) throw new Error('Network response was not ok');
+                if(!response.ok) {
+                    // Fallback to original path just in case
+                    return fetch(`/objectifs/edit/${id}?_t=${new Date().getTime()}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    }).then(res => {
+                        if(!res.ok) throw new Error('Network error');
+                        return res.json();
+                    });
+                }
                 return response.json();
             })
             .then(data => {
@@ -308,10 +336,14 @@
                 document.getElementById('edit_status').value = data.status || 'en_cours';
                 document.getElementById('edit_avancement').value = data.avancement || 0;
                 document.getElementById('edit_idDepartement').value = data.idDepartement || '';
+                
+                submitBtn.innerHTML = 'Sauvegarder';
+                submitBtn.disabled = false;
             })
             .catch(error => {
                 console.error('Error fetching objective data:', error);
-                document.getElementById('edit_titre').value = 'Erreur lors du chargement.';
+                titreInput.value = 'Erreur lors du chargement.';
+                submitBtn.innerHTML = 'Erreur';
             });
         }
 
@@ -321,9 +353,8 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                document.getElementById('addObjectifModal')?.classList.add('hidden');
-                document.getElementById('editObjectifModal')?.classList.add('hidden');
-                document.body.style.overflow = 'auto';
+                toggleModal('addObjectifModal', 'close');
+                toggleModal('editObjectifModal', 'close');
             }
         });
     </script>
