@@ -40,7 +40,7 @@ public function store(Request $request) {
 
     DB::transaction(function () use ($newUser) {
         $user = User::create($newUser);
-
+        $user->assignRole($user->type);
         // One Manager per Department Logic
         if ($user->type === 'manager' && $user->idDepartement) {
             $departement = Departement::find($user->idDepartement);

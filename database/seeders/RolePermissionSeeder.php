@@ -1,23 +1,27 @@
-<?php namespace Database\Seeders;
+<?php
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Models\User;
 
 class RolePermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
-
+    public function run(): void
     {
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Create Roles
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $managerRole = Role::firstOrCreate(['name' => 'manager']);
+        $employeeRole = Role::firstOrCreate(['name' => 'employee']);
+
+        // Create basic permissions if needed
         $permissions = [
+
             // --- Permission ---
             'permission.edit',
             'permission.view',
@@ -118,17 +122,13 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
+
         ];
 
-      
-
         foreach ($permissions as $permission) {
-
-             Permission::firstOrCreate(['name' => $permission]);
-
+            Permission::firstOrCreate(['name' => $permission]);
         }
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $admin->syncPermissions(Permission::all());
+
 
         $manager = Role::firstOrCreate(['name' => 'manager']);
         $manager->syncPermissions([
@@ -146,27 +146,24 @@ class RolePermissionSeeder extends Seeder
             'document.view', 'document.approve',
             'reunion.view', 'reunion.create', 'reunion.edit',
             'prime.view', 'prime.create',
+
         ]);
-        $employe = Role::firstOrCreate(['name' => 'employe']);
-        $employe->syncPermissions([
-            'tache.view',
-            'pointage.view', 'pointage.create',
-            'conge.view', 'conge.create',
-            'reclamation.view', 'reclamation.create',
-            'document.view', 'document.create',
-            'reunion.view',
-            'objectif.view',
-            'prime.view',
-            'presentation.view',
-            'dossier.view',
+        $employeeRole->givePermissionTo([
+            'reunions.view',
+            'reclamations.view',
+            'dashboard.view',
+            'objectif.view'
         ]);
 
-
-    
+        // Sync existing users
+        User::all()->each(function ($user) use ($adminRole, $managerRole, $employeeRole) {
+            if ($user->type === 'admin') {
+                $user->assignRole($adminRole);
+            } elseif ($user->type === 'manager') {
+                $user->assignRole($managerRole);
+            } else {
+                $user->assignRole($employeeRole);
+            }
+        });
     }
-
-        
-
-    
-    
 }

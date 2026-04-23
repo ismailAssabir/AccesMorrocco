@@ -10,12 +10,23 @@ use App\Models\Departement;
 
 class TacheController extends Controller
 {
-    public function index(){
-        $Taches = Tache::with(['users', 'objectif', 'departement'])->get();
+    public function index()
+    {
+        $query = Tache::with(['users', 'objectif', 'departement']);
+
+        if (auth()->user()->type === 'employee') {
+            $user = auth()->user();
+            $query->where(function($q) use ($user) {
+                $q->whereNull('idDepartement')
+                  ->orWhere('idDepartement', $user->idDepartement);
+            });
+        }
+
+        $Taches = $query->get();
         $users = User::all();
         $objectifs = Objectif::all();
         $departements = Departement::all();
-        return view('taches.index' , compact('Taches', 'users', 'objectifs', 'departements') );
+        return view('taches.index', compact('Taches', 'users', 'objectifs', 'departements'));
     }
 
 public function store(Request $request) {
@@ -86,10 +97,19 @@ public function store(Request $request) {
 
     return redirect()->back()->with('msg', "La tâche a été ajoutée avec succès");
 }
-public function show($id){
-    $Tache = Tache::with(['users', 'objectif'])->findOrFail($id);
-    return view('showTache' , compact('Tache'));
-}
+    public function show($id)
+    {
+        $Tache = Tache::with(['users', 'objectif'])->findOrFail($id);
+
+        if (auth()->user()->type === 'employee') {
+            $user = auth()->user();
+            if ($Tache->idDepartement !== null && $Tache->idDepartement !== $user->idDepartement) {
+                abort(403, "Vous n'êtes pas autorisé à voir cette tâche.");
+            }
+        }
+
+        return view('showTache', compact('Tache'));
+    }
 public function destroy($id)
 {   $Tache = Tache::findOrFail($id);
     $Tache->delete();

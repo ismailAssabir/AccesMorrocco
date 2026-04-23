@@ -7,7 +7,7 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Objectifs de l'Entreprise</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Pilotez et suivez les KPI majeurs pour atteindre nos ambitions.</p>
             </div>
-            @if(auth()->user()->role !== 'employee')
+            @if(auth()->user()->type !== 'employee')
             <button onclick="toggleModal('addObjectifModal')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -80,7 +80,7 @@
                 </div>
 
                 {{-- Action Overlay --}}
-                @if(auth()->user()->role !== 'employee')
+                @if(auth()->user()->type !== 'employee')
                 <div class="absolute inset-x-7 bottom-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                     <div class="bg-white/90 backdrop-blur-md border border-slate-100 rounded-2xl shadow-xl p-1.5 flex gap-1.5">
                         <button type="button" onclick="openEditModal('{{ $obj->idObjectif }}')" class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
