@@ -13,7 +13,7 @@ class ObjectifController extends Controller
     public function index()
     {
         Gate::authorize('objectif.view');
-        $objs = Objectif::with('taches')->get();
+        $objs = Objectif::with(['taches', 'departement.manager'])->get();
         // Fetch departements for the add modal if we implement it
         $departements = \App\Models\Departement::all();
         return view('objectifs.index', compact('objs', 'departements'));
@@ -66,7 +66,24 @@ class ObjectifController extends Controller
     public function edit(string $id)
     {
         Gate::authorize('objectif.edit');
-        $obj = Objectif::with('taches')->findOrFail($id);
+        $obj = Objectif::findOrFail($id);
+        
+        // If it's an AJAX request (for the modal), return prepared JSON
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'idObjectif'    => $obj->idObjectif,
+                'titre'         => $obj->titre,
+                'description'   => $obj->description,
+                'dateDebut'     => $obj->dateDebut ? $obj->dateDebut->format('Y-m-d') : '',
+                'dateFin'       => $obj->dateFin ? $obj->dateFin->format('Y-m-d') : '',
+                'status'        => $obj->status,
+                'avancement'    => $obj->avancement,
+                'idDepartement' => $obj->idDepartement,
+                'status_config' => $obj->status_config,
+                'calculated_progress' => $obj->calculated_progress
+            ]);
+        }
+
         $departements = \App\Models\Departement::all();
         return view('objectifs.edit' , compact('obj', 'departements'));
     }
@@ -76,19 +93,22 @@ class ObjectifController extends Controller
      */
     public function update(Request $request, string $id)
     {
-            Gate::authorize('objectif.edit');
-            $data = $request->validate([
-                'titre' => 'required|string|max:55',
-                'description' => 'nullable|string|max:255',
-                'dateFin' => 'nullable|date',
-                'status' => 'nullable|string',
-                'avancement' => 'required|integer|min:0|max:100',
-                'dateDebut' => 'nullable|date',
-                'idDepartement'=> 'nullable|exists:departements,idDepartement'
-            ]);
+        Gate::authorize('objectif.edit');
+        
+        $data = $request->validate([
+            'titre'         => 'required|string|max:55',
+            'description'   => 'nullable|string|max:500',
+            'dateFin'       => 'nullable|date',
+            'dateDebut'     => 'nullable|date',
+            'status'        => 'required|string|in:en_cours,atteint,echoue',
+            'avancement'    => 'required|integer|min:0|max:100',
+            'idDepartement' => 'nullable|exists:departements,idDepartement'
+        ]);
+
         $obj = Objectif::findOrFail($id);
         $obj->update($data);
-        return redirect()->route('goals.index')->with('msg' , "L'objectif a été mis à jour avec succès");
+
+        return redirect()->route('goals.index')->with('msg', "L'objectif stratégique a été mis à jour avec succès.");
     }
 
     /**

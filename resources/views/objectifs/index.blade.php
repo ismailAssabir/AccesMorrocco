@@ -23,52 +23,74 @@
         {{-- ═══════════ MAIN CONTENT ═══════════ --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             @forelse($objs as $obj)
-            <div class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 bg-[#b11d40]/10 rounded-2xl flex items-center justify-center shrink-0">
-                        <svg class="w-6 h-6 text-[#b11d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            <div class="bg-white border border-slate-100 rounded-[2rem] shadow-xl shadow-slate-200/40 p-7 flex flex-col hover:shadow-2xl hover:shadow-[#b11d40]/5 transition-all duration-300 relative group hover:-translate-y-1">
+                
+                {{-- Card Header: Icon & Status --}}
+                <div class="flex justify-between items-start mb-6">
+                    <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-indigo-100/50">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </div>
                     <div class="flex items-center gap-2">
-                        @php
-                            $statusColor = match($obj->status) {
-                                'termine' => 'bg-emerald-100 text-emerald-700',
-                                'en_cours' => 'bg-blue-100 text-blue-700',
-                                'retard' => 'bg-red-100 text-red-700',
-                                default => 'bg-gray-100 text-gray-700'
-                            };
-                            $statusLabel = match($obj->status) {
-                                'termine' => 'Terminé',
-                                'en_cours' => 'En cours',
-                                'retard' => 'En retard',
-                                default => $obj->status
-                            };
-                        @endphp
-                        <span class="{{ $statusColor }} font-bold px-3 py-1 rounded-lg text-xs">{{ $statusLabel }}</span>
+                        <span class="{{ $obj->status_config['class'] }} font-bold px-3.5 py-1.5 rounded-xl text-[10px] uppercase tracking-wider shadow-sm border border-current/10">
+                            {{ $obj->status_config['label'] }}
+                        </span>
                     </div>
                 </div>
                 
-                <h3 class="text-xl font-black text-slate-800 mb-2">{{ $obj->titre }}</h3>
-                <p class="text-slate-500 text-sm mb-6 line-clamp-2">{{ $obj->description }}</p>
+                {{-- Title & Description --}}
+                <div class="mb-6">
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2 leading-tight group-hover:text-[#b11d40] transition-colors">{{ $obj->titre }}</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed line-clamp-2 font-medium">{{ $obj->description }}</p>
+                </div>
 
-                <div>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Complétion</span>
-                        <span class="text-2xl font-extrabold text-slate-800">{{ $obj->avancement }}%</span>
+                {{-- Meta Data: Dept & Assignee --}}
+                <div class="flex flex-wrap items-center gap-4 mb-8 pt-4 border-t border-slate-50">
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <div class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">{{ optional($obj->departement)->title ?? 'Global' }}</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                        <div class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-[#b11d40] to-rose-400" style="width: {{ $obj->avancement }}%"></div>
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <div class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            {{ ($obj->departement && $obj->departement->manager) ? $obj->departement->manager->firstName . ' ' . $obj->departement->manager->lastName : 'Non assigné' }}
+                        </span>
                     </div>
                 </div>
 
-                {{-- Admin/Manager Actions --}}
+                {{-- Progress Visualization --}}
+                <div class="mt-auto">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Complétion Globale</span>
+                        <span class="text-lg font-black text-slate-900">{{ $obj->avancement }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner">
+                        @php
+                            $progressColor = 'bg-rose-500';
+                            if($obj->avancement > 70) $progressColor = 'bg-emerald-500';
+                            elseif($obj->avancement > 30) $progressColor = 'bg-amber-500';
+                        @endphp
+                        <div class="h-full rounded-full transition-all duration-1000 ease-out {{ $progressColor }} shadow-sm" 
+                             style="width: {{ $obj->avancement }}%">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Action Overlay --}}
                 @if(auth()->user()->role !== 'employee')
-                <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button type="button" onclick='openEditModal(@json($obj))' class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </button>
-                    <button type="button" onclick="confirmDeleteObjectif('{{ $obj->idObjectif }}')" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
+                <div class="absolute inset-x-7 bottom-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                    <div class="bg-white/90 backdrop-blur-md border border-slate-100 rounded-2xl shadow-xl p-1.5 flex gap-1.5">
+                        <button type="button" onclick="openEditModal('{{ $obj->idObjectif }}')" class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Modifier
+                        </button>
+                        <button type="button" onclick="confirmDeleteObjectif('{{ $obj->idObjectif }}')" class="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -86,9 +108,9 @@
 
     {{-- Add Objectif Modal --}}
     <div id="addObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addObjectifModal')"></div>
-        <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity" onclick="toggleObjectifModal('addObjectifModal')"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto" style="animation: modalIn .2s ease-out">
                 
                 {{-- Header --}}
                 <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
@@ -96,7 +118,7 @@
                         <h2 class="text-lg font-black text-slate-800">Nouvel Objectif Stratégique</h2>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Planification · Access Morocco</p>
                     </div>
-                    <button type="button" onclick="toggleModal('addObjectifModal')"
+                    <button type="button" onclick="toggleObjectifModal('addObjectifModal')"
                         class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -109,7 +131,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="md:col-span-2 space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif <span class="text-[#be2346]">*</span></label>
-                                <input type="text" name="titre" required placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="text" name="titre" required maxlength="55" placeholder="Ex: Expansion Marché EMEA" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             </div>
                             <div class="md:col-span-2 space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
@@ -125,10 +147,10 @@
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut <span class="text-[#be2346]">*</span></label>
-                                <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                     <option value="en_cours">En cours</option>
-                                    <option value="termine">Terminé</option>
-                                    <option value="retard">En retard</option>
+                                    <option value="atteint">Atteint</option>
+                                    <option value="echoue">Échoué</option>
                                 </select>
                             </div>
                             <div class="space-y-1.5">
@@ -137,7 +159,7 @@
                             </div>
                             <div class="md:col-span-2 space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
-                                <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                     <option value="">-- Global --</option>
                                     @foreach($departements as $dept)
                                         <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
@@ -148,7 +170,7 @@
 
                         {{-- Footer Buttons --}}
                         <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleModal('addObjectifModal')"
+                            <button type="button" onclick="toggleObjectifModal('addObjectifModal')"
                                 class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
                                 Annuler
                             </button>
@@ -164,9 +186,9 @@
 
     {{-- Edit Objectif Modal --}}
     <div id="editObjectifModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editObjectifModal')"></div>
-        <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm -z-10 transition-opacity" onclick="toggleObjectifModal('editObjectifModal')"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] pointer-events-auto" style="animation: modalIn .2s ease-out">
                 
                 {{-- Header --}}
                 <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
@@ -174,7 +196,7 @@
                         <h2 class="text-lg font-black text-slate-800">Modifier l'Objectif</h2>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
                     </div>
-                    <button type="button" onclick="toggleModal('editObjectifModal')"
+                    <button type="button" onclick="toggleObjectifModal('editObjectifModal')"
                         class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -189,7 +211,7 @@
                             
                             <div class="md:col-span-2 space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de l'objectif *</label>
-                                <input type="text" name="titre" id="edit_titre" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="text" name="titre" id="edit_titre" required maxlength="55" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             </div>
 
                             <div class="md:col-span-2 space-y-1.5">
@@ -209,10 +231,10 @@
 
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut *</label>
-                                <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <select name="status" id="edit_status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                     <option value="en_cours">En cours</option>
-                                    <option value="termine">Terminé</option>
-                                    <option value="retard">En retard</option>
+                                    <option value="atteint">Atteint</option>
+                                    <option value="echoue">Échoué</option>
                                 </select>
                             </div>
 
@@ -223,7 +245,7 @@
 
                             <div class="md:col-span-2 space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
-                                <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                     <option value="">-- Global --</option>
                                     @foreach($departements as $dept)
                                         <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
@@ -234,7 +256,7 @@
 
                         {{-- Footer Buttons --}}
                         <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleModal('editObjectifModal')"
+                            <button type="button" onclick="toggleObjectifModal('editObjectifModal')"
                                 class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
                                 Annuler
                             </button>
@@ -250,26 +272,47 @@
     </div>
 
     <script>
-        function toggleModal(id) {
+        function toggleObjectifModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
                 modal.classList.toggle('hidden');
                 document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
             }
         }
-        function openEditModal(obj) {
+        function openEditModal(id) {
             const form = document.getElementById('editObjectifForm');
-            form.action = '/objectifs/edit/' + obj.idObjectif;
+            form.action = '/objectifs/edit/' + id;
             
-            document.getElementById('edit_titre').value = obj.titre || '';
-            document.getElementById('edit_description').value = obj.description || '';
-            document.getElementById('edit_dateDebut').value = obj.dateDebut || '';
-            document.getElementById('edit_dateFin').value = obj.dateFin || '';
-            document.getElementById('edit_status').value = obj.status || 'en_cours';
-            document.getElementById('edit_avancement').value = obj.avancement || 0;
-            document.getElementById('edit_idDepartement').value = obj.idDepartement || '';
+            // Show modal immediately for better UX
+            toggleObjectifModal('editObjectifModal');
             
-            toggleModal('editObjectifModal');
+            // Temporary loading state
+            document.getElementById('edit_titre').value = 'Chargement...';
+            
+            // Fetch the data from the controller (AJAX)
+            fetch(`/objectifs/edit/${id}?_t=${new Date().getTime()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if(!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('edit_titre').value = data.titre || '';
+                document.getElementById('edit_description').value = data.description || '';
+                document.getElementById('edit_dateDebut').value = data.dateDebut || '';
+                document.getElementById('edit_dateFin').value = data.dateFin || '';
+                document.getElementById('edit_status').value = data.status || 'en_cours';
+                document.getElementById('edit_avancement').value = data.avancement || 0;
+                document.getElementById('edit_idDepartement').value = data.idDepartement || '';
+            })
+            .catch(error => {
+                console.error('Error fetching objective data:', error);
+                document.getElementById('edit_titre').value = 'Erreur lors du chargement.';
+            });
         }
 
         function confirmDeleteObjectif(id) {

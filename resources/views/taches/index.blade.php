@@ -3,9 +3,13 @@
          x-data="{ 
             showModal: {{ $errors->any() ? 'true' : 'false' }}, 
             showEditModal: false,
-            currentTask: { titre: '', idTache: '', description: '', priorite: 'moyenne', status: 'todo', dateDebut: '', duree: '', idDepartement: '', idObjectif: '' },
+            currentTask: { titre: '', idTache: '', description: '', priorite: 'moyenne', status: 'todo', start_date: '', end_date: '', typeDuree: 'jours', idDepartement: '', idObjectif: '' },
             openEditModal(task) {
-                this.currentTask = task;
+                this.currentTask = {
+                    ...task,
+                    start_date: task.dateDebut ? task.dateDebut.replace(' ', 'T').substring(0, 16) : '',
+                    end_date: task.duree ? task.duree.replace(' ', 'T').substring(0, 16) : ''
+                };
                 this.showEditModal = true;
             },
             confirmDelete(id) {
@@ -157,12 +161,19 @@
 
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Date début</label>
-                                <input type="date" name="dateDebut" value="{{ old('dateDebut') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="datetime-local" name="start_date" value="{{ old('start_date') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Échéance</label>
-                                <input type="date" name="duree" value="{{ old('duree') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                <input type="hidden" name="typeDuree" value="jours">
+                                <input type="datetime-local" name="end_date" value="{{ old('end_date') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Type de Durée</label>
+                                <select name="typeDuree" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="jours" {{ old('typeDuree') == 'jours' ? 'selected' : '' }}>Jours</option>
+                                    <option value="h" {{ old('typeDuree') == 'h' ? 'selected' : '' }}>Heures</option>
+                                    <option value="mois" {{ old('typeDuree') == 'mois' ? 'selected' : '' }}>Mois</option>
+                                </select>
                             </div>
                             
                             <div class="md:col-span-2 space-y-1.5">
@@ -263,11 +274,19 @@
 
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date début</label>
-                                <input type="date" name="dateDebut" x-model="currentTask.dateDebut" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="datetime-local" name="start_date" x-model="currentTask.start_date" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Échéance</label>
-                                <input type="date" name="duree" x-model="currentTask.duree" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="datetime-local" name="end_date" x-model="currentTask.end_date" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Durée</label>
+                                <select name="typeDuree" x-model="currentTask.typeDuree" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    <option value="jours">Jours</option>
+                                    <option value="h">Heures</option>
+                                    <option value="mois">Mois</option>
+                                </select>
                             </div>
                         </div>
 

@@ -106,13 +106,16 @@ Route::put('/demandeDocuments/edit/{id}', [DemandeController::class, 'update']);
 Route::delete('/demandeDocuments/delete/{id}', [DemandeController::class, 'destroy']);
 
 #Objectif Routes
-Route::get('/objectifs', [ObjectifController::class, 'index'])->name('goals.index');
-Route::get('/objectifs/create', [ObjectifController::class, 'create'])->name('goals.create');
-Route::post('/objectifs', [ObjectifController::class, 'store'])->name('goals.store');
-Route::get('/objectifs/{id}', [ObjectifController::class, 'show'])->name('goals.show');
-Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit'])->name('goals.edit');
-Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update'])->name('goals.update');
-Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy'])->name('goals.destroy');
+#Objectif Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/objectifs', [ObjectifController::class, 'index'])->name('goals.index');
+    Route::get('/objectifs/create', [ObjectifController::class, 'create'])->name('goals.create');
+    Route::post('/objectifs', [ObjectifController::class, 'store'])->name('goals.store');
+    Route::get('/objectifs/{id}', [ObjectifController::class, 'show'])->name('goals.show');
+    Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit'])->name('goals.edit');
+    Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update'])->name('goals.update');
+    Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy'])->name('goals.destroy');
+});
 
 #Permission Routes
 Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
@@ -169,8 +172,7 @@ Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middlewar
 Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
 Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
 
-# Goals Route
-Route::get('/goals', [ObjectifController::class, 'index'])->middleware(['auth', 'verified'])->name('goals.index');
+
 
 
 
