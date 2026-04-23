@@ -120,6 +120,7 @@
                 </div>
                 <span class="font-medium text-sm">Objectifs</span>
             </a>
+            @endcan
             @can('conge.view')
             <a href="{{ Route::has('conge.index') ? route('conge.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
