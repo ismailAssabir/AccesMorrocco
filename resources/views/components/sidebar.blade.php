@@ -41,6 +41,7 @@
 
         <nav class="space-y-1">
             
+@if(auth()->user()->role !== 'employee')
       <a href="{{ url('/users') }}" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
    {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -52,8 +53,10 @@
     </div>
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
+@endif
 
 
+@if(auth()->user()->role !== 'employee')
             <a href="/departements" 
 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
@@ -65,6 +68,7 @@
                 </div>
                 <span class="font-medium text-sm">Département</span>
             </a>
+@endif
 
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
@@ -155,19 +159,16 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('logout') }}" class="ml-2">
-                @csrf
-                <button type="submit" 
-                    class="group p-2.5 rounded-lg bg-white/5 hover:bg-red-600/20 border border-white/5 hover:border-red-600/40 transition-all duration-300 active:scale-90"
-                    title="Quitter">
-                    <svg xmlns="http://www.w3.org/2000/svg" 
-                        class="w-5 h-5 text-white/40 group-hover:text-[#be2346] transition-all duration-300" 
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                </button>
-            </form>
+            <button type="button" onclick="confirmLogout()"
+                class="group p-2.5 rounded-lg bg-white/5 hover:bg-red-600/20 border border-white/5 hover:border-red-600/40 transition-all duration-300 active:scale-90"
+                title="Quitter">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    class="w-5 h-5 text-white/40 group-hover:text-[#be2346] transition-all duration-300" 
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
         </div>
     </div>
 </aside>

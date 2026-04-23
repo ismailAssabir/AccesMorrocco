@@ -1,7 +1,13 @@
 <x-app-layout>
     @php
-        $departements = \App\Models\Departement::all();
+        $departements = \App\Models\Departement::with('manager')->get();
     @endphp
+    <style>
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -45,46 +51,11 @@
         </div>
 
         <div class="px-7 pt-6">
-    {{-- Success Message --}}
-    @if(session('msg'))
-        <div id="success-alert" 
-             class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl font-bold text-sm flex items-center gap-3 transition-all duration-500 ease-in-out">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            {{ session('msg') }}
+            <x-status-messages />
         </div>
-    @endif
-
-    {{-- Error Messages --}}
-    @if($errors->any())
-        <div id="error-alert" 
-             class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl font-bold text-sm transition-all duration-500 ease-in-out">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        function fadeAndRemove(elementId) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                setTimeout(() => {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateY(-10px)';
-                    setTimeout(() => el.remove(), 500); 
-                }, 2000); 
-            }
-        }
-
-        fadeAndRemove('success-alert');
-        fadeAndRemove('error-alert');
-
         // Auto-open modal if userId is in URL
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
@@ -96,39 +67,6 @@
             }
         }
     });
-
-    // Toast Notification System
-    function showToast(message, type = 'success') {
-        const toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'fixed bottom-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none';
-            document.body.appendChild(container);
-        }
-        
-        const toast = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-red-50 border-red-200 text-red-600';
-        const icon = type === 'success' 
-            ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
-            : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-            
-        toast.className = `p-4 ${bgColor} border rounded-2xl shadow-xl font-bold text-sm flex items-center gap-3 transition-all duration-500 transform translate-x-20 opacity-0 pointer-events-auto`;
-        toast.innerHTML = `${icon} <span>${message}</span>`;
-        
-        document.getElementById('toast-container').appendChild(toast);
-        
-        // Appear
-        setTimeout(() => {
-            toast.classList.remove('translate-x-20', 'opacity-0');
-        }, 100);
-        
-        // Disappear
-        setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-y-[-10px]');
-            setTimeout(() => toast.remove(), 500);
-        }, 4000);
-    }
 </script>
 
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
@@ -163,15 +101,18 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ $user->post ?? 'Non défini' }}</td>
                             <td class="px-6 py-4">
-                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat }}</span>
+                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $user->typeContrat == 'CD' ? 'CDI' : $user->typeContrat }}</span>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button onclick="openShowUserModal('{{ $user->idUser }}')" class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
+                                    <button onclick='openViewModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                     </button>
-                                    <button onclick="openEditModal('{{ $user->idUser }}')" class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
+                                    <button onclick='openEditModal(@json($user))' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                                    </button>
+                                    <button onclick="confirmDeleteUser('{{ route('users.destroy', $user->idUser ) }}')" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all" title="Supprimer">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </div>
                             </td>
@@ -213,104 +154,118 @@
         <div id="addUserModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('addUserModal')"></div>
             <div class="relative flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden p-8">
+                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+                    
+                    {{-- Header --}}
                     <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                         <div>
-                            <h2 class="text-lg font-black text-slate-800" id="deptModalTitle">Nouveau Collaborateur</h2>
+                            <h2 class="text-lg font-black text-slate-800">Nouveau Collaborateur</h2>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Fiche de création · Access Morocco</p>
                         </div>
-                        <button type="button" onclick="closeDeptModal()"
-                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] hover:border-[#b11d40]/30 transition-all">
+                        <button type="button" onclick="toggleModal('addUserModal')"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <form action="{{ url('/users') }}" method="POST" class="space-y-5">
-    @csrf
-    <input type="hidden" name="fichier" value="placeholder">
-    <input type="hidden" name="rip" value="placeholder">
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Prénom *</label>
-            <input type="text" name="firstName" required placeholder="Ex: Jean" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Nom *</label>
-            <input type="text" name="lastName" required placeholder="Ex: Dupont" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                    {{-- Form Content --}}
+                    <div class="overflow-y-auto">
+                        <form action="{{ route('users.store') }}" method="POST" class="p-7 space-y-5">
+                            @csrf
+                            <input type="hidden" name="fichier" value="placeholder">
+                            <input type="hidden" name="rip" value="placeholder">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Prénom *</label>
+                                    <input type="text" name="firstName" required placeholder="Ex: Jean" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col col-span-2">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Adresse Email *</label>
-            <input type="email" name="email" required placeholder="email@exemple.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nom *</label>
+                                    <input type="text" name="lastName" required placeholder="Ex: Dupont" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Mot de passe *</label>
-            <input type="password" name="password" required value="12345678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Adresse Email *</label>
+                                    <input type="email" name="email" required placeholder="email@exemple.com" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">CIN *</label>
-            <input type="text" name="cin" required placeholder="Ex: AB12345" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Mot de passe *</label>
+                                    <input type="password" name="password" required value="12345678" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Poste occupé</label>
-            <input type="text" name="post" placeholder="Ex: Développeur Full Stack" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">CIN *</label>
+                                    <input type="text" name="cin" required placeholder="Ex: AB12345" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Téléphone *</label>
-            <input type="text" name="phoneNumber" required placeholder="06..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Poste occupé</label>
+                                    <input type="text" name="post" placeholder="Ex: Développeur Full Stack" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date de naissance *</label>
-            <input type="date" name="birthday" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Téléphone *</label>
+                                    <input type="text" name="phoneNumber" required placeholder="06..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Salaire (MAD) *</label>
-            <input type="number" name="salaire" required placeholder="Ex: 8000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de naissance *</label>
+                                    <input type="date" name="birthday" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Rôle Système *</label>
-            <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="" disabled selected>— Sélectionner un rôle —</option>
-                <option value="employee">Employé</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-            </select>
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Salaire (MAD) *</label>
+                                    <input type="number" name="salaire" required placeholder="Ex: 8000" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Type de Contrat *</label>
-            <select name="typeContrat" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="CDI">CDI</option>
-                <option value="CI">CI</option>
-                <option value="freelance">Freelance</option>
-            </select>
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rôle Système *</label>
+                                    <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled selected>— Sélectionner un rôle —</option>
+                                        <option value="employee">Employé</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
 
-        <div class="flex flex-col col-span-2">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Département Affecté *</label>
-            <select name="idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#be2346]/50 transition-all">
-                <option value="" disabled selected>— Choisir un département —</option>
-                @foreach($departements as $dept)
-                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
-                @endforeach
-            </select>
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Contrat *</label>
+                                    <select name="typeContrat" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="CD">CDI</option>
+                                        <option value="CI">CI</option>
+                                        <option value="freelance">Freelance</option>
+                                    </select>
+                                </div>
 
-    </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département Affecté *</label>
+                                    <select name="idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled selected>— Choisir un département —</option>
+                                        @foreach($departements as $dept)
+                                            @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                                            <option value="{{ $dept->idDepartement }}" data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">{{ $dept->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
-    <button type="submit" class="w-full py-4 mt-4 rounded-xl bg-[#be2346] hover:bg-[#a01d3a] text-white font-black shadow-lg shadow-[#be2346]/20 transition-all active:scale-[0.98]">
-        Confirmer l'ajout
-    </button>
-</form>
+                            {{-- Footer Buttons --}}
+                            <div class="flex gap-3 pt-4">
+                                <button type="button" onclick="toggleModal('addUserModal')"
+                                    class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                    Confirmer l'ajout
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -424,138 +379,319 @@
                     </div>
 
                 </div>
+              </div>
             </div>
         </div>
 
+        {{-- ═══════════ MODAL — Modifier Collaborateur ═══════════ --}}
         <div id="editUserModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editUserModal')"></div>
             <div class="relative flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden p-8 relative">
-                    <button onclick="toggleModal('editUserModal')"
-                        class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+                    
+                    {{-- Header --}}
+                    <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                        <div>
+                            <h2 class="text-lg font-black text-slate-800">Modifier collaborateur</h2>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Mise à jour · Access Morocco</p>
+                        </div>
+                        <button type="button" onclick="toggleModal('editUserModal')"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
 
-                    <h2 class="text-xl font-black text-slate-800 mb-6">Modifier collaborateur</h2>
-                    <form id="editForm" method="POST" class="space-y-5">
-    @csrf
-    @method('PUT')
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Prénom</label>
-            <input type="text" name="firstName" id="edit_firstName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                    {{-- Form Content --}}
+                    <div class="overflow-y-auto">
+                        <form id="editForm" method="POST" class="p-7 space-y-5">
+                            @csrf
+                            @method('PUT')
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Prénom</label>
+                                    <input type="text" name="firstName" id="edit_firstName" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Nom</label>
-            <input type="text" name="lastName" id="edit_lastName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nom</label>
+                                    <input type="text" name="lastName" id="edit_lastName" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col col-span-2">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Adresse Email</label>
-            <input type="email" name="email" id="edit_email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Adresse Email</label>
+                                    <input type="email" name="email" id="edit_email" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col col-span-2">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Poste</label>
-            <input type="text" name="post" id="edit_post" placeholder="Poste" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Poste</label>
+                                    <input type="text" name="post" id="edit_post" placeholder="Poste" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Rôle Système</label>
-            <select name="type" id="edit_role" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="" disabled>Sélectionner le rôle</option>
-                <option value="employee">Employé</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-            </select>
-        </div>
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Adresse</label>
+                                    <input type="text" name="address" id="edit_address" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">CIN</label>
-            <input type="text" name="cin" id="edit_cin" placeholder="CIN" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rôle Système</label>
+                                    <select name="type" id="edit_role" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled>Sélectionner le rôle</option>
+                                        <option value="employee">Employé</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Salaire (MAD)</label>
-            <input type="number" name="salaire" id="edit_salaire" placeholder="Salaire" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">CIN</label>
+                                    <input type="text" name="cin" id="edit_cin" placeholder="CIN" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Téléphone</label>
-            <input type="text" name="phoneNumber" id="edit_phoneNumber" placeholder="Téléphone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Salaire (MAD)</label>
+                                    <input type="number" name="salaire" id="edit_salaire" placeholder="Salaire" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Date de Naissance</label>
-            <input type="date" name="birthday" id="edit_birthday" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Téléphone</label>
+                                    <input type="text" name="phoneNumber" id="edit_phoneNumber" placeholder="Téléphone" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Type de Contrat</label>
-            <select name="typeContrat" id="edit_typeContrat" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-[#be2346]/50 outline-none transition-all">
-                <option value="CDI">CDI</option>
-                <option value="CI">CI</option>
-                <option value="freelance">Freelance</option>
-            </select>
-        </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de Naissance</label>
+                                    <input type="date" name="birthday" id="edit_birthday" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-        <div class="flex flex-col col-span-2">
-            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 mb-1">Département Affecté</label>
-            <select name="idDepartement" id="edit_idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#be2346]/50 transition-all">
-                <option value="" disabled>Sélectionner le département</option>
-                @foreach($departements as $dept)
-                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'embauche</label>
+                                    <input type="date" name="dateEmb" id="edit_dateEmb" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
 
-    <button type="submit" class="w-full py-4 mt-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black shadow-lg shadow-slate-200 transition-all active:scale-[0.98]">
-        Sauvegarder les modifications
-    </button>
-</form>
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Contrat</label>
+                                    <select name="typeContrat" id="edit_typeContrat" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="CD">CDI</option>
+                                        <option value="CI">CI</option>
+                                        <option value="freelance">Freelance</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut</label>
+                                    <select name="status" id="edit_status" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="active">Actif</option>
+                                        <option value="desactive">Désactivé</option>
+                                        <option value="conge">En Congé</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département Affecté</label>
+                                    <select name="idDepartement" id="edit_idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled>Sélectionner le département</option>
+                                        @foreach($departements as $dept)
+                                            @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                                            <option value="{{ $dept->idDepartement }}" data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">{{ $dept->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Footer Buttons --}}
+                            <div class="flex gap-3 pt-4">
+                                <button type="button" onclick="toggleModal('editUserModal')"
+                                    class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                    Sauvegarder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+
+        {{-- ═══════════ MODAL — Modifier Collaborateur ═══════════ --}}
+        <div id="editUserModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editUserModal')"></div>
+            <div class="relative flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+                    
+                    {{-- Header --}}
+                    <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                        <div>
+                            <h2 class="text-lg font-black text-slate-800">Modifier collaborateur</h2>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Mise à jour · Access Morocco</p>
+                        </div>
+                        <button type="button" onclick="toggleModal('editUserModal')"
+                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Form Content --}}
+                    <div class="overflow-y-auto">
+                        <form id="editForm" method="POST" class="p-7 space-y-5">
+                            @csrf
+                            @method('PUT')
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Prénom</label>
+                                    <input type="text" name="firstName" id="edit_firstName" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nom</label>
+                                    <input type="text" name="lastName" id="edit_lastName" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Adresse Email</label>
+                                    <input type="email" name="email" id="edit_email" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Poste</label>
+                                    <input type="text" name="post" id="edit_post" placeholder="Poste" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Adresse</label>
+                                    <input type="text" name="address" id="edit_address" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rôle Système</label>
+                                    <select name="type" id="edit_role" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled>Sélectionner le rôle</option>
+                                        <option value="employee">Employé</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">CIN</label>
+                                    <input type="text" name="cin" id="edit_cin" placeholder="CIN" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Salaire (MAD)</label>
+                                    <input type="number" name="salaire" id="edit_salaire" placeholder="Salaire" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Téléphone</label>
+                                    <input type="text" name="phoneNumber" id="edit_phoneNumber" placeholder="Téléphone" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date de Naissance</label>
+                                    <input type="date" name="birthday" id="edit_birthday" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date d'embauche</label>
+                                    <input type="date" name="dateEmb" id="edit_dateEmb" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type de Contrat</label>
+                                    <select name="typeContrat" id="edit_typeContrat" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="CD">CDI</option>
+                                        <option value="CI">CI</option>
+                                        <option value="freelance">Freelance</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut</label>
+                                    <select name="status" id="edit_status" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="active">Actif</option>
+                                        <option value="desactive">Désactivé</option>
+                                        <option value="conge">En Congé</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5 md:col-span-2">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département Affecté</label>
+                                    <select name="idDepartement" id="edit_idDepartement" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="" disabled>Sélectionner le département</option>
+                                        @foreach($departements as $dept)
+                                            @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                                            <option value="{{ $dept->idDepartement }}" data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">{{ $dept->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Footer Buttons --}}
+                            <div class="flex gap-3 pt-4">
+                                <button type="button" onclick="toggleModal('editUserModal')"
+                                    class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                                    Sauvegarder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            </div>
+        </div>
+    </div>
     </div>
 
     <script>
-        function openShowUserModal(id) {
-            // Add a light loading state to the table if needed, here we just fetch
-            fetch(`/users/${id}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+        function updateUrl(params) {
+            let baseUrl = "{{ route('users.index') }}";
+            let newUrl = baseUrl;
+            
+            if (params.userId) {
+                if (params.action === 'edit') {
+                    newUrl = baseUrl + '/edit/' + params.userId;
+                } else {
+                    newUrl = baseUrl + '/' + params.userId;
                 }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(user => {
-                openViewModal(user);
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
-                showToast("Impossible de charger les informations de l'utilisateur.", 'error');
-            });
+            }
+            
+            window.history.pushState(null, '', newUrl);
+        }
+
+        function resetUrl() {
+            updateUrl({});
         }
 
         function toggleModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
+                const isOpening = modal.classList.contains('hidden');
                 modal.classList.toggle('hidden');
                 document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
+                
+                // Reset URL when closing user modals
+                if (!isOpening && (id === 'viewUserModal' || id === 'editUserModal')) {
+                    resetUrl();
+                }
             }
         }
 
-        function openViewModal(user) {
+        function openViewModal(user, skipPush = false) {
             console.log("Viewing user:", user);
+            
+            if (!skipPush) {
+                updateUrl({ userId: (user.idUser || user.id) });
+            }
             
             // Full Name and Avatar
             document.getElementById('view_fullName').innerText = user.firstName + ' ' + user.lastName;
@@ -565,7 +701,7 @@
             // Professional Details
             document.getElementById('view_post').innerText = user.post || 'Collaborateur';
             document.getElementById('view_dept').innerText = user.departement ? user.departement.title : 'Non assigné';
-            document.getElementById('view_contract').innerText = user.typeContrat || 'CDI';
+            document.getElementById('view_contract').innerText = user.typeContrat === 'CD' ? 'CDI' : (user.typeContrat || 'CDI');
             document.getElementById('view_salaire').innerText = user.salaire ? new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(user.salaire) : '0,00 MAD';
             document.getElementById('view_dateEmb').innerText = user.dateEmb ? new Date(user.dateEmb).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non renseignée';
             
@@ -603,56 +739,101 @@
             } else if (status === 'desactive') {
                 statusEl.innerText = 'Désactivé';
                 statusEl.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-slate-50 text-slate-400 border border-slate-200';
-            } else {
-                statusEl.innerText = status;
-                statusEl.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-slate-50 text-slate-400 border border-slate-200';
             }
-
             toggleModal('viewUserModal');
         }
 
-        async function openEditModal(id) {
-            try {
-                const response = await fetch(`{{ url('/') }}/users/edit/${id}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                // Debugging: Affichage du contenu brut de la réponse
-                const rawText = await response.text();
-                console.log("Raw Response:", rawText);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const user = JSON.parse(rawText);
-                
-                // Dynamically update the form action
-                document.getElementById('editForm').action = `{{ url("/users/edit") }}/${id}`;
-                
-                // Form Mapping with null check
-                document.getElementById('edit_firstName').value = user.firstName || '';
-                document.getElementById('edit_lastName').value = user.lastName || '';
-                document.getElementById('edit_email').value = user.email || '';
-                document.getElementById('edit_cin').value = user.cin || '';
-                document.getElementById('edit_post').value = user.post || '';
-                document.getElementById('edit_salaire').value = user.salaire || '';
-                document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
-                document.getElementById('edit_birthday').value = user.birthday || '';
-                document.getElementById('edit_typeContrat').value = user.typeContrat || 'CDI';
-                document.getElementById('edit_idDepartement').value = user.idDepartement || '';
-                
-                // Loading role into select (field name 'type' or 'role' depending on model)
-                document.getElementById('edit_role').value = user.type || user.role || 'employee';
-
-                toggleModal('editUserModal');
-            } catch (error) {
-                console.error("Fetch error details:", error);
-                showToast(`Erreur (${error.message}): Impossible de charger les données pour la modification.`, 'error');
-            }
+        function openEditModal(user) {
+            const form = document.getElementById('editForm');
+            form.action = `/users/edit/${user.idUser}`;
+            
+            document.getElementById('edit_firstName').value = user.firstName || '';
+            document.getElementById('edit_lastName').value = user.lastName || '';
+            document.getElementById('edit_email').value = user.email || '';
+            document.getElementById('edit_cin').value = user.cin || '';
+            document.getElementById('edit_birthday').value = user.birthday ? user.birthday.split(' ')[0] : '';
+            document.getElementById('edit_address').value = user.address || '';
+            document.getElementById('edit_phoneNumber').value = user.phoneNumber || '';
+            document.getElementById('edit_typeContrat').value = user.typeContrat || 'CD';
+            document.getElementById('edit_salaire').value = user.salaire || 0;
+            document.getElementById('edit_post').value = user.post || '';
+            document.getElementById('edit_dateEmb').value = user.dateEmb ? user.dateEmb.split(' ')[0] : '';
+            document.getElementById('edit_idDepartement').value = user.idDepartement || '';
+            document.getElementById('edit_status').value = user.status || 'active';
+            document.getElementById('edit_role').value = user.type || 'employee';
+            
+            toggleModal('editUserModal');
         }
+
+        function confirmDeleteUser(url) {
+            window.confirmDelete(url, 'employé');
+        }
+
+        // --- Auto-open and UI initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Server-side auto-open (When data is received from routes)
+            @if(isset($openModal) && isset($selectedUser))
+                const selectedUser = @json($selectedUser);
+                const openModal = "{{ $openModal }}";
+                if (openModal === 'view') {
+                    openViewModal(selectedUser, true);
+                } else if (openModal === 'edit') {
+                    openEditModal(selectedUser, true);
+                }
+            @endif
+
+            // Handle back button
+            window.onpopstate = function() {
+                document.getElementById('viewUserModal').classList.add('hidden');
+                document.getElementById('editUserModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            };
+        });
+
+        // Add Global-Modal based Validation
+        function bindManagerValidation(formSelector, roleSelector, deptSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+            
+            form.addEventListener('submit', function(e) {
+                const typeSelect = form.querySelector(roleSelector);
+                const deptSelect = form.querySelector(deptSelector);
+                
+                if (typeSelect && deptSelect && typeSelect.value === 'manager' && deptSelect.value) {
+                    const selectedOption = deptSelect.options[deptSelect.selectedIndex];
+                    const currentManager = selectedOption.getAttribute('data-current-manager');
+                    
+                    if (currentManager && currentManager !== '') {
+                        e.preventDefault();
+                        
+                        window.confirmDelete = window.confirmDelete || function(){}; // Safety
+                        
+                        // Use openGlobalDeleteModal for custom text and theme
+                        openGlobalDeleteModal(
+                            null, 
+                            'Remplacer le Manager ?', 
+                            `Ce département a déjà un manager (${currentManager}). En confirmant, il sera rétrogradé en employé pour laisser la place au nouveau manager.`,
+                            'Confirmer le remplacement',
+                            'info',
+                            'switch'
+                        );
+                        
+                        // Override the form submission logic for this specific case
+                        const confirmBtn = document.querySelector('#globalDeleteForm button[type="submit"]');
+                        const originalOnclick = confirmBtn.onclick;
+                        
+                        confirmBtn.onclick = function(event) {
+                            event.preventDefault();
+                            form.submit();
+                        };
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            bindManagerValidation('#addUserModal form', 'select[name="type"]', 'select[name="idDepartement"]');
+            bindManagerValidation('#editForm', '#edit_role', '#edit_idDepartement');
+        });
     </script>
 </x-app-layout>

@@ -19,31 +19,72 @@ class TacheController extends Controller
     }
 
 public function store(Request $request) {
-    
-
-    $newTache = $request->validate([
-        'idObjectif'  => 'nullable|exists:objectifs,idObjectif', 
-        'titre'       => 'required|max:30', 
-        'dateDebut'   => 'nullable|date',
-        'duree'       => 'nullable|date', 
-        'typeDuree'   => 'required|in:h,jours,mois', 
-        'heureDebut'  => 'nullable', 
-        'priorite'    => 'required|in:basse,moyenne,haute', 
-        'status'      => 'required|in:todo,en_cours,termine',
-        'description' => 'nullable',
-        'idUser'      => 'nullable|exists:users,idUser',
-        'idDepartement' => 'nullable|exists:departements,idDepartement'
+    $request->validate([
+        'titre'         => 'required|max:30',
+        'start_date'    => 'nullable|date',
+        'end_date'      => 'nullable|date|after_or_equal:start_date',
+        'typeDuree'     => 'required|in:h,jours,mois',
+        'priorite'      => 'required|in:basse,moyenne,haute',
+        'status'        => 'required|in:todo,en_cours,termine',
+        'idDepartement' => 'nullable|exists:departements,idDepartement',
+        'idUser'        => 'nullable|exists:users,idUser',
+        'idObjectif'    => 'nullable|exists:objectifs,idObjectif',
+        'description'   => 'nullable',
     ]);
 
-    unset($newTache['idUser']);
-    $Tache = Tache::create($newTache);
+    $data = $request->all();
+    
+    // Parse dates with Carbon
+    $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->start_date) : null;
+    $end = $request->filled('end_date') ? \Carbon\Carbon::parse($request->end_date) : null;
 
+    // Precise Human-Readable Duration Logic
+    $formattedDuration = '0 min';
+    if ($start && $end) {
+        if ($start->equalTo($end)) {
+            $formattedDuration = 'Short Task';
+        } else {
+            $totalMinutes = $start->diffInMinutes($end);
+            
+            if ($totalMinutes >= 1440) {
+                // Scenario A: More than 24 hours (Multiple Days)
+                $days = floor($totalMinutes / 1440);
+                $remMins = $totalMinutes % 1440;
+                $hours = floor($remMins / 60);
+                $formattedDuration = $hours > 0 ? "{$days}j {$hours}h" : "{$days} " . ($days > 1 ? 'Jours' : 'Jour');
+            } else {
+                // Scenario B: Less than 24 hours (Hours/Minutes)
+                if ($totalMinutes < 60) {
+                    $formattedDuration = $totalMinutes . ' min';
+                } else {
+                    $hours = floor($totalMinutes / 60);
+                    $mins = $totalMinutes % 60;
+                    $formattedDuration = $mins > 0 ? "{$hours}h {$mins}min" : "{$hours}h";
+                }
+            }
+        }
+    }
+
+    // Prepare model data
+    $tacheData = [
+        'titre'         => $request->titre,
+        'dateDebut'     => $start,
+        'duree'         => $end, // duree stores the end date/time
+        'typeDuree'     => $request->typeDuree,
+        'priorite'      => $request->priorite,
+        'status'        => $request->status,
+        'idDepartement' => $request->idDepartement,
+        'idObjectif'    => $request->idObjectif,
+        'description'   => $request->description,
+    ];
+
+    $tache = Tache::create($tacheData);
 
     if ($request->filled('idUser')) {
-    $Tache->users()->attach($request->idUser);
-}
-    return redirect()->back()->with('msg' , "La tache a été ajouté avec succès");
+        $tache->users()->attach($request->idUser);
+    }
 
+    return redirect()->back()->with('msg', "La tâche a été ajoutée avec succès");
 }
 public function show($id){
     $Tache = Tache::with(['users', 'objectif'])->findOrFail($id);
@@ -60,32 +101,69 @@ public function edit($id){
     return view('editTache' , compact('Tache'));
 }
 
-public function update(Request $request ,$id){
-    
-    $TacheUpdate = $request->validate([
-       'idObjectif'  => 'nullable|exists:objectifs,idObjectif', 
-        'titre'       => 'required|max:30', 
-        'dateDebut'   => 'nullable|date',
-        'duree'       => 'nullable|date', 
-        'typeDuree'   => 'required|in:h,jours,mois', 
-        'heureDebut'  => 'nullable', 
-        'priorite'    => 'required|in:basse,moyenne,haute', 
-        'status'      => 'required|in:todo,en_cours,termine',
-        'description' => 'nullable',
-        'idUser'      => 'nullable|exists:users,idUser',
-        'idDepartement' => 'nullable|exists:departements,idDepartement'
+public function update(Request $request, $id) {
+    $request->validate([
+        'titre'         => 'required|max:30',
+        'start_date'    => 'nullable|date',
+        'end_date'      => 'nullable|date|after_or_equal:start_date',
+        'typeDuree'     => 'required|in:h,jours,mois',
+        'priorite'      => 'required|in:basse,moyenne,haute',
+        'status'        => 'required|in:todo,en_cours,termine',
+        'idDepartement' => 'nullable|exists:departements,idDepartement',
+        'idUser'        => 'nullable|exists:users,idUser',
+        'idObjectif'    => 'nullable|exists:objectifs,idObjectif',
+        'description'   => 'nullable',
     ]);
-    unset($TacheUpdate['idUser']);
 
-    $Tache = Tache::findOrFail($id);
+    $tache = Tache::findOrFail($id);
     
-    
-   $Tache->update($TacheUpdate);
-   if ($request->filled('idUser')) {
-    $Tache->users()->sync($request->idUser);}
+    // Parse dates with Carbon
+    $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->start_date) : null;
+    $end = $request->filled('end_date') ? \Carbon\Carbon::parse($request->end_date) : null;
 
+    // Precise Human-Readable Duration Logic (Consistency)
+    $formattedDuration = '0 min';
+    if ($start && $end) {
+        if ($start->equalTo($end)) {
+            $formattedDuration = 'Short Task';
+        } else {
+            $totalMinutes = $start->diffInMinutes($end);
+            if ($totalMinutes >= 1440) {
+                // Scenario A: More than 24 hours (Multiple Days)
+                $days = floor($totalMinutes / 1440);
+                $remMins = $totalMinutes % 1440;
+                $hours = floor($remMins / 60);
+                $formattedDuration = $hours > 0 ? "{$days}j {$hours}h" : "{$days} " . ($days > 1 ? 'Jours' : 'Jour');
+            } else {
+                // Scenario B: Less than 24 hours (Hours/Minutes)
+                if ($totalMinutes < 60) {
+                    $formattedDuration = $totalMinutes . ' min';
+                } else {
+                    $hours = floor($totalMinutes / 60);
+                    $mins = $totalMinutes % 60;
+                    $formattedDuration = $mins > 0 ? "{$hours}h {$mins}min" : "{$hours}h";
+                }
+            }
+        }
+    }
 
-    return redirect()->back()->with('msg' , 'La tache été mises à jour avec succès');
+    $tache->update([
+        'titre'         => $request->titre,
+        'dateDebut'     => $start,
+        'duree'         => $end,
+        'typeDuree'     => $request->typeDuree,
+        'priorite'      => $request->priorite,
+        'status'        => $request->status,
+        'idDepartement' => $request->idDepartement,
+        'idObjectif'    => $request->idObjectif,
+        'description'   => $request->description,
+    ]);
+
+    if ($request->filled('idUser')) {
+        $tache->users()->sync($request->idUser);
+    }
+
+    return redirect()->back()->with('msg', 'La tâche a été mise à jour avec succès');
 }
 
 public function assignUser(Request $request) {

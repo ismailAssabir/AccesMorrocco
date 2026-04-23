@@ -15,12 +15,13 @@ class DemandeController extends Controller
     }
     
     public function create(){
+        Gate::authorize('document.create');
         return view('demande.create');
     }
     public function store(Request $request){
         Gate::authorize('document.create');
         $data = $request->validate([
-            'title' => 'required|string|max:55',
+            'titre' => 'required|string|max:55',
             'description' => 'nullable|string|max:255',
             'idUser' => 'nullable|exists:users,idUser',
             'status' => 'nullable|string',
@@ -58,7 +59,8 @@ class DemandeController extends Controller
     return redirect()->back()->with('msg' , 'La demande été mises à jour avec succès');
     }
     public function destroy($id)
-        {    Gate::authorize('document.delete');
+        {   
+             Gate::authorize('document.delete');
             $doc = DocumentDemande::findOrFail($id);
             $doc->delete();
             return redirect()->back()->with('msg', 'La demande a été supprimée');

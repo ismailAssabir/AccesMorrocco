@@ -80,4 +80,9 @@ class User extends Authenticatable
 
     public function isAdmin(): bool { return $this->type === 'admin'; }
     public function isManager(): bool { return $this->type === 'manager'; }
+
+    public function getRoleAttribute()
+    {
+        return $this->type;
+    }
 }

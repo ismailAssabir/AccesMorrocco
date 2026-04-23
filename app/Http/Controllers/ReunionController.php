@@ -10,9 +10,22 @@ class ReunionController extends Controller
 {
     public function index()
     {
-    
         $reunions = Reunion::with('departement')->get();
-        return view('reunions.index', compact('reunions'));
+        $departements = Departement::all();
+        return view('reunions.index', compact('reunions', 'departements'));
+    }
+
+    public function create()
+    {
+        $departements = Departement::all();
+        return view('reunions.create', compact('departements'));
+    }
+
+    public function edit($id)
+    {
+        $reunion = Reunion::findOrFail($id);
+        $departements = Departement::all();
+        return view('reunions.edit', compact('reunion', 'departements'));
     }
 
     public function store(Request $request)
@@ -31,7 +44,7 @@ class ReunionController extends Controller
 
         Reunion::create($newReunion);
 
-        return redirect()->back()->with('msg', 'La réunion a été ajoutée avec succès');
+        return redirect('/reunions')->with('msg', 'La réunion a été ajoutée avec succès');
     }
 
     public function show($id)
@@ -58,13 +71,13 @@ class ReunionController extends Controller
 
         $reunion->update($updatedData);
 
-        return redirect()->back()->with('msg', 'La réunion a été mise à jour');
+        return redirect('/reunions')->with('msg', 'La réunion a été mise à jour');
     }
 
     public function destroy($id)
     {
         $reunion = Reunion::findOrFail($id);
         $reunion->delete();
-        return redirect()->back()->with('msg', 'Réunion supprimée avec succès');
+        return redirect('/reunions')->with('msg', 'Réunion supprimée avec succès');
     }
 }

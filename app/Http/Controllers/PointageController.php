@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pointage;
+use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class PointageController extends Controller
 {
-    
+   
     public function index()
     {
         $today = now()->toDateString();
         $pointages = Pointage::with('user')->get();
-
         return view('Adminpointage', compact('pointages'));
     }
 
@@ -27,92 +27,96 @@ class PointageController extends Controller
             ->whereIn('status', ['retard', 'absent'])
             ->orderBy('date', 'desc')
             ->get();
-
         return view('user_infractions', compact('infractions'));
     }
     
+    
     public function checkIn(Request $request)
     {
-        $validatedData = $request->validate([
-            'gps' => 'required|string',
-        ]);
+        $request->validate(['gps' => 'required|string']);
+
+        
+        $settings = Company::first();
+        $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
+        $companyEntryTime = $settings->companyEntryTime ?? "08:00:00";
+        $maxDistance = $settings->distance ?? 200;
 
         $idUser = auth()->id();
-        $companyGps = "32.9348,-6.0234"; 
-        $companyEntryTime = "08:00:00";  
-        $maxDistance = 200;              
+        $today = now()->toDateString();
 
-        $userLoc = explode(',', $validatedData['gps']);
-        $compLoc = explode(',', $companyGps);
         
+        $userLoc = explode(',', $request->gps);
+        $compLoc = explode(',', $companyGps);
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
         if ($distance > $maxDistance) {
             return redirect()->back()->with('error', "Trop loin de l'entreprise.");
         }
 
-        $today = now()->toDateString();
-        $currentTime = now();
-        $officialTime = Carbon::createFromTimeString($companyEntryTime);
-
         
-        $alreadyPointed = Pointage::where('idUser', $idUser)
-            ->where('date', $today)
-            ->whereNotNull('heureEntree') 
-            ->exists();
-
-        if ($alreadyPointed) {
+        $already = Pointage::where('idUser', $idUser)->where('date', $today)->whereNotNull('heureEntree')->exists();
+        if ($already) {
             return redirect()->back()->with('error', 'Déjà pointé aujourd\'hui.');
         }
 
-        $status = 'present';
-        if ($currentTime->gt($officialTime->addMinutes(15))) {
-            $status = 'retard';
-        }
+        $currentTime = now();
+        $officialTime = Carbon::createFromTimeString($companyEntryTime);
+        $status = $currentTime->gt($officialTime->addMinutes(15)) ? 'retard' : 'present';
 
         Pointage::create([
             'idUser'      => $idUser,
             'date'        => $today,
             'heureEntree' => $currentTime->toTimeString(),
             'status'      => $status,
-            'gps'         => $validatedData['gps'],
+            'gps'         => $request->gps,
         ]);
 
         return redirect()->back()->with('msg', 'Entrée enregistrée.');
     }
 
+    
     public function checkOut(Request $request) 
     {
         $request->validate(['gps' => 'required|string']);
 
+        $settings = Company::first();
+        $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
+        $exitTimeOfficial = $settings->companyExitTime ?? "17:00:00";
+        $maxDistance = $settings->distance ?? 200;
+
         $idUser = auth()->id();
         $today = now()->toDateString();
-        $companyGps = "32.9348,-6.0234"; 
 
         $userLoc = explode(',', $request->gps);
         $compLoc = explode(',', $companyGps);
-        
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
-        if ($distance > 200) {
+        if ($distance > $maxDistance) {
             return redirect()->back()->with('error', "Trop loin pour la sortie.");
         }
 
-       
-        $pointage = Pointage::where('idUser', $idUser)
-            ->where('date', $today)
-            ->whereNull('heureSortie') 
-            ->first();
+        $pointage = Pointage::where('idUser', $idUser)->where('date', $today)->whereNull('heureSortie')->first();
 
         if (!$pointage) {
             return redirect()->back()->with('error', 'Aucun pointage actif trouvé.');
         }
 
-        $pointage->update(['heureSortie' => now()->toTimeString()]);
+        $currentTime = now();
+        $officialExit = Carbon::createFromTimeString($exitTimeOfficial);
+        
+        $updateData = ['heureSortie' => $currentTime->toTimeString()];
+        $msg = 'Sortie enregistrée.';
 
-        return redirect()->back()->with('msg', 'Sortie enregistrée.');
+        if ($currentTime->lt($officialExit)) {
+            $updateData['status'] = 'retard';
+            $msg = 'Sortie enregistrée (Retard : sortie anticipée).';
+        }
+
+        $pointage->update($updateData);
+        return redirect()->back()->with('msg', $msg);
     }
 
+    
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 6371000;
@@ -122,6 +126,7 @@ class PointageController extends Controller
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
+    
     public function submitJustification(Request $request)
     {
         $validatedData = $request->validate([
@@ -131,12 +136,27 @@ class PointageController extends Controller
             'fichier'       => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:2048', 
         ]);
 
+        $pointage = Pointage::findOrFail($validatedData['idPointage']);
+
         if ($request->hasFile('fichier')) {        
             $validatedData['fichier'] = $request->file('fichier')->store('pointages', 'public');
         }
 
         $pointage->update($validatedData);
-
         return redirect()->back()->with('msg', 'Justification envoyée.');
+    }
+
+    
+    public function updateSettings(Request $request)
+    {
+        $validatedData = $request->validate([
+            'companyGps'       => 'nullable|string',
+            'companyEntryTime' => 'nullable',
+            'companyExitTime'  => 'nullable',
+            'distance'         => 'nullable|integer',
+        ]);
+
+        Company::updateOrCreate(['id' => 1], $validatedData);
+        return redirect()->back()->with('msg', 'Paramètres mis à jour.');
     }
 }

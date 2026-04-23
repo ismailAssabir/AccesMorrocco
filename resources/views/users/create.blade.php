@@ -70,9 +70,10 @@
                             <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 focus:border-[#be2346] focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-all">
                                 <option value="">-- Sélectionner --</option>
                                 {{-- We dynamically pull this since it's allowed in Blade if controller didn't supply --}}
-                                @php $depts = \App\Models\Departement::all(); @endphp
+                                @php $depts = \App\Models\Departement::with('manager')->get(); @endphp
                                 @foreach($depts as $dept)
-                                    <option value="{{ $dept->idDepartement }}" {{ old('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>
+                                    @php $deptManager = $dept->manager ? trim($dept->manager->firstName . ' ' . $dept->manager->lastName) : ''; @endphp
+                                    <option value="{{ $dept->idDepartement }}" {{ old('idDepartement') == $dept->idDepartement ? 'selected' : '' }} data-current-manager="{{ htmlspecialchars($deptManager, ENT_QUOTES) }}">
                                         {{ $dept->title ?? $dept->name }}
                                     </option>
                                 @endforeach
@@ -94,7 +95,7 @@
                         <div>
                             <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-1.5">Type de Contrat</label>
                             <select name="typeContrat" class="w-full bg-slate-50 border border-slate-200 focus:border-[#be2346] focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-all">
-                                <option value="CDI" {{ old('typeContrat') == 'CDI' ? 'selected' : '' }}>CDI</option>
+                                <option value="CD" {{ old('typeContrat') == 'CD' ? 'selected' : '' }}>CDI</option>
                                 <option value="CI" {{ old('typeContrat') == 'CI' ? 'selected' : '' }}>CI</option>
                                 <option value="freelance" {{ old('typeContrat') == 'freelance' ? 'selected' : '' }}>Freelance</option>
                             </select>
@@ -122,3 +123,34 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const typeSelect = document.querySelector('select[name="type"]');
+                const deptSelect = document.querySelector('select[name="idDepartement"]');
+                
+                if (typeSelect.value === 'manager' && deptSelect.value) {
+                    const selectedOption = deptSelect.options[deptSelect.selectedIndex];
+                    const currentManager = selectedOption.getAttribute('data-current-manager');
+                    
+                    if (currentManager && currentManager !== '') {
+                        e.preventDefault();
+                        
+                        window.showConfirmModal({
+                            title: 'Conflit Département',
+                            text: `Ce département a déjà un manager (${currentManager}). Voulez-vous le remplacer ?`,
+                            confirmButtonText: 'Oui, remplacer',
+                            onConfirm: () => {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>

@@ -196,7 +196,7 @@
                     <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
                         <tr>
                             <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-2/5">Tâche</th>
-                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5">Assignation</th>
+                            <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black min-w-[200px]">Assignation</th>
                             <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5 text-center">Durée</th>
                             <th class="px-6 py-4 uppercase tracking-wider text-[11px] font-black w-1/5 text-center">Status</th>
                         </tr>
@@ -211,27 +211,32 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex flex-col gap-2">
-                                        <div class="flex flex-col gap-1.5 mt-1">
-                                            @foreach($tache->users as $u)
-                                                <div class="flex items-center gap-2 group/user bg-slate-50/50 hover:bg-red-50 px-2 py-1 rounded-lg border border-slate-100 hover:border-red-100 transition-all">
-                                                    <form action="{{ route('tasks.unassign') }}" method="POST" class="flex items-center">
-                                                        @csrf
-                                                        <input type="hidden" name="idTache" value="{{ $tache->idTache }}">
-                                                        <input type="hidden" name="idUser" value="{{ $u->idUser }}">
-                                                        <button type="submit" class="w-5 h-5 rounded-md bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Retirer">
-                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                        </button>
-                                                    </form>
-                                                    <span class="text-[11px] font-bold text-slate-700">{{ $u->firstName }} {{ $u->lastName }}</span>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        @forelse($tache->users as $u)
+                                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg group/badge transition-all hover:border-[#b11d40]/30 hover:bg-[#b11d40]/5">
+                                                <div class="w-5 h-5 rounded-md bg-white border border-slate-200 flex items-center justify-center text-[8px] font-black text-[#b11d40] shadow-sm">
+                                                    {{ strtoupper(substr($u->firstName, 0, 1) . substr($u->lastName, 0, 1)) }}
                                                 </div>
-                                            @endforeach
-                                        </div>
+                                                <span class="text-[10px] font-bold text-slate-600 truncate max-w-[80px]" title="{{ $u->firstName }} {{ $u->lastName }}">
+                                                    {{ Str::limit($u->firstName . ' ' . $u->lastName, 12) }}
+                                                </span>
+                                                <form action="{{ route('tasks.unassign') }}" method="POST" class="inline-flex">
+                                                    @csrf
+                                                    <input type="hidden" name="idTache" value="{{ $tache->idTache }}">
+                                                    <input type="hidden" name="idUser" value="{{ $u->idUser }}">
+                                                    <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors" title="Retirer">
+                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @empty
+                                            <span class="text-[10px] font-black uppercase text-slate-300 italic tracking-widest">Non assigné</span>
+                                        @endforelse
                                         
-                                        <form action="{{ route('tasks.assign') }}" method="POST" class="mt-1">
+                                        <form action="{{ route('tasks.assign') }}" method="POST" class="ml-1">
                                             @csrf
                                             <input type="hidden" name="idTache" value="{{ $tache->idTache }}">
-                                            <select name="idUser" onchange="this.form.submit()" class="text-[10px] bg-slate-50 border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-[#b11d40] transition-all">
+                                            <select name="idUser" onchange="this.form.submit()" class="text-[9px] font-black uppercase bg-slate-50 border-slate-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-[#b11d40] transition-all cursor-pointer hover:bg-slate-100">
                                                 <option value="">+ Assigner</option>
                                                 @foreach($employeesList as $emp)
                                                     <option value="{{ $emp->idUser }}">{{ $emp->firstName }}</option>
@@ -242,16 +247,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($tache->dateDebut && $tache->duree)
-                                        @php
-                                            $start = \Carbon\Carbon::parse($tache->dateDebut);
-                                            $end = \Carbon\Carbon::parse($tache->duree);
-                                            $duration = $start->diffInDays($end);
-                                        @endphp
-                                        <span class="text-xs font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-lg">
-                                            {{ $duration }} jours
+                                        <span class="text-[10px] font-black text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg uppercase tracking-tight">
+                                            {{ $tache->formatted_duration }}
                                         </span>
                                     @else
-                                        <span class="text-xs text-slate-400">--</span>
+                                        <span class="text-xs text-slate-400 font-medium">--</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">

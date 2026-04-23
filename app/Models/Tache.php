@@ -22,6 +22,46 @@ class Tache extends Model
         'status',
         'description'
     ];
+    protected $casts = [
+        'dateDebut' => 'datetime',
+        'duree' => 'datetime',
+    ];
+
+    public function getFormattedDurationAttribute()
+    {
+        if (!$this->dateDebut || !$this->duree) {
+            return 'N/A';
+        }
+
+        $start = $this->dateDebut;
+        $end = $this->duree;
+
+        if ($start->equalTo($end)) {
+            return 'Short Task';
+        }
+
+        $totalMinutes = $start->diffInMinutes($end);
+
+        // Scenario A: More than 24 hours (Multiple Days)
+        if ($totalMinutes >= 1440) {
+            $days = floor($totalMinutes / 1440);
+            $remainingMinutes = $totalMinutes % 1440;
+            $hours = floor($remainingMinutes / 60);
+            
+            return $hours > 0 ? "{$days}j {$hours}h" : "{$days} " . ($days > 1 ? 'Jours' : 'Jour');
+        }
+
+        // Scenario B: Less than 24 hours (Hours/Minutes)
+        if ($totalMinutes < 60) {
+            return $totalMinutes . ' min';
+        }
+
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+
+        return $minutes > 0 ? "{$hours}h {$minutes}min" : "{$hours}h";
+    }
+
     function departement(){
         return $this->belongsTo(Departement::class, 'idDepartement', 'idDepartement');
     }
