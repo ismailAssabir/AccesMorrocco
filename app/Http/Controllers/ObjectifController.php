@@ -35,12 +35,17 @@ class ObjectifController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('objectif.create');
+        
+        if (!$request->filled('idDepartement')) {
+            $request->merge(['idDepartement' => null]);
+        }
+
         $data = $request->validate([
             'titre' => 'required|string|max:55',
             'description' => 'nullable|string|max:255',
             'dateFin' => 'nullable|date',
             'status' => 'nullable|string',
-            'avancement' => 'required|string',
+            'avancement' => 'required|integer|min:0|max:100',
             'dateDebut' => 'nullable|date',
             'idDepartement'=> 'nullable|exists:departements,idDepartement'
         ]);
@@ -94,6 +99,10 @@ class ObjectifController extends Controller
     public function update(Request $request, string $id)
     {
         Gate::authorize('objectif.edit');
+        
+        if (!$request->filled('idDepartement')) {
+            $request->merge(['idDepartement' => null]);
+        }
         
         $data = $request->validate([
             'titre'         => 'required|string|max:55',
