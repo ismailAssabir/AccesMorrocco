@@ -290,7 +290,7 @@
 
         function openEditModal(id) {
             const form = document.getElementById('editObjectifForm');
-            form.action = `/objectifs/${id}`;
+            form.action = `/objectifs/edit/${id}`;
             
             // Show modal immediately for better UX
             toggleModal('editObjectifModal', 'open');
@@ -307,25 +307,14 @@
             submitBtn.disabled = true;
             
             // Fetch the data from the controller (AJAX)
-            fetch(`/objectifs/${id}/edit?_t=${new Date().getTime()}`, {
+            fetch(`/objectifs/edit/${id}?_t=${new Date().getTime()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
             })
             .then(response => {
-                if(!response.ok) {
-                    // Fallback to original path just in case
-                    return fetch(`/objectifs/edit/${id}?_t=${new Date().getTime()}`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    }).then(res => {
-                        if(!res.ok) throw new Error('Network error');
-                        return res.json();
-                    });
-                }
+                if(!response.ok) throw new Error('Network error');
                 return response.json();
             })
             .then(data => {
