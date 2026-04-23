@@ -13,9 +13,9 @@ use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\TacheController;
 use App\Http\Controllers\ReunionController;
-
-use App\Models\Reclamation;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Reclamation;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,9 +29,7 @@ Route::get('/', function () {
     return app(AuthenticatedSessionController::class)->create(request());
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------

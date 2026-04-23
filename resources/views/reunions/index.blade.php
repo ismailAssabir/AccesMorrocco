@@ -313,5 +313,5 @@
                 document.body.style.overflow = 'auto';
             }
         });
-    </script>git 
+    </script>
 </x-app-layout>
