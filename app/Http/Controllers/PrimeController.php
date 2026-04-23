@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Prime;
+use Illuminate\Support\Facades\Gate;
 
 class PrimeController extends Controller
 {
     public function index()
-    {
+    {    Gate::authorize('prime.view');
         $primes = Prime::with(['tache', 'pointage'])->get();
         return view('primes.index', compact('primes'));
     }
 
     public function store(Request $request)
-    {
+    {           Gate::authorize('prime.create');
+
         $newPrime = $request->validate([
             'idTache'         => 'nullable|exists:taches,idTache',
             'idPointage'      => 'nullable|exists:pointages,idPointage',
@@ -34,13 +36,14 @@ class PrimeController extends Controller
     }
 
     public function show($id)
-    {
+    {           Gate::authorize('prime.view');
+
         $prime = Prime::with(['tache', 'pointage'])->findOrFail($id);
         return view('primes.show', compact('prime'));
     }
 
     public function update(Request $request, $id)
-    {
+    {   Gate::authorize('prime.edit');
         $prime = Prime::findOrFail($id);
         
         $updatedData = $request->validate([
@@ -59,7 +62,7 @@ class PrimeController extends Controller
     }
 
     public function destroy($id)
-    {
+    {   Gate::authorize('prime.delete');
         $prime = Prime::findOrFail($id);
         $prime->delete();
         return redirect()->back()->with('msg', 'Prime supprimée avec succès');

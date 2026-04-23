@@ -18,8 +18,8 @@ return new class extends Migration
             $table->time('heureEntree')->nullable();
             $table->time('heureSortie')->nullable();
             $table->date('date')->nullable();
-            $table->enum('status', ['present','absent','retard'])->default('present');
-            $table->decimal('gps', 10, 7)->nullable();
+            $table->enum('status', ['present','absent','retard'])->default('absent');
+            $table->string('gps')->nullable();
             $table->string('justification')->nullable();
             $table->string('fichier')->nullable();
             $table->string('typejustif')->nullable();
@@ -27,9 +27,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('pointages');

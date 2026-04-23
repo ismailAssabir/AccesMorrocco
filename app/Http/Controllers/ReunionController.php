@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reunion;
 use App\Models\Departement;
+use Illuminate\Support\Facades\Gate;
+
 
 class ReunionController extends Controller
 {
     public function index()
-    {
+    {   Gate::authorize('reunion.view');
         $query = Reunion::with('departement');
 
         if (auth()->user()->type === 'employee') {
@@ -26,20 +28,22 @@ class ReunionController extends Controller
     }
 
     public function create()
-    {
+    {       Gate::authorize('reunion.create');
+
         $departements = Departement::all();
         return view('reunions.create', compact('departements'));
     }
 
     public function edit($id)
-    {
+    {    Gate::authorize('reunion.edit');
         $reunion = Reunion::findOrFail($id);
         $departements = Departement::all();
         return view('reunions.edit', compact('reunion', 'departements'));
     }
 
     public function store(Request $request)
-    {
+    {       Gate::authorize('reunion.create');
+
         $newReunion = $request->validate([
             'idDepartement' => 'nullable|exists:departements,idDepartement',
             'objectif'      => 'required|string|max:255',
@@ -58,7 +62,7 @@ class ReunionController extends Controller
     }
 
     public function show($id)
-    {
+    {    Gate::authorize('reunion.view');
         $reunion = Reunion::with('departement')->findOrFail($id);
 
         if (auth()->user()->type === 'employee') {
@@ -72,7 +76,7 @@ class ReunionController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
+    {    Gate::authorize('reunion.edit');
         $reunion = Reunion::findOrFail($id);
         
         $updatedData = $request->validate([
@@ -93,7 +97,7 @@ class ReunionController extends Controller
     }
 
     public function destroy($id)
-    {
+    {   Gate::authorize('reunion.delete');
         $reunion = Reunion::findOrFail($id);
         $reunion->delete();
         return redirect('/reunions')->with('msg', 'Réunion supprimée avec succès');

@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Pointage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+
 
 class DepartementController extends Controller
 {
@@ -27,6 +29,7 @@ class DepartementController extends Controller
         return $jours;
     }
     public function index(){
+        Gate::authorize('departement.view');
         $depts = Departement::with(['manager', 'employes'])
             ->withCount([
                 'employes as users_count', 
@@ -68,7 +71,7 @@ class DepartementController extends Controller
     }
 
 public function store(Request $request) {
-    
+     Gate::authorize('departement.create');
 
     $newDepartement = $request->validate([
         'title'     => 'required|string|max:55',
@@ -98,17 +101,23 @@ public function store(Request $request) {
 
 }
 public function show($id){
+            Gate::authorize('departement.view');
+
     $departement = Departement::with(['manager', 'taches', 'taches.users'])->findOrFail($id);
     return view('showDepartement' , compact('departement'));
 }
 public function destroy($id)
-{   $departement = Departement::findOrFail($id);
+
+{   
+    Gate::authorize('departement.delete');
+$departement = Departement::findOrFail($id);
     $departement->delete();
     return redirect()->back()->with('msg', 'Le département a été supprimée');
 }
 
     public function edit(Request $request, $id)
-    {
+    {        Gate::authorize('departement.edit');
+
         $departement = Departement::with('manager')->findOrFail($id);
         
         if ($request->ajax()) {
@@ -119,7 +128,8 @@ public function destroy($id)
     }
 
 public function update(Request $request ,$id){
-    
+         Gate::authorize('departement.edit');
+
     $departementUpdate = $request->validate([
         'title'     => 'required|string|max:55',
         'description'    => 'nullable|string|max:255',

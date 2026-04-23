@@ -7,15 +7,16 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\TacheController;
+use App\Http\Controllers\ReunionController;
 use App\Http\Controllers\CongeController;
+use App\Http\Controllers\PointageController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
-use App\Http\Controllers\TacheController;
-use App\Http\Controllers\ReunionController;
+use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
-use App\Models\Reclamation;
 
 /*
 |--------------------------------------------------------------------------
@@ -184,5 +185,62 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->name('reunions.destroy');
     });
 });
+
+
+#Pointage Routes 
+
+
+Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
+Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
+Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
+Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
+Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+#Paiment Routes
+Route::get('/paiements', [PaiementController::class, 'index'])->name('paiements.index');
+Route::post('/paiements/store', [PaiementController::class, 'store'])->name('paiements.store');
+Route::get('/paiements/{id}', [PaiementController::class, 'show'])->name('paiements.show');
+Route::get('/paiements/{id}/edit', [PaiementController::class, 'edit'])->name('paiements.edit');
+Route::put('/paiements/{id}', [PaiementController::class, 'update'])->name('paiements.update');
+Route::delete('/paiements/{id}', [PaiementController::class, 'destroy'])->name('paiements.destroy');
+
+# Pointage Route
+Route::get('/pointage', function () {
+    $pointages = collect([
+        ['id' => 1, 'employe' => 'Karim Benali', 'checkin' => '08:00', 'checkout' => '17:00', 'status' => 'Présent'],
+        ['id' => 2, 'employe' => 'Sara Alaoui', 'checkin' => '08:15', 'checkout' => '17:05', 'status' => 'En retard'],
+        ['id' => 3, 'employe' => 'Youssef Nouri', 'checkin' => '--:--', 'checkout' => '--:--', 'status' => 'Absent'],
+        ['id' => 4, 'employe' => 'Hassan IDRISSI', 'checkin' => '07:55', 'checkout' => '16:50', 'status' => 'Présent']
+    ]);
+    return view('pointages.index', compact('pointages'));
+})->middleware(['auth', 'verified'])->name('pointages.index');
+
+# Tasks Route
+Route::get('/tasks', [TacheController::class, 'index'])->middleware(['auth', 'verified'])->name('tasks.index');
+Route::post('/tasks', [TacheController::class, 'store'])->middleware(['auth', 'verified'])->name('tasks.store');
+Route::delete('/tasks/{id}', [TacheController::class, 'destroy'])->middleware(['auth', 'verified'])->name('tasks.destroy');
+Route::post('/tasks/assign', [TacheController::class, 'assignUser'])->middleware(['auth', 'verified'])->name('tasks.assign');
+Route::post('/tasks/unassign', [TacheController::class, 'unassignUser'])->middleware(['auth', 'verified'])->name('tasks.unassign');
+Route::put('/tasks/{id}', [TacheController::class, 'update'])->middleware(['auth', 'verified'])->name('tasks.update');
+Route::patch('/tasks/{id}/status', function (Illuminate\Http\Request $request, $id) {
+    $tache = App\Models\Tache::findOrFail($id);
+    $tache->update(['status' => $request->status]);
+    return redirect()->back();
+})->middleware(['auth', 'verified'])->name('tasks.updateStatus');
+
+# Meetings Route
+Route::get('/meetings', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('meetings.index');
+
+# Reunion Routes (mapping to the same controller but using /reunions prefix as per views)
+Route::get('/reunions', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('reunions.index');
+Route::get('/reunions/create', [ReunionController::class, 'create'])->middleware(['auth', 'verified'])->name('reunions.create');
+Route::post('/reunions', [ReunionController::class, 'store'])->middleware(['auth', 'verified'])->name('reunions.store');
+Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middleware(['auth', 'verified'])->name('reunions.edit');
+Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
+Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
+
+
+
+
 
 require __DIR__.'/auth.php';

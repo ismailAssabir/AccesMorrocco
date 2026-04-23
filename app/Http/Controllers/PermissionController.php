@@ -20,6 +20,7 @@ class PermissionController extends Controller
     }
     public function edit($id)
     {
+        Gate::authorize('permission.edit');
         $employe = User::with('roles', 'permissions')->findOrFail($id);
         $roles = Role::all();
         $permissions = Permission::all()->groupBy(fn($p) => explode('.', $p->name)[0]);
@@ -29,6 +30,7 @@ class PermissionController extends Controller
 
     public function update(Request $request, $id)
     {
+        Gate::authorize('permission.edit');
         $employe = User::findOrFail($id);
 
      
