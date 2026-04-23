@@ -8,7 +8,7 @@
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
             @if(auth()->user()->role !== 'employee')
-            <button onclick="toggleModal('addReunionModal')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
+            <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -86,194 +86,201 @@
     {{-- ═══════════ MODALS ═══════════ --}}
 
     {{-- Add Reunion Modal --}}
-    <div id="addReunionModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addReunionModal')"></div>
-        <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
-                
-                {{-- Header --}}
-                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800">Planifier une Réunion</h2>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Nouvel événement · Access Morocco</p>
+    <div id="addReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addReunionModal', 'close')"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+            
+            {{-- Header --}}
+            <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="text-lg font-black text-slate-800">Planifier une Réunion</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Nouvel événement · Access Morocco</p>
+                </div>
+                <button type="button" onclick="toggleModal('addReunionModal', 'close')"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Form Content --}}
+            <div class="overflow-y-auto">
+                <form action="{{ url('/reunions') }}" method="POST" class="p-7 space-y-5">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de la réunion <span class="text-[#be2346]">*</span></label>
+                            <input type="text" name="titre" required placeholder="Ex: Revue de projet hebdomadaire" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type <span class="text-[#be2346]">*</span></label>
+                            <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="Interne">Interne</option>
+                                <option value="Externe">Externe</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
+                            <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="">-- Aucun --</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date et Heure <span class="text-[#be2346]">*</span></label>
+                            <input type="datetime-local" name="dateHeure" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de fin</label>
+                            <input type="time" name="heureFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lieu / Salle</label>
+                            <input type="text" name="lieu" placeholder="Ex: Salle A" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
+                            <input type="url" name="lien" placeholder="Ex: https://meet..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Objectif <span class="text-[#be2346]">*</span></label>
+                            <input type="text" name="objectif" required placeholder="But principal..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                            <textarea name="description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                        </div>
                     </div>
-                    <button type="button" onclick="toggleModal('addReunionModal')"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] hover:border-[#be2346]/30 transition-all">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
 
-                {{-- Form Content --}}
-                <div class="overflow-y-auto">
-                    <form action="{{ url('/reunions') }}" method="POST" class="p-7 space-y-5">
-                        @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de la réunion <span class="text-[#be2346]">*</span></label>
-                                <input type="text" name="titre" required placeholder="Ex: Revue de projet hebdomadaire" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type <span class="text-[#be2346]">*</span></label>
-                                <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="Interne">Interne</option>
-                                    <option value="Externe">Externe</option>
-                                    <option value="Autre">Autre</option>
-                                </select>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
-                                <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="">-- Aucun --</option>
-                                    @foreach($departements as $dept)
-                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date et Heure <span class="text-[#be2346]">*</span></label>
-                                <input type="datetime-local" name="dateHeure" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de fin</label>
-                                <input type="time" name="heureFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lieu / Salle</label>
-                                <input type="text" name="lieu" placeholder="Ex: Salle A" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
-                                <input type="url" name="lien" placeholder="Ex: https://meet..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Objectif <span class="text-[#be2346]">*</span></label>
-                                <input type="text" name="objectif" required placeholder="But principal..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
-                                <textarea name="description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
-                            </div>
-                        </div>
-
-                        {{-- Footer Buttons --}}
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleModal('addReunionModal')"
-                                class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
-                                Planifier
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {{-- Footer Buttons --}}
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="toggleModal('addReunionModal', 'close')"
+                            class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                            Annuler
+                        </button>
+                        <button type="submit"
+                            class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                            Planifier
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
     {{-- Edit Reunion Modal --}}
-    <div id="editReunionModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editReunionModal')"></div>
-        <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
-                
-                {{-- Header --}}
-                <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800">Modifier la Réunion</h2>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
+    <div id="editReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editReunionModal', 'close')"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+            
+            {{-- Header --}}
+            <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="text-lg font-black text-slate-800">Modifier la Réunion</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Édition · Access Morocco</p>
+                </div>
+                <button type="button" onclick="toggleModal('editReunionModal', 'close')"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {{-- Form Content --}}
+            <div class="overflow-y-auto">
+                <form id="editReunionForm" method="POST" class="p-7 space-y-5">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de la réunion *</label>
+                            <input type="text" name="titre" id="edit_titre" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type *</label>
+                            <select name="type" id="edit_type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="Interne">Interne</option>
+                                <option value="Externe">Externe</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
+                            <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <option value="">-- Aucun --</option>
+                                @foreach($departements as $dept)
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date et Heure *</label>
+                            <input type="datetime-local" name="dateHeure" id="edit_dateHeure" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de fin</label>
+                            <input type="time" name="heureFin" id="edit_heureFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lieu / Salle</label>
+                            <input type="text" name="lieu" id="edit_lieu" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
+                            <input type="url" name="lien" id="edit_lien" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Objectif *</label>
+                            <input type="text" name="objectif" id="edit_objectif" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                            <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
+                        </div>
                     </div>
-                    <button type="button" onclick="toggleModal('editReunionModal')"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346] transition-all">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
 
-                {{-- Form Content --}}
-                <div class="overflow-y-auto">
-                    <form id="editReunionForm" method="POST" class="p-7 space-y-5">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de la réunion *</label>
-                                <input type="text" name="titre" id="edit_titre" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type *</label>
-                                <select name="type" id="edit_type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="Interne">Interne</option>
-                                    <option value="Externe">Externe</option>
-                                    <option value="Autre">Autre</option>
-                                </select>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
-                                <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                    <option value="">-- Aucun --</option>
-                                    @foreach($departements as $dept)
-                                        <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date et Heure *</label>
-                                <input type="datetime-local" name="dateHeure" id="edit_dateHeure" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de fin</label>
-                                <input type="time" name="heureFin" id="edit_heureFin" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lieu / Salle</label>
-                                <input type="text" name="lieu" id="edit_lieu" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
-                                <input type="url" name="lien" id="edit_lien" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Objectif *</label>
-                                <input type="text" name="objectif" id="edit_objectif" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-
-                            <div class="md:col-span-2 space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
-                                <textarea name="description" id="edit_description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
-                            </div>
-                        </div>
-
-                        {{-- Footer Buttons --}}
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="toggleModal('editReunionModal')"
-                                class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
-                                Sauvegarder
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {{-- Footer Buttons --}}
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="toggleModal('editReunionModal', 'close')"
+                            class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
+                            Annuler
+                        </button>
+                        <button type="submit"
+                            class="flex-1 py-3.5 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleModal(id) {
+        function toggleModal(id, action = 'toggle') {
             const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.toggle('hidden');
-                document.body.style.overflow = modal.classList.contains('hidden') ? 'auto' : 'hidden';
+            if (!modal) return;
+
+            const isHidden = modal.classList.contains('hidden');
+            const shouldOpen = action === 'open' || (action === 'toggle' && isHidden);
+
+            if (shouldOpen) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
             }
         }
 
@@ -285,7 +292,7 @@
             document.getElementById('edit_type').value = reunion.type || 'Interne';
             document.getElementById('edit_idDepartement').value = reunion.idDepartement || '';
             
-            // Format date for datetime-local
+            // Precise date/time conversion for datetime-local
             if (reunion.dateHeure) {
                 const d = new Date(reunion.dateHeure);
                 const offset = d.getTimezoneOffset() * 60000;
@@ -299,24 +306,18 @@
             document.getElementById('edit_objectif').value = reunion.objectif || '';
             document.getElementById('edit_description').value = reunion.description || '';
             
-            toggleModal('editReunionModal');
+            toggleModal('editReunionModal', 'open');
         }
 
         function confirmDeleteReunion(id) {
             window.confirmDelete(`/reunions/delete/${id}`, 'réunion');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Re-use logic if needed for other UI initializations
-        });
-
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                document.getElementById('addReunionModal')?.classList.add('hidden');
-                document.getElementById('editReunionModal')?.classList.add('hidden');
-                document.body.style.overflow = 'auto';
+                toggleModal('addReunionModal', 'close');
+                toggleModal('editReunionModal', 'close');
             }
         });
     </script>
 </x-app-layout>
-
