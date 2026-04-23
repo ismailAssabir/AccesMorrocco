@@ -41,7 +41,7 @@
 
         <nav class="space-y-1">
             
-@if(auth()->user()->role !== 'employee')
+@if(auth()->user()->type !== 'employee')
       <a href="{{ url('/users') }}" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
    {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -56,14 +56,14 @@
 @endif
 
 
-@if(auth()->user()->role !== 'employee')
+@if(auth()->user()->type !== 'employee')
             <a href="/departements" 
 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
                     <svg class="w-5 h-5 {{ request()->is('departements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span class="font-medium text-sm">Département</span>
@@ -144,20 +144,20 @@
     {{-- ═══════════════ BOTTOM SECTION (fixed) ═══════════════ --}}
     <div class="flex-shrink-0 px-6 py-8 border-t border-white/5">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0 active:scale-90 transition-transform cursor-pointer">
+            <a href="{{ route('profile.edit') }}" class="group/profile flex items-center gap-3 min-w-0 p-2 -ml-2 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0 group-hover/profile:scale-110 group-hover/profile:rotate-3 transition-transform">
                     {{ substr(optional(Auth::user())->firstName ?? 'A', 0, 1) }}{{ substr(optional(Auth::user())->lastName ?? 'D', 0, 1) }}
                 </div>
                 
                 <div class="flex flex-col min-w-0">
-                    <p class="text-sm font-bold tracking-tight text-white leading-tight truncate">
+                    <p class="text-sm font-bold tracking-tight text-white leading-tight truncate group-hover/profile:text-[#be2346] transition-colors">
                         {{ optional(Auth::user())->firstName ?? 'Admin' }} {{ optional(Auth::user())->lastName ?? 'User' }}
                     </p>
-                    <p class="text-[10px] text-[#be2346] uppercase font-black tracking-widest mt-0.5 opacity-80">
+                    <p class="text-[10px] text-[#be2346] uppercase font-black tracking-widest mt-0.5 opacity-80 group-hover/profile:opacity-100 transition-opacity">
                         {{ optional(Auth::user())->role ?? 'Admin' }}
                     </p>
                 </div>
-            </div>
+            </a>
 
             <button type="button" onclick="confirmLogout()"
                 class="group p-2.5 rounded-lg bg-white/5 hover:bg-red-600/20 border border-white/5 hover:border-red-600/40 transition-all duration-300 active:scale-90"

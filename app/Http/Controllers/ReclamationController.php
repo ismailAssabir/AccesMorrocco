@@ -6,37 +6,51 @@ use Illuminate\Support\Facades\Auth;
 
 class ReclamationController extends Controller
 {
-     public function index(){
-        $Reclamations = Reclamation::with('user')->get();
-        return view('AllReclamations' , compact("Reclamations"));
+    public function index()
+    {
+        $query = Reclamation::with('user');
+
+        if (auth()->user()->type === 'employee') {
+            $query->where('idUser', auth()->id());
+        }
+
+        $Reclamations = $query->get();
+        return view('AllReclamations', compact("Reclamations"));
     }
 
-public function store(Request $request) {
-    
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'description' => 'nullable|string|min:10|max:255',
+            'status'      => 'in:ouverte,en_cours,resolue',
+            'priorite'    => 'in:basse,moyenne,haute',
+            'titre'       => 'string|min:2|max:20',
+            'fichier'     => 'nullable|mimes:pdf,jpg,jpeg,png|max:5120',
+            'reponse'     => 'string|max:255|nullable'
+        ]);
 
-    $newReclamation = $request->validate([
-        'idUser'     => 'required|exists:users,idUser',
-        'description'    => 'nullable|string|min:10|max:255',
-        'status'  => 'in:ouverte,en_cours,resolue',
-        'priorite' => 'in:basse,moyenne,haute',
-        'titre' => 'string|min:2|max:20',
-        'fichier' =>'nullable|mimes:pdf,jpg,jpeg,png|max:5120',
-        'reponse' => 'string|max:255|nullable'
-    ]);
-    if($request->hasFile('fichier')) {
-        $path = request->file('fichier')->store('Reclamations' , 'public');
-        $newReclamation['fichier'] = $path;
+        // Force idUser to current user for employees
+        $data['idUser'] = auth()->id();
+
+        if ($request->hasFile('fichier')) {
+            $path = $request->file('fichier')->store('Reclamations', 'public');
+            $data['fichier'] = $path;
+        }
+
+        Reclamation::create($data);
+        return redirect()->back()->with('msg', "La Réclamation a été ajoutée avec succès");
     }
-    
-    $Reclamation = Reclamation::create($newReclamation);
-    return redirect()->back()->with('msg' , "La Reclamation a été ajoutée avec succès");
-}
 
+    public function show($id)
+    {
+        $Reclamation = Reclamation::with('user')->findOrFail($id);
 
-public function show($id){
-    $Reclamation = Reclamation::with('user')->findOrFail($id);
-    return view('showReclamation' , compact('Reclamation'));
-}
+        if (auth()->user()->type === 'employee' && $Reclamation->idUser !== auth()->id()) {
+            abort(403, "Vous n'êtes pas autorisé à voir cette réclamation.");
+        }
+
+        return view('showReclamation', compact('Reclamation'));
+    }
 
 
 

@@ -23,12 +23,14 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Gestion des Tâches</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Suivez l'avancement des projets et des assignations.</p>
             </div>
+            @if(auth()->user()->type !== 'employee')
             <button @click="showModal = true" class="flex items-center gap-2 bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#be2346]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
                 Ajouter une Tâche
             </button>
+            @endif
         </div>
 
         <x-status-messages />
