@@ -348,4 +348,3 @@
         });
     </script>
 </x-app-layout>
-
