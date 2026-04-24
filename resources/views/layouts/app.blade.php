@@ -11,9 +11,6 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
-        <!-- Global Components -->
-        <x-delete-confirmation-modal />
     </head>
     <body class="font-sans antialiased text-gray-900">
        <div class="flex min-h-screen bg-[#FDFCFB]"> 
@@ -28,5 +25,9 @@
         </main>
     </div>
 </div>
+
+    <!-- Global Components -->
+    <x-delete-confirmation-modal />
+    <x-pointage-modal />
     </body>
 </html>

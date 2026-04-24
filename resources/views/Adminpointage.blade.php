@@ -90,7 +90,14 @@
             <option value="retard">Retard</option>
             <option value="absent">Absent</option>
         </select>
-        <button onclick="document.getElementById('search-input').value='';document.getElementById('status-filter').value='';filterTable()"
+        <select id="role-filter" onchange="filterTable()"
+            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all appearance-none min-w-[160px]">
+            <option value="">Tous les rôles</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="employee">Employé</option>
+        </select>
+        <button onclick="document.getElementById('search-input').value='';document.getElementById('status-filter').value='';document.getElementById('role-filter').value='';filterTable()"
             class="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">
             Réinitialiser
         </button>
@@ -99,6 +106,20 @@
     {{-- ═══════════ MAIN TABLE ═══════════ --}}
     <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+        
+        <div class="px-7 pt-6 pb-2 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
+            <div>
+                <h2 class="text-lg font-black text-slate-800">Historique de Pointage (Équipe)</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Suivi en temps réel des Entrées/Sorties</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Actifs
+                </span>
+            </div>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-slate-600" id="pointage-table">
                 <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase font-extrabold text-slate-400 tracking-wider">
@@ -128,9 +149,30 @@
                             $mins  = $entry->diffInMinutes($exit);
                             $duree = intdiv($mins, 60) . 'h ' . ($mins % 60) . 'min';
                         }
+
+                        // Calculate delay
+                        $delayIn = null;
+                        $delayOut = null;
+                        if ($pointage->heureEntree && isset($settings->companyEntryTime)) {
+                            $entry = \Carbon\Carbon::parse($pointage->heureEntree);
+                            $officialIn = \Carbon\Carbon::parse($settings->companyEntryTime);
+                            if ($entry->gt($officialIn)) {
+                                $diff = $officialIn->diffInMinutes($entry);
+                                if ($diff > 0) $delayIn = "+ " . $diff . " min";
+                            }
+                        }
+                        if ($pointage->heureSortie && isset($settings->companyExitTime)) {
+                            $exit = \Carbon\Carbon::parse($pointage->heureSortie);
+                            $officialOut = \Carbon\Carbon::parse($settings->companyExitTime);
+                            if ($exit->lt($officialOut)) {
+                                $diff = $exit->diffInMinutes($officialOut);
+                                if ($diff > 0) $delayOut = "- " . $diff . " min";
+                            }
+                        }
                     @endphp
                     <tr class="hover:bg-slate-50 transition-colors pointage-row"
                         data-name="{{ strtolower($empName) }}"
+                        data-role="{{ strtolower($user->type ?? 'employee') }}"
                         data-date="{{ $pointage->date }}"
                         data-status="{{ $pointage->status }}">
                         <td class="px-6 py-4">
@@ -139,9 +181,15 @@
                                     {{ $initial }}
                                 </div>
                                 <div>
-                                    <p class="font-bold text-slate-800 text-sm">{{ $empName }}</p>
+                                    <p class="font-bold text-slate-800 text-sm leading-tight">{{ $empName }}</p>
                                     @if($user)
-                                    <p class="text-xs text-slate-400">{{ $user->email ?? '' }}</p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <p class="text-[10px] text-slate-400 font-medium">{{ $user->email ?? '' }}</p>
+                                        <span class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border
+                                            {{ ($user->type ?? '') === 'admin' ? 'bg-red-50 text-[#be2346] border-red-100' : (($user->type ?? '') === 'manager' ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-100') }}">
+                                            {{ $user->type ?? 'User' }}
+                                        </span>
+                                    </div>
                                     @endif
                                 </div>
                             </div>
@@ -150,18 +198,36 @@
                             {{ $pointage->date ? \Carbon\Carbon::parse($pointage->date)->translatedFormat('d M Y') : '--' }}
                         </td>
                         <td class="px-6 py-4">
-                            <span class="font-mono text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-bold">
-                                {{ $pointage->heureEntree ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i') : '--:--' }}
-                            </span>
+                            <div class="flex flex-col">
+                                <span class="font-mono text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-bold w-fit">
+                                    {{ $pointage->heureEntree ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i') : '--:--' }}
+                                </span>
+                                @if($delayIn)
+                                    <span class="text-[9px] font-black text-amber-500 mt-1 ml-1 uppercase tracking-tighter">{{ $delayIn }}</span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-bold">
-                                {{ $pointage->heureSortie ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i') : '--:--' }}
-                            </span>
+                            <div class="flex flex-col">
+                                <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-bold w-fit">
+                                    {{ $pointage->heureSortie ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i') : '--:--' }}
+                                </span>
+                                @if($delayOut)
+                                    <span class="text-[9px] font-black text-[#be2346] mt-1 ml-1 uppercase tracking-tighter">Anticipé: {{ $delayOut }}</span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 text-slate-500 font-medium text-xs">{{ $duree }}</td>
                         <td class="px-6 py-4 text-xs text-slate-400 font-mono">
-                            {{ $pointage->gps ? substr($pointage->gps, 0, 12) . '...' : '—' }}
+                            @if($pointage->gps)
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ $pointage->gps }}" target="_blank" 
+                               class="flex items-center gap-1.5 hover:text-[#be2346] transition-colors group">
+                                <svg class="w-3 h-3 text-slate-300 group-hover:text-[#be2346]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>{{ substr($pointage->gps, 0, 12) }}...</span>
+                            </a>
+                            @else
+                                —
+                            @endif
                         </td>
                         <td class="px-6 py-4">
                             @if($pointage->status === 'present')
@@ -227,25 +293,25 @@
             @csrf
             <div class="space-y-1.5">
                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">GPS de l'entreprise</label>
-                <input type="text" name="companyGps" placeholder="Ex: 32.9348,-6.0234"
+                <input type="text" name="companyGps" placeholder="Ex: 32.9348,-6.0234" value="{{ $settings->companyGps ?? '' }}"
                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 font-mono">
                 <p class="text-[10px] text-slate-400 ml-1">Format: latitude,longitude</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure d'Entrée</label>
-                    <input type="time" name="companyEntryTime"
+                    <input type="time" name="companyEntryTime" value="{{ $settings->companyEntryTime ?? '' }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de Sortie</label>
-                    <input type="time" name="companyExitTime"
+                    <input type="time" name="companyExitTime" value="{{ $settings->companyExitTime ?? '' }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
             </div>
             <div class="space-y-1.5">
                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (mètres)</label>
-                <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000"
+                <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 <p class="text-[10px] text-slate-400 ml-1">Rayon autorisé autour de l'entreprise pour le pointage GPS.</p>
             </div>
@@ -286,15 +352,21 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettingsModal(); });
 
     function filterTable() {
-        const query  = document.getElementById('search-input').value.toLowerCase();
+        const search = document.getElementById('search-input').value.toLowerCase();
         const status = document.getElementById('status-filter').value.toLowerCase();
-        document.querySelectorAll('.pointage-row').forEach(row => {
-            const name   = row.dataset.name || '';
-            const date   = row.dataset.date || '';
-            const rowSts = row.dataset.status || '';
-            const matchQ = name.includes(query) || date.includes(query);
-            const matchS = !status || rowSts === status;
-            row.style.display = (matchQ && matchS) ? '' : 'none';
+        const role   = document.getElementById('role-filter').value.toLowerCase();
+        const rows   = document.querySelectorAll('.pointage-row');
+
+        rows.forEach(row => {
+            const nameMatch   = row.getAttribute('data-name').includes(search);
+            const statusMatch = status === '' || row.getAttribute('data-status') === status;
+            const roleMatch   = role === '' || row.getAttribute('data-role') === role;
+            
+            if (nameMatch && statusMatch && roleMatch) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
         });
     }
 </script>

@@ -21,13 +21,12 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
-<<<<<<< HEAD
+            // --- Legacy / Plural / Custom (from HEAD) ---
             'users.view', 'users.manage',
             'reunions.view', 'reunions.manage',
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
-            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete'
-=======
+
             // --- Permission ---
             'permission.edit',
             'permission.view',
@@ -128,23 +127,19 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
->>>>>>> e7be349915a68141dcbcdcc5103f914d372ead48
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-<<<<<<< HEAD
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
-        $managerRole->givePermissionTo([
-            'reunions.view', 'reunions.manage',
-            'reclamations.view', 'reclamations.manage',
-            'dashboard.view'
-=======
-        $manager = Role::firstOrCreate(['name' => 'manager']);
-        $manager->syncPermissions([
+
+        // Sync Manager permissions (merged from both branches)
+        $managerRole->syncPermissions([
+            'dashboard.view',
+            'users.view', 'users.manage',
             'user.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
@@ -155,11 +150,10 @@ class RolePermissionSeeder extends Seeder
             'tache.view', 'tache.create', 'tache.edit',
             'pointage.view',
             'conge.view', 'conge.approve',
-            'reclamation.view', 'reclamation.respond',
+            'reclamation.view', 'reclamation.respond', 'reclamations.view', 'reclamations.manage',
             'document.view', 'document.approve',
-            'reunion.view', 'reunion.create', 'reunion.edit',
+            'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
             'prime.view', 'prime.create',
->>>>>>> e7be349915a68141dcbcdcc5103f914d372ead48
         ]);
         $employeeRole->givePermissionTo([
             'reunions.view',

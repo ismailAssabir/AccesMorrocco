@@ -97,77 +97,131 @@
         </div>
     </div>
 
-    {{-- ═══════════ MES INFRACTIONS ═══════════ --}}
+    {{-- ═══════════ HISTORIQUE DE POINTAGE ═══════════ --}}
     <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
-        <div class="h-1.5 w-full bg-gradient-to-r from-amber-400 to-orange-500"></div>
-        <div class="px-7 pt-6 pb-3 flex items-center justify-between">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+        
+        <div class="px-7 pt-6 pb-2 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
             <div>
-                <h2 class="text-lg font-black text-slate-800">Mes Infractions</h2>
-                <p class="text-xs text-slate-400 font-medium mt-0.5">Retards et absences — Justifiez vos irrégularités.</p>
+                <h2 class="text-lg font-black text-slate-800">Historique de Pointage</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Vos 15 derniers enregistrements (Entrées & Sorties)</p>
             </div>
-            <span class="bg-amber-50 text-amber-600 font-black text-xs px-3 py-1 rounded-full border border-amber-200">
-                {{ $infractions->count() }} infraction(s)
-            </span>
+            <div class="flex items-center gap-2">
+                <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    {{ $recentPointages->count() }} Records
+                </span>
+            </div>
         </div>
 
-        @if($infractions->count() > 0)
+        @if($recentPointages->count() > 0)
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-slate-600">
-                <thead class="bg-slate-50 border-y border-slate-200 text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase font-extrabold text-slate-400 tracking-wider">
                     <tr>
-                        <th class="px-6 py-3">Date</th>
-                        <th class="px-6 py-3">Arrivée</th>
-                        <th class="px-6 py-3">Départ</th>
-                        <th class="px-6 py-3">Statut</th>
-                        <th class="px-6 py-3">Justification</th>
-                        <th class="px-6 py-3 text-right">Action</th>
+                        <th class="px-6 py-4">Date & Rôle</th>
+                        <th class="px-6 py-4">Arrivée</th>
+                        <th class="px-6 py-4">Départ</th>
+                        <th class="px-6 py-4">Durée</th>
+                        <th class="px-6 py-4">Statut</th>
+                        <th class="px-6 py-4">Analyse / Justif.</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @foreach($infractions as $infraction)
+                    @foreach($recentPointages as $p)
+                    @php
+                        $entry = $p->heureEntree ? \Carbon\Carbon::parse($p->heureEntree) : null;
+                        $exit  = $p->heureSortie ? \Carbon\Carbon::parse($p->heureSortie) : null;
+                        
+                        $duree = '--';
+                        if ($entry && $exit) {
+                            $mins = $entry->diffInMinutes($exit);
+                            $duree = intdiv($mins, 60) . 'h ' . ($mins % 60) . 'min';
+                        }
+
+                        $delayIn = null;
+                        $delayOut = null;
+                        if ($entry && isset($settings->companyEntryTime)) {
+                            $officialIn = \Carbon\Carbon::parse($settings->companyEntryTime);
+                            if ($entry->gt($officialIn)) {
+                                $diff = $officialIn->diffInMinutes($entry);
+                                if ($diff > 0) $delayIn = "+ " . $diff . " min";
+                            }
+                        }
+                        if ($exit && isset($settings->companyExitTime)) {
+                            $officialOut = \Carbon\Carbon::parse($settings->companyExitTime);
+                            if ($exit->lt($officialOut)) {
+                                $diff = $exit->diffInMinutes($officialOut);
+                                if ($diff > 0) $delayOut = "- " . $diff . " min";
+                            }
+                        }
+                    @endphp
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-slate-800">
-                            {{ \Carbon\Carbon::parse($infraction->date)->translatedFormat('d M Y') }}
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">
-                                {{ $infraction->heureEntree ?? '--:--' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">
-                                {{ $infraction->heureSortie ?? '--:--' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($infraction->status === 'retard')
-                                <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">Retard</span>
-                            @elseif($infraction->status === 'absent')
-                                <span class="bg-red-50 text-[#b11d40] font-bold px-3 py-1 rounded-full text-xs border border-red-200">Absent</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 max-w-xs">
-                            @if($infraction->justification)
-                                <p class="text-xs text-slate-500 truncate">{{ $infraction->justification }}</p>
-                                @if($infraction->typejustif)
-                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">{{ $infraction->typejustif }}</span>
+                        <td class="px-6 py-4 font-bold text-slate-800 flex flex-col">
+                            <span>{{ \Carbon\Carbon::parse($p->date)->translatedFormat('d M Y') }}</span>
+                            @php
+                                $recordUser = $p->user;
+                                $typeName = $recordUser->type ?? 'employee';
+                            @endphp
+                            <div class="flex flex-col gap-1 mt-1.5">
+                                @if(auth()->user()->type !== 'employee')
+                                    <span class="text-[10px] font-extrabold text-slate-700 leading-none">{{ $recordUser->firstName ?? '' }} {{ $recordUser->lastName ?? '' }}</span>
                                 @endif
+                                <span class="text-[7px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border w-fit
+                                    {{ $typeName === 'admin' ? 'bg-red-50 text-[#be2346] border-red-100' : ($typeName === 'manager' ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-100') }}">
+                                    {{ $typeName }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-mono text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-bold w-fit">
+                                    {{ $p->heureEntree ? \Carbon\Carbon::parse($p->heureEntree)->format('H:i') : '--:--' }}
+                                </span>
+                                @if($delayIn)
+                                    <span class="text-[9px] font-black text-amber-500 mt-1 ml-1 uppercase tracking-tighter">{{ $delayIn }}</span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-mono text-xs bg-slate-50 text-slate-500 px-2.5 py-1 rounded-lg font-bold w-fit">
+                                    {{ $p->heureSortie ? \Carbon\Carbon::parse($p->heureSortie)->format('H:i') : '--:--' }}
+                                </span>
+                                @if($delayOut)
+                                    <span class="text-[9px] font-black text-[#be2346] mt-1 ml-1 uppercase tracking-tighter">Anticipé: {{ $delayOut }}</span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-500 font-medium">{{ $duree }}</td>
+                        <td class="px-6 py-4">
+                            @if($p->status === 'present')
+                                <span class="text-emerald-500 font-bold flex items-center gap-1.5 text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    Présent
+                                </span>
+                            @elseif($p->status === 'retard')
+                                <span class="text-amber-500 font-bold flex items-center gap-1.5 text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Retard
+                                </span>
                             @else
-                                <span class="text-slate-300 text-xs italic">Aucune justification</span>
+                                <span class="text-slate-400 font-bold flex items-center gap-1.5 text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    {{ ucfirst($p->status) }}
+                                </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
-                            @if(!$infraction->justification)
-                            <button type="button"
-                                onclick="openJustifModal({{ $infraction->idPointage }})"
-                                class="text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white border border-indigo-200 px-3 py-1.5 rounded-xl transition-all">
-                                Justifier
-                            </button>
+                        <td class="px-6 py-4">
+                            @if(($p->status === 'retard' || $p->status === 'absent') && !$p->justification)
+                                <button onclick="openJustifModal({{ $p->idPointage }})" 
+                                    class="text-[10px] font-black uppercase text-[#be2346] hover:text-[#911633] underline">
+                                    Justifier
+                                </button>
+                            @elseif($p->justification)
+                                <span class="text-[10px] font-bold text-slate-400 italic">Justifié</span>
                             @else
-                            <span class="text-xs font-bold text-emerald-500 flex items-center justify-end gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                Soumis
-                            </span>
+                                <span class="text-[10px] font-bold text-slate-300">—</span>
                             @endif
                         </td>
                     </tr>
@@ -176,14 +230,8 @@
             </table>
         </div>
         @else
-        <div class="py-16 text-center">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
-                <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <p class="font-bold text-slate-700">Aucune infraction enregistrée</p>
-            <p class="text-sm text-slate-400 mt-1">Continuez comme ça !</p>
+        <div class="py-12 text-center text-slate-400 italic text-sm">
+            Aucun historique trouvé.
         </div>
         @endif
     </div>

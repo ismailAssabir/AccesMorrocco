@@ -14,26 +14,80 @@ class PointageController extends Controller
    
     public function index()
     {
-        $today = now()->toDateString();
-        $pointages = Pointage::with('user')->get();
-        return view('Adminpointage', compact('pointages'));
+        $pointages = Pointage::with('user')->orderBy('date', 'desc')->orderBy('heureEntree', 'desc')->get();
+        $settings = Company::first();
+        return view('Adminpointage', compact('pointages', 'settings'));
     }
 
    
     public function userPointage()
     {
         $idUser = auth()->id();
-        $infractions = Pointage::where('idUser', $idUser)
-            ->whereIn('status', ['retard', 'absent'])
+        $today  = now()->toDateString();
+
+        $todayPointage = Pointage::where('idUser', $idUser)
+            ->where('date', $today)
+            ->first();
+
+        $query = Pointage::query();
+        if (auth()->user()->type === 'employee') {
+            $query->where('idUser', $idUser);
+        }
+        
+        $recentPointages = $query->with('user')
             ->orderBy('date', 'desc')
+            ->orderBy('heureEntree', 'desc')
+            ->take(15)
             ->get();
-        return view('pointages.index', compact('infractions'));
+
+        $settings = Company::first();
+        return view('pointages.index', compact('todayPointage', 'recentPointages', 'settings'));
     }
+
+    /**
+     * JSON endpoint — returns today's check-in/out state for AJAX.
+     */
+    public function status()
+    {
+        $idUser = auth()->id();
+        $today  = now()->toDateString();
+
+        $pointage = Pointage::where('idUser', $idUser)
+            ->where('date', $today)
+            ->first();
+
+        return response()->json([
+            'checked_in'  => (bool) $pointage?->heureEntree,
+            'checked_out' => (bool) $pointage?->heureSortie,
+            'heureEntree' => $pointage?->heureEntree
+                ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i')
+                : null,
+            'heureSortie' => $pointage?->heureSortie
+                ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i')
+                : null,
+            'status'      => $pointage?->status,
+            'idPointage'  => $pointage?->idPointage,
+        ]);
+    }
+
     
     
     public function checkIn(Request $request)
     {
-        $request->validate(['gps' => 'required|string']);
+        if ($request->has('gps') && !empty($request->gps)) {
+            $gps = str_replace(' ', '', $request->gps);
+            $parts = explode(',', $gps);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            $request->merge(['gps' => $gps]);
+        }
+
+        $request->validate([
+            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
+        ], [
+            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
+        ]);
 
         
         $settings = Company::first();
@@ -45,18 +99,24 @@ class PointageController extends Controller
         $today = now()->toDateString();
 
         
-        $userLoc = explode(',', $request->gps);
-        $compLoc = explode(',', $companyGps);
+        $userLoc = $this->parseGps($request->gps);
+        $compLoc = $this->parseGps($companyGps);
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
         if ($distance > $maxDistance) {
-            return redirect()->back()->with('error', "Trop loin de l'entreprise.");
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => "Trop loin de l'entreprise. Distance: " . round($distance) . "m."], 422);
+            }
+            return redirect()->route('pointages.index')->with('error', "Trop loin de l'entreprise.");
         }
 
         
         $already = Pointage::where('idUser', $idUser)->where('date', $today)->whereNotNull('heureEntree')->exists();
         if ($already) {
-            return redirect()->back()->with('error', 'Déjà pointé aujourd\'hui.');
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => "Vous avez déjà pointé votre arrivée aujourd'hui."], 422);
+            }
+            return redirect()->route('pointages.index')->with('error', 'Déjà pointé aujourd\'hui.');
         }
 
         $currentTime = now();
@@ -71,13 +131,38 @@ class PointageController extends Controller
             'gps'         => $request->gps,
         ]);
 
-        return redirect()->back()->with('msg', 'Entrée enregistrée.');
+        $heureFormatted = $currentTime->format('H:i');
+        $statusLabel = $status === 'retard' ? 'Retard' : 'Présent';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'     => true,
+                'message'     => 'Entrée enregistrée avec succès.',
+                'heureEntree' => $heureFormatted,
+                'status'      => $status,
+                'statusLabel' => $statusLabel,
+            ]);
+        }
+        return redirect()->route('pointages.index')->with('success', 'Entrée enregistrée avec succès.');
     }
 
     
     public function checkOut(Request $request) 
     {
-        $request->validate(['gps' => 'required|string']);
+        if ($request->has('gps') && !empty($request->gps)) {
+            $gps = str_replace(' ', '', $request->gps);
+            $parts = explode(',', $gps);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            $request->merge(['gps' => $gps]);
+        }
+
+        $request->validate([
+            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
+        ], [
+            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
+        ]);
 
         $settings = Company::first();
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
@@ -87,24 +172,33 @@ class PointageController extends Controller
         $idUser = auth()->id();
         $today = now()->toDateString();
 
-        $userLoc = explode(',', $request->gps);
-        $compLoc = explode(',', $companyGps);
+        $userLoc = $this->parseGps($request->gps);
+        $compLoc = $this->parseGps($companyGps);
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
         if ($distance > $maxDistance) {
-            return redirect()->back()->with('error', "Trop loin pour la sortie.");
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Trop loin pour la sortie. Distance: ' . round($distance) . 'm.'], 422);
+            }
+            return redirect()->route('pointages.index')->with('error', "Trop loin pour la sortie.");
         }
 
         $pointage = Pointage::where('idUser', $idUser)->where('date', $today)->whereNull('heureSortie')->first();
 
         if (!$pointage) {
-            return redirect()->back()->with('error', 'Aucun pointage actif trouvé.');
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => "Aucun pointage d'entrée actif trouvé pour aujourd'hui."], 422);
+            }
+            return redirect()->route('pointages.index')->with('error', 'Aucun pointage actif trouvé.');
         }
 
         $currentTime = now();
         $officialExit = Carbon::createFromTimeString($exitTimeOfficial);
         
-        $updateData = ['heureSortie' => $currentTime->toTimeString()];
+        $updateData = [
+            'heureSortie' => $currentTime->toTimeString(),
+            'gps'         => $request->gps,
+        ];
         $msg = 'Sortie enregistrée.';
 
         if ($currentTime->lt($officialExit)) {
@@ -113,7 +207,29 @@ class PointageController extends Controller
         }
 
         $pointage->update($updateData);
-        return redirect()->back()->with('msg', $msg);
+
+        $heureFormatted = $currentTime->format('H:i');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'     => true,
+                'message'     => $msg,
+                'heureSortie' => $heureFormatted,
+                'status'      => $pointage->status,
+            ]);
+        }
+        return redirect()->route('pointages.index')->with('success', $msg);
+    }
+
+    
+    private function parseGps($gpsString)
+    {
+        if (empty($gpsString)) return [0, 0];
+        $parts = explode(',', $gpsString);
+        return [
+            (float)($parts[0] ?? 0),
+            (float)($parts[1] ?? 0)
+        ];
     }
 
     
@@ -149,14 +265,31 @@ class PointageController extends Controller
     
     public function updateSettings(Request $request)
     {
+        if ($request->has('companyGps') && !empty($request->companyGps)) {
+            $gps = str_replace(' ', '', $request->companyGps);
+            $parts = explode(',', $gps);
+            
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            
+            $request->merge(['companyGps' => $gps]);
+        }
+
         $validatedData = $request->validate([
-            'companyGps'       => 'nullable|string',
+            'companyGps'       => 'nullable|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
             'companyEntryTime' => 'nullable',
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
+        ], [
+            'companyGps.regex' => 'Le format GPS doit être: latitude,longitude (ex: 32.93,-6.02)'
         ]);
 
-        Company::updateOrCreate(['id' => 1], $validatedData);
+        $updateData = array_filter($validatedData, function($val) {
+            return !is_null($val);
+        });
+
+        Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');
     }
 }

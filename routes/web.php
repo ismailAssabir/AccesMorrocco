@@ -149,8 +149,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/demandeDocuments', [DemandeController::class, 'store']);
     Route::get('/demandeDocuments/{id}', [DemandeController::class, 'show']);
 
-    # Pointage Route (User view)
-    Route::get('/pointage', [PointageController::class, 'userPointage'])->name('pointages.index');
 
     # Tasks Route
     Route::get('/tasks', [TacheController::class, 'index'])->name('tasks.index');
@@ -183,14 +181,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 #Pointage Routes 
-
-
-Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
-Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
-Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
-Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
-Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
-Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/pointage', [PointageController::class, 'userPointage'])->name('pointages.index');
+    Route::get('/pointage/status', [PointageController::class, 'status'])->name('pointage.status');
+    Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
+    Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
+    Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
+    Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
+    
+    Route::middleware('role:admin')->group(function() {
+        Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+        Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+    });
+});
 #Paiment Routes
 Route::get('/paiements', [PaimentController::class, 'index'])->name('paiements.index');
 Route::post('/paiements/store', [PaimentController::class, 'store'])->name('paiements.store');
