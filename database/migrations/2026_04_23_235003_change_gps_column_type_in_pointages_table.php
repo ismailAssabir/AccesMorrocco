@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('companies', function (Blueprint $table) {
-            $table->id();
-            $table->string('companyGps');
-            $table->time('companyEntryTime');
-            $table->time('companyExitTime');
-            $table->decimal('distance',6,2);
-            $table->timestamps();
+        Schema::table('pointages', function (Blueprint $table) {
+            $table->string('gps')->nullable()->change();
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('companies');
+        Schema::table('pointages', function (Blueprint $table) {
+            $table->decimal('gps', 10, 7)->nullable()->change();
+        });
     }
 };

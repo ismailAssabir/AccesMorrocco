@@ -21,11 +21,112 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
+            // --- Legacy / Plural / Custom (from HEAD) ---
             'users.view', 'users.manage',
             'reunions.view', 'reunions.manage',
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
-            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete'
+
+            // --- Permission ---
+            'permission.edit',
+            'permission.view',
+            // --- Ctegory ---
+            'category.view',
+            'category.create',
+            'category.delete',
+            'category.edit',
+            // --- Users ---
+            'user.view',
+            'user.create',
+            'user.edit',
+            'user.delete',
+
+            // --- Départements ---
+            'departement.view',
+            'departement.create',
+            'departement.edit',
+            'departement.delete',
+
+            // --- Clients ---
+            'client.view',
+            'client.create',
+            'client.edit',
+            'client.delete',
+
+            // --- Leads ---
+            'lead.view',
+            'lead.create',
+            'lead.edit',
+            'lead.delete',
+
+            // --- Dossiers ---
+            'dossier.view',
+            'dossier.create',
+            'dossier.edit',
+            'dossier.delete',
+
+            // --- Présentations ---
+            'presentation.view',
+            'presentation.create',
+            'presentation.edit',
+            'presentation.delete',
+
+            // --- Paiements ---
+            'paiement.view',
+            'paiement.create',
+            'paiement.edit',
+            'paiement.delete',
+
+            // --- Objectifs ---
+            'objectif.view',
+            'objectif.create',
+            'objectif.edit',
+            'objectif.delete',
+
+            // --- Tâches ---
+            'tache.view',
+            'tache.create',
+            'tache.edit',
+            'tache.delete',
+
+            // --- Pointages ---
+            'pointage.view',
+            'pointage.create',
+            'pointage.edit',
+            'pointage.delete',
+
+            // --- Congés ---
+            'conge.view',
+            'conge.create',
+            'conge.edit',
+            'conge.delete',
+            'conge.approve',
+
+            // --- Réclamations ---
+            'reclamation.view',
+            'reclamation.create',
+            'reclamation.edit',
+            'reclamation.delete',
+            'reclamation.respond',
+
+            // --- Documents ---
+            'document.view',
+            'document.create',
+            'document.edit',
+            'document.delete',
+            'document.approve',
+
+            // --- Réunions ---
+            'reunion.view',
+            'reunion.create',
+            'reunion.edit',
+            'reunion.delete',
+
+            // --- Primes ---
+            'prime.view',
+            'prime.create',
+            'prime.edit',
+            'prime.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -34,10 +135,25 @@ class RolePermissionSeeder extends Seeder
 
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
-        $managerRole->givePermissionTo([
-            'reunions.view', 'reunions.manage',
-            'reclamations.view', 'reclamations.manage',
-            'dashboard.view'
+
+        // Sync Manager permissions (merged from both branches)
+        $managerRole->syncPermissions([
+            'dashboard.view',
+            'users.view', 'users.manage',
+            'user.view',
+            'client.view', 'client.create', 'client.edit',
+            'lead.view', 'lead.create', 'lead.edit',
+            'dossier.view', 'dossier.create', 'dossier.edit',
+            'presentation.view', 'presentation.create', 'presentation.edit',
+            'paiement.view', 'paiement.create',
+            'objectif.view', 'objectif.create', 'objectif.edit',
+            'tache.view', 'tache.create', 'tache.edit',
+            'pointage.view',
+            'conge.view', 'conge.approve',
+            'reclamation.view', 'reclamation.respond', 'reclamations.view', 'reclamations.manage',
+            'document.view', 'document.approve',
+            'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
+            'prime.view', 'prime.create',
         ]);
         $employeeRole->givePermissionTo([
             'reunions.view',

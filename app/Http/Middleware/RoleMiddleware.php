@@ -22,13 +22,17 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        // Check if user has any of the required roles
-        // We use Spatie's hasAnyRole if it's available, otherwise check the 'type' column as fallback
-        $hasRole = false;
-        
+        // Check Spatie roles first if available (catch exception if roles don't exist yet)
         if (method_exists($request->user(), 'hasAnyRole')) {
-            $hasRole = $request->user()->hasAnyRole($roles);
-        } else {
+            try {
+                $hasRole = $request->user()->hasAnyRole($roles);
+            } catch (\Spatie\Permission\Exceptions\RoleDoesNotExist $e) {
+                $hasRole = false;
+            }
+        }
+
+        // Fallback to 'type' column if not authorized by Spatie
+        if (!$hasRole) {
             $hasRole = in_array($request->user()->type, $roles);
         }
 

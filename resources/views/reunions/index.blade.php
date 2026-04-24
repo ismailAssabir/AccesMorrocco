@@ -7,13 +7,8 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Planification des Réunions</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
-<<<<<<< HEAD
-            @if(auth()->user()->role !== 'employee')
-            <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
-=======
             @if(auth()->user()->type !== 'employee')
-            <button onclick="toggleModal('addReunionModal')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
->>>>>>> 471c433cd9fa924606d5d223d68bd7d3fcf6adde
+            <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -126,7 +121,7 @@
                             </select>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px) font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
                             <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="">-- Aucun --</option>
                                 @foreach($departements as $dept)
@@ -328,8 +323,4 @@
             }
         });
     </script>
-<<<<<<< HEAD
 </x-app-layout>
-=======
-</x-app-layout>
->>>>>>> 471c433cd9fa924606d5d223d68bd7d3fcf6adde
