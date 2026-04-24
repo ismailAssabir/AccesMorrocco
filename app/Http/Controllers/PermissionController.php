@@ -1,51 +1,45 @@
 <?php
-
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Gate;
 
 class PermissionController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         Gate::authorize('permission.view');
-        $employes = User::with('roles', 'permissions')->get();
-        $roles = Role::all();
-        $permissions = Permission::all()->groupBy(fn($p) => explode('.', $p->name)[0]);
-
-        return view('permissions.index', compact('employes', 'roles', 'permissions'));
+        $roles = Role::with('permissions')->get();
+        return view('permissions.index', compact('roles'));
     }
+
     public function edit($id)
     {
-        $employe = User::with('roles', 'permissions')->findOrFail($id);
-        $roles = Role::all();
+        Gate::authorize('permission.edit');
+        $role = Role::findOrFail($id);
+        
+        // Groupement des permissions par module (ex: 'user.create' -> 'user')
         $permissions = Permission::all()->groupBy(fn($p) => explode('.', $p->name)[0]);
 
-        return view('permissions.edit', compact('employe', 'roles', 'permissions'));
+        return view('permissions.edit', compact('role', 'permissions'));
     }
 
     public function update(Request $request, $id)
     {
-        $employe = User::findOrFail($id);
+        Gate::authorize('permission.edit');
+        $role = Role::findOrFail($id);
 
-     
-        if ($request->has('role')) {
-            $employe->syncRoles([$request->role]);
-        }
-
-       
+        // Synchronisation des permissions au rôle
         if ($request->has('permissions')) {
-            $employe->syncPermissions($request->permissions);
+            $role->syncPermissions($request->permissions);
         } else {
-            $employe->syncPermissions([]);
+            $role->syncPermissions([]);
         }
 
         return redirect()
             ->route('permissions.index')
-            ->with('success', 'Permissions mises à jour avec succès');
+            ->with('success', "Permissions du rôle '{$role->name}' mises à jour.");
     }
-
 }

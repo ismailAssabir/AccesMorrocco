@@ -19,7 +19,7 @@ return new class extends Migration
             $table->time('heureSortie')->nullable();
             $table->date('date')->nullable();
             $table->enum('status', ['present','absent','retard'])->default('absent');
-            $table->decimal('gps', 10, 7)->nullable();
+            $table->string('gps')->nullable();
             $table->string('justification')->nullable();
             $table->string('fichier')->nullable();
             $table->string('typejustif')->nullable();

@@ -21,12 +21,13 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
-            // --- Legacy / Plural / Custom (from HEAD) ---
+<<<<<<<<< Temporary merge branch 1
             'users.view', 'users.manage',
             'reunions.view', 'reunions.manage',
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
-
+            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete'
+=========
             // --- Permission ---
             'permission.edit',
             'permission.view',
@@ -127,19 +128,23 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
+>>>>>>>>> Temporary merge branch 2
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+<<<<<<<<< Temporary merge branch 1
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
-
-        // Sync Manager permissions (merged from both branches)
-        $managerRole->syncPermissions([
-            'dashboard.view',
-            'users.view', 'users.manage',
+        $managerRole->givePermissionTo([
+            'reunions.view', 'reunions.manage',
+            'reclamations.view', 'reclamations.manage',
+            'dashboard.view'
+=========
+        $manager = Role::firstOrCreate(['name' => 'manager']);
+        $manager->syncPermissions([
             'user.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
@@ -154,6 +159,7 @@ class RolePermissionSeeder extends Seeder
             'document.view', 'document.approve',
             'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
             'prime.view', 'prime.create',
+>>>>>>>>> Temporary merge branch 2
         ]);
         $employeeRole->givePermissionTo([
             'reunions.view',

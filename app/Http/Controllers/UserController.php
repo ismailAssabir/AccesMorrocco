@@ -6,16 +6,19 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Departement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
     public function index(){
-        $users = User::with('departement')->get();
+       Gate::authorize('user.view');
+       $users = User::with('departement')->get();
         return view('AllUser' , compact("users"));
     }
 
 public function store(Request $request) {
-    
+        Gate::authorize('user.create');
+
     $newUser = $request->validate([
         'firstName'     => 'required|string|max:50',
         'lastName'      => 'required|string|max:50',
@@ -41,17 +44,17 @@ public function store(Request $request) {
     DB::transaction(function () use ($newUser) {
         $user = User::create($newUser);
 
-        // One Manager per Department Logic
+        $user->assignRole($user->type);
+
         if ($user->type === 'manager' && $user->idDepartement) {
             $departement = Departement::find($user->idDepartement);
             
             if ($departement) {
-                // If the department already has a different manager, demote them to employee
                 if ($departement->idUser && $departement->idUser !== $user->idUser) {
                     User::where('idUser', $departement->idUser)->update(['type' => 'employee']);
                 }
                 
-                // Set the new user as the manager of this department
+              
                 $departement->update(['idUser' => $user->idUser]);
             }
         }
@@ -61,6 +64,7 @@ public function store(Request $request) {
 }
 
 public function show($id){
+    Gate::authorize('user.view');
     if (request()->ajax()) {
         $user = User::with('departement')->findOrFail($id);
         return response()->json($user);
@@ -71,6 +75,8 @@ public function show($id){
 }
 
     public function edit($id){
+             Gate::authorize('user.edit');
+
         if (request()->ajax()) {
             $user = User::findOrFail($id);
             return response()->json($user);
@@ -81,6 +87,8 @@ public function show($id){
     }
 
     public function update(Request $request ,$id){
+             Gate::authorize('user.edit');
+
         $user = User::findOrFail($id);
         $userUpdate = $request->validate([
             'firstName'    => 'required|string|max:50',
@@ -111,26 +119,21 @@ public function show($id){
         DB::transaction(function () use ($user, $userUpdate) {
             $user->update($userUpdate);
 
-            // One Manager per Department Logic
             if ($user->type === 'manager' && $user->idDepartement) {
                 $departement = Departement::find($user->idDepartement);
                 
                 if ($departement) {
-                    // Remove the user from any other department they might be managing
                     Departement::where('idUser', $user->idUser)
                                ->where('idDepartement', '!=', $departement->idDepartement)
                                ->update(['idUser' => null]);
 
-                    // If the department already has a different manager, demote them to employee
                     if ($departement->idUser && $departement->idUser !== $user->idUser) {
                         User::where('idUser', $departement->idUser)->update(['type' => 'employee']);
                     }
                     
-                    // Set the new user as the manager of this department
                     $departement->update(['idUser' => $user->idUser]);
                 }
             } else {
-                // If the user is no longer a manager, or has no department, remove them from managing any dept
                 Departement::where('idUser', $user->idUser)->update(['idUser' => null]);
             }
         });
@@ -139,11 +142,10 @@ public function show($id){
     }
 
     public function destroy($id)
-    {
+    {   Gate::authorize('user.delete');
         $user = User::findOrFail($id);
         
         DB::transaction(function () use ($user) {
-            // Remove from department manager if applicable
             Departement::where('idUser', $user->idUser)->update(['idUser' => null]);
             $user->delete();
         });

@@ -8,20 +8,33 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+
 
 class PointageController extends Controller
 {
+
+private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
+        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+    }
+
    
     public function index()
     {
-        $pointages = Pointage::with('user')->orderBy('date', 'desc')->orderBy('heureEntree', 'desc')->get();
-        $settings = Company::first();
-        return view('Adminpointage', compact('pointages', 'settings'));
+        $today = now()->toDateString();
+        $pointages = Pointage::with('user')->get();
+        return view('Adminpointage', compact('pointages'));
     }
 
    
     public function userPointage()
-    {
+    {           Gate::authorize('pointage.view');
+
         $idUser = auth()->id();
         $today  = now()->toDateString();
 
@@ -74,20 +87,7 @@ class PointageController extends Controller
     
     public function checkIn(Request $request)
     {
-        if ($request->has('gps') && !empty($request->gps)) {
-            $gps = str_replace(' ', '', $request->gps);
-            $parts = explode(',', $gps);
-            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
-                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
-            }
-            $request->merge(['gps' => $gps]);
-        }
-
-        $request->validate([
-            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
-        ], [
-            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
-        ]);
+        $request->validate(['gps' => 'required|string']);
 
         
         $settings = Company::first();
@@ -149,20 +149,7 @@ class PointageController extends Controller
     
     public function checkOut(Request $request) 
     {
-        if ($request->has('gps') && !empty($request->gps)) {
-            $gps = str_replace(' ', '', $request->gps);
-            $parts = explode(',', $gps);
-            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
-                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
-            }
-            $request->merge(['gps' => $gps]);
-        }
-
-        $request->validate([
-            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
-        ], [
-            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
-        ]);
+        $request->validate(['gps' => 'required|string']);
 
         $settings = Company::first();
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
@@ -233,18 +220,10 @@ class PointageController extends Controller
     }
 
     
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
-    {
-        $earthRadius = 6371000;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) * sin($dLon / 2);
-        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
-    }
-
+    
     
     public function submitJustification(Request $request)
-    {
+    {    Gate::authorize('pointage.edit');
         $validatedData = $request->validate([
             'idPointage'    => 'required|exists:pointages,idPointage',
             'justification' => 'required|string|max:500',
@@ -255,7 +234,7 @@ class PointageController extends Controller
         $pointage = Pointage::findOrFail($validatedData['idPointage']);
 
         if ($request->hasFile('fichier')) {        
-            $validatedData['fichier'] = $request->file('fichier')->store('pointages', 'public');
+            $validatedData['fichier'] = $request->file('fichier')->store('Justifpointages', 'public');
         }
 
         $pointage->update($validatedData);
@@ -265,17 +244,6 @@ class PointageController extends Controller
     
     public function updateSettings(Request $request)
     {
-        if ($request->has('companyGps') && !empty($request->companyGps)) {
-            $gps = str_replace(' ', '', $request->companyGps);
-            $parts = explode(',', $gps);
-            
-            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
-                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
-            }
-            
-            $request->merge(['companyGps' => $gps]);
-        }
-
         $validatedData = $request->validate([
             'companyGps'       => 'nullable|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
             'companyEntryTime' => 'nullable',

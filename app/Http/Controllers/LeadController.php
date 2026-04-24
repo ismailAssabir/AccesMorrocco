@@ -7,15 +7,14 @@ use App\Models\Lead;
 use App\Models\User;
 use App\Models\Departement;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
+
 
 class LeadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
-    {
-        // كنستعملو with باش نجيبو البيانات ديال الجداول المرتبطة فدقة وحدة
+    {   Gate::authorize('lead.view');
         $leads = Lead::with(['user', 'client', 'departements'])->get();
         return view('leads.index', compact('leads'));
     }
@@ -24,7 +23,8 @@ class LeadController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {       Gate::authorize('lead.create');
+
         $validatedData = $request->validate([
             'firstName'     => 'required|string|max:25',
             'lastName'      => 'required|string|max:25',
@@ -51,14 +51,15 @@ class LeadController extends Controller
     }
 
     public function show($id)
-    {
+    {           Gate::authorize('lead.view');
+
         $lead = Lead::with(['user', 'client', 'departements'])->findOrFail($id);
         return view('leads.show', compact('lead'));
     }
 
  
     public function update(Request $request, $id)
-    {
+    {      Gate::authorize('lead.edit');
         $lead = Lead::findOrFail($id);
 
         $validatedData = $request->validate([
@@ -90,7 +91,7 @@ class LeadController extends Controller
 
     
     public function destroy($id)
-    {
+    {   Gate::authorize('lead.delete');
         $lead = Lead::findOrFail($id);
         $lead->delete();
 

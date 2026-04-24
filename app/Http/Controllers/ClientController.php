@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Client;
+use Illuminate\Support\Facades\Gate;
+
 class ClientController extends Controller
 {
     public function index(){
+                Gate::authorize('client.view');
+
         $clients = Client::All();
         return view('AllClients' , compact("clients"));
     }
 
 public function store(Request $request) {
-    
+        Gate::authorize('client.create');
+
 
     $newClient = $request->validate([
         'firstName'     => 'required|string|max:50',
@@ -35,16 +40,20 @@ public function store(Request $request) {
 
 }
 public function show($id){
+            Gate::authorize('client.view');
+
     $client = Client::findOrFail($id);
     return view('showClient' , compact('client'));
 }
 
 public function edit($id){
+     Gate::authorize('client.edit');
     $client = Client::findOrFail($id);
     return view('editClient' , compact('client'));
 }
 
 public function update(Request $request ,$id){
+     Gate::authorize('client.edit');
     $client = Client::findOrFail($id);
     $clientUpdate = $request->validate([
         'firstName'    => 'required|string|max:50',
