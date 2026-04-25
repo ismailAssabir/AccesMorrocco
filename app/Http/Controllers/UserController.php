@@ -10,10 +10,46 @@ use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
-    public function index(){
-       Gate::authorize('user.view');
-       $users = User::with('departement')->get();
-        return view('AllUser' , compact("users"));
+    public function index(Request $request)
+    {
+        Gate::authorize('user.view');
+
+        $query = User::with('departement');
+
+        // Global Search
+        $query->when($request->search, function ($q, $search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('firstName', 'like', "%{$search}%")
+                    ->orWhere('lastName', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('post', 'like', "%{$search}%")
+                    ->orWhere('cin', 'like', "%{$search}%");
+            });
+        });
+
+        // Advanced Filters
+        $query->when($request->poste, fn($q, $v) => $q->where('post', $v))
+              ->when($request->type, fn($q, $v) => $q->where('type', $v))
+              ->when($request->typeContrat, fn($q, $v) => $q->where('typeContrat', $v))
+              ->when($request->departement, fn($q, $v) => $q->where('idDepartement', $v))
+              ->when($request->status, fn($q, $v) => $q->where('status', $v));
+
+        $users = $query->latest()->paginate(10)->withQueryString();
+
+        $stats = [
+            'total' => User::count(),
+            'conge' => User::where('status', 'conge')->count(),
+            'freelance' => User::where('typeContrat', 'freelance')->count(),
+        ];
+
+        if ($request->ajax()) {
+            return view('partials._user_table', compact('users'))->render();
+        }
+
+        $departements = Departement::all();
+        $posts = User::whereNotNull('post')->distinct()->pluck('post');
+
+        return view('AllUser', compact('users', 'departements', 'posts', 'stats'));
     }
 
 public function store(Request $request) {

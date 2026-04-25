@@ -248,12 +248,6 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         Sécurité
                     </button>
-                    <button @click="tab = 'danger'"
-                        :class="tab === 'danger' ? 'elite-tab-active font-bold text-red-600' : 'text-slate-400 hover:text-slate-600'"
-                        class="relative px-5 py-4 text-sm font-semibold transition-colors duration-200 flex items-center gap-2 whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Zone Critique
-                    </button>
                 </div>
 
                 {{-- Tab Content --}}
@@ -274,13 +268,6 @@
                         @include('profile.partials.update-password-form')
                     </div>
 
-                    {{-- Danger Zone --}}
-                    <div x-show="tab === 'danger'" x-cloak
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
-                        @include('profile.partials.delete-user-form')
-                    </div>
                 </div>
             </div>
 

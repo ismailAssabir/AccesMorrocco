@@ -9,8 +9,6 @@
             </div>
         </div>
         @can('permission.edit')
-            
-        @endcan
         <form action="{{ route('permissions.update', $role->id) }}" method="POST">
             @csrf
             @method('PUT')
