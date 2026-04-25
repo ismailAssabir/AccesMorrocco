@@ -21,13 +21,11 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
-<<<<<<<<< Temporary merge branch 1
             'users.view', 'users.manage',
             'reunions.view', 'reunions.manage',
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
-            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete'
-=========
+            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete',
             // --- Permission ---
             'permission.edit',
             'permission.view',
@@ -128,23 +126,16 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
->>>>>>>>> Temporary merge branch 2
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-<<<<<<<<< Temporary merge branch 1
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
-        $managerRole->givePermissionTo([
-            'reunions.view', 'reunions.manage',
-            'reclamations.view', 'reclamations.manage',
-            'dashboard.view'
-=========
-        $manager = Role::firstOrCreate(['name' => 'manager']);
-        $manager->syncPermissions([
+
+        $managerRole->syncPermissions([
             'user.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
@@ -158,8 +149,8 @@ class RolePermissionSeeder extends Seeder
             'reclamation.view', 'reclamation.respond', 'reclamations.view', 'reclamations.manage',
             'document.view', 'document.approve',
             'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
-            'prime.view', 'prime.create',
->>>>>>>>> Temporary merge branch 2
+            'prime.view', 'prime.create', 'prime.delete',
+            'dashboard.view'
         ]);
         $employeeRole->givePermissionTo([
             'reunions.view',
