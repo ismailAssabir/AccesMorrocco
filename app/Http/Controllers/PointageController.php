@@ -107,7 +107,7 @@ class PointageController extends Controller
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
         $companyEntryTime = $settings->companyEntryTime ?? "08:00:00";
         $maxDistance = $settings->distance ?? 200;
-
+        $MaxDelay = $settings->Maxdelay;
         $idUser = auth()->id();
         $today = now()->toDateString();
 
@@ -132,7 +132,7 @@ class PointageController extends Controller
 
         $currentTime = now();
         $officialTime = Carbon::createFromTimeString($companyEntryTime);
-        $status = $currentTime->gt($officialTime->addMinutes(15)) ? 'retard' : 'present';
+        $status = $currentTime->gt($officialTime->addMinutes($MaxDelay)) ? 'retard' : 'present';
 
         Pointage::create([
             'idUser'      => $idUser,
@@ -267,10 +267,13 @@ class PointageController extends Controller
         }
 
         $validatedData = $request->validate([
-            'companyGps'       => 'nullable|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
+            'companyGps'       => 'nullable|string',
             'companyEntryTime' => 'nullable',
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
+            'MaxDeley' => 'integer|nullable' ,
+             'AbsenceTime' => 'nullable|date_format:H:i',
+
         ], [
             'companyGps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);
