@@ -207,13 +207,20 @@ Route::delete('/paiements/{id}', [PaimentController::class, 'destroy'])->name('p
 
 
 // Lead Routes
-Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
-Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
-Route::get('/leads/export-pdf', [LeadController::class, 'exportPdf'])->name('leads.export-pdf');
-Route::get('/leads/{id}', [LeadController::class, 'show'])->name('leads.show');
-Route::put('/leads/{id}', [LeadController::class, 'update'])->name('leads.update');
-Route::delete('/leads/{id}', [LeadController::class, 'destroy'])->name('leads.destroy');
-
+Route::get('/leads',[LeadController::class, 'index'])->name('leads.index');
+Route::post('/leads',[LeadController::class, 'store'])->name('leads.store');
+Route::get('/leads/export-pdf',[LeadController::class, 'exportPdf'])->name('leads.export-pdf');
+Route::get('/leads/{id}',[LeadController::class, 'show'])->name('leads.show');
+Route::get('/leads/{id}/edit',[LeadController::class, 'edit'])->name('leads.edit');
+Route::put('/leads/{id}',[LeadController::class, 'update'])->name('leads.update');
+Route::post('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
+Route::delete('/leads/{id}',[LeadController::class, 'destroy'])->name('leads.destroy');
+Route::get('/departements/{id}/users', function ($id) {
+    $users = App\Models\User::where('idDepartement', $id)
+                ->where('type', 'employee')
+                ->get(['idUser', 'firstName', 'lastName']);
+    return response()->json($users);
+})->name('departements.users');
 
 
 

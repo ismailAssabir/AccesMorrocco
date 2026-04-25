@@ -34,9 +34,12 @@ class LeadController extends Controller
             $query->where('type', $request->type);
         }
 
-        $leads = $query->latest()->paginate(10)->withQueryString();
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->statut);
+        }
 
-        $types = Lead::select('type')->distinct()->pluck('type');
+        $leads  = $query->latest()->paginate(10)->withQueryString();
+        $types  = Lead::select('type')->distinct()->pluck('type');
 
         return view('leads.index', compact('leads', 'types'));
     }
@@ -62,6 +65,7 @@ class LeadController extends Controller
         ]);
 
         $validatedData['dateCreation'] = now()->toDateString();
+        $validatedData['statut']       = 'nouveau';
 
         Lead::create($validatedData);
 
@@ -72,11 +76,22 @@ class LeadController extends Controller
     {
         Gate::authorize('lead.view');
 
-        $lead = Lead::with(['user', 'client', 'departements'])->findOrFail($id);
-        $users = User::all();
+        $lead        = Lead::with(['user', 'client', 'departements'])->findOrFail($id);
+        $users       = User::all();
         $departements = Departement::all();
 
         return view('leads.show', compact('lead', 'users', 'departements'));
+    }
+
+    public function edit($id)
+    {
+        Gate::authorize('lead.edit');
+
+        $lead         = Lead::findOrFail($id);
+        $users        = User::all();
+        $departements = Departement::all();
+
+        return view('leads.edit', compact('lead', 'users', 'departements'));
     }
 
     public function update(Request $request, $id)
@@ -103,17 +118,71 @@ class LeadController extends Controller
 
         $lead->update($validatedData);
 
-        return redirect()->back()->with('msg', 'Lead mis à jour avec succès !');
+        return redirect()->route('leads.show', $id)->with('msg', 'Lead mis à jour avec succès !');
+    }
+
+    public function updateStatut(Request $request, $id)
+    {
+        Gate::authorize('lead.edit');
+
+        $lead = Lead::findOrFail($id);
+
+        $request->validate([
+            'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
+            'idDepartement' => 'nullable|exists:departements,idDepartement',
+            'idUser'        => 'nullable|exists:users,idUser',
+        ]);
+
+        $statut = $request->statut;
+
+        // Logique métier
+        if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
+            $lead->statut = '1er_appel';
+
+        } elseif ($statut === '2eme_appel' && $lead->statut === '1er_appel') {
+            $lead->statut = '2eme_appel';
+
+        } elseif ($statut === 'lost') {
+            // Pas de réponse après 2 appels OU refus explicite
+            $lead->statut = 'lost';
+
+        } elseif ($statut === 'promis') {
+            $lead->statut = 'promis';
+
+        } elseif ($statut === 'ok') {
+            // Conversion en client
+            $lead->statut = 'ok';
+
+            if ($request->filled('idDepartement')) {
+                $lead->idDepartement = $request->idDepartement;
+            }
+            if ($request->filled('idUser')) {
+                $lead->idUser = $request->idUser;
+            }
+        } else {
+            return redirect()->back()->with('error', 'Transition de statut non autorisée.');
+        }
+
+        $lead->save();
+
+        $messages = [
+            '1er_appel'  => '1er appel enregistré.',
+            '2eme_appel' => '2ème appel enregistré.',
+            'lost'       => 'Lead marqué comme perdu.',
+            'promis'     => 'Lead marqué comme promis.',
+            'ok'         => 'Lead converti en client avec succès !',
+        ];
+
+        return redirect()->route('leads.show', $id)->with('msg', $messages[$statut]);
     }
 
     public function destroy($id)
     {
         Gate::authorize('lead.delete');
 
-        $lead = Lead::findOrFail($id);
-        $lead->delete();
+        Lead::findOrFail($id)->delete();
 
-        return redirect()->back()->with('msg', 'Lead supprimé avec succès !');
+        return redirect()->route('leads.index')->with('msg', 'Lead supprimé avec succès !');
     }
 
     public function exportPdf(Request $request)
@@ -132,14 +201,12 @@ class LeadController extends Controller
             });
         }
 
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
+        if ($request->filled('type'))   $query->where('type', $request->type);
+        if ($request->filled('statut')) $query->where('statut', $request->statut);
 
         $leads = $query->latest()->get();
 
-        $pdf = Pdf::loadView('leads.pdf', compact('leads'))
-            ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('leads.pdf', compact('leads'))->setPaper('a4', 'landscape');
 
         return $pdf->download('leads-' . now()->format('Y-m-d') . '.pdf');
     }

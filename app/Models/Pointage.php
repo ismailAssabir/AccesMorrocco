@@ -20,7 +20,8 @@ class Pointage extends Model
         'gps',
         'justification',
         'fichier',
-        'typejustif'
+        'typejustif',
+        'justification_status'
     ];
     public function user() {
         return $this->belongsTo(\App\Models\User::class, 'idUser', 'idUser');

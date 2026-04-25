@@ -32,7 +32,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         $settings = Company::first();
         return view('Adminpointage', compact('pointages', 'settings'));
     }
-
+    }
    
     public function userPointage()
     {           Gate::authorize('pointage.view');
@@ -85,7 +85,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         ]);
     }
 
-    
+
     
     public function checkIn(Request $request)
     {
@@ -163,7 +163,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', 'Entrée enregistrée avec succès.');
     }
 
-    
+    }
     public function checkOut(Request $request) 
     {
         Gate::authorize('pointage.edit');
@@ -240,7 +240,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
-    
+    }
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
@@ -269,8 +269,30 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             $validatedData['fichier'] = $request->file('fichier')->store('Justifpointages', 'public');
         }
 
+        $validatedData['justification_status'] = 'en_attente';
+
         $pointage->update($validatedData);
         return redirect()->back()->with('msg', 'Justification envoyée.');
+    }
+
+    public function validateJustification(Request $request, $id)
+    {
+        Gate::authorize('role:admin'); // Only admins can validate
+
+        $request->validate([
+            'action' => 'required|in:accepte,refuse',
+        ]);
+
+        $pointage = Pointage::findOrFail($id);
+        $pointage->justification_status = $request->action;
+
+        if ($request->action === 'accepte') {
+            $pointage->status = 'present'; // Clear the infraction if accepted
+        }
+
+        $pointage->save();
+
+        return redirect()->back()->with('msg', 'Justification ' . ($request->action === 'accepte' ? 'acceptée' : 'refusée') . '.');
     }
 
     
@@ -304,4 +326,4 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');
     }
-}
+}}

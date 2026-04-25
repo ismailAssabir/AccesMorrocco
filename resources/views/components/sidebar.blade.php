@@ -41,7 +41,7 @@
 
         <nav class="space-y-1">
             
-@if(auth()->user()->type !== 'employee')
+
     @can('user.view')
       <a href="{{ url('/users') }}" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
@@ -55,10 +55,10 @@
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
 @endcan
-@endif
 
 
-@if(auth()->user()->type !== 'employee')
+
+
             @can('departement.view')
             <a href="/departements" 
 
@@ -72,7 +72,12 @@
                 <span class="font-medium text-sm">Département</span>
             </a>
             @endcan
+<<<<<<< HEAD
 @endif
+=======
+
+
+>>>>>>> 902eae50e825771163336ffc8f5158d767daa782
             @can('pointage.view')
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
 
@@ -98,6 +103,7 @@
                 <span class="font-medium text-sm">Gestion des tâches</span>
             </a>
             @endcan
+            
             @can('reunion.view')
             <a href="{{ Route::has('meetings.index') ? route('meetings.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95

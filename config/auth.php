@@ -42,6 +42,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        
+        // Guard ajouté pour les managers
+        'manager' => [
+            'driver' => 'session',
+            'provider' => 'users', // Utilise le même provider que web
+        ],
     ],
 
     /*
@@ -67,9 +73,10 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
+        // Si vous voulez un provider séparé pour les managers avec une table différente
+        // 'managers' => [
+        //     'driver' => 'eloquent',
+        //     'model' => App\Models\Manager::class,
         // ],
     ],
 
