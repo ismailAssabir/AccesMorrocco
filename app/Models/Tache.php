@@ -62,6 +62,22 @@ class Tache extends Model
         return $minutes > 0 ? "{$hours}h {$minutes}min" : "{$hours}h";
     }
 
+    public function getPriorityConfigAttribute()
+    {
+        $configs = [
+            'haute' => ['border' => 'bg-red-500', 'bg' => 'bg-red-50', 'text' => 'text-red-700', 'label' => 'HAUTE'],
+            'moyenne' => ['border' => 'bg-amber-500', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'label' => 'MOYENNE'],
+            'basse' => ['border' => 'bg-emerald-500', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'label' => 'BASSE'],
+        ];
+
+        return $configs[$this->priorite] ?? $configs['moyenne'];
+    }
+
+    public function getIsOverdueAttribute()
+    {
+        return $this->duree && $this->duree->isPast() && $this->status !== 'termine';
+    }
+
     function departement(){
         return $this->belongsTo(Departement::class, 'idDepartement', 'idDepartement');
     }

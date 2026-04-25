@@ -160,7 +160,7 @@
                     <div class="animate-fade-in">
                         <h1 class="text-3xl font-black text-gray-900 tracking-tight">Intelligence <span class="text-[#be2346]">Opérationnelle</span></h1>
                         <div class="flex items-center gap-4 mt-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#be2346]/10 text-[#be2346] uppercase tracking-widest border border-[#be2346]/20">Admin Panel</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#be2346]/10 text-[#be2346] uppercase tracking-widest border border-[#be2346]/20">Administration</span>
                             <span class="text-xs text-gray-400 font-medium tracking-wide italic">Dernière analyse : {{ now()->format('H:i') }}</span>
                         </div>
                     </div>
@@ -181,8 +181,7 @@
                     <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-8">
                             <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Growth</span>
+                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Évolution Directe</span>
                             </div>
                         </div>
                         <h2 class="text-xl font-black text-gray-900 mb-2">Croissance de l'Effectif</h2>
@@ -272,7 +271,7 @@
                     <div class="lg:col-span-2 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
                         <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
                             <h2 class="text-lg font-black text-gray-900">Requêtes Récentes</h2>
-                            <span class="px-3 py-1 bg-gray-100 text-[10px] font-bold text-gray-500 rounded-full uppercase tracking-tighter">Live Feed</span>
+                            <span class="px-3 py-1 bg-gray-100 text-[10px] font-bold text-gray-500 rounded-full uppercase tracking-tighter">Flux en direct</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
@@ -359,7 +358,7 @@
                         new ApexCharts(document.querySelector("#reclamationsChart"), {
                             series: [{{ $reclamationsByStatus['ouverte'] }}, {{ $reclamationsByStatus['en_cours'] }}, {{ $reclamationsByStatus['resolue'] }}],
                             chart: { type: 'donut', height: 180 },
-                            labels: ['Ouvert', 'Process', 'Done'],
+                            labels: ['Ouverte', 'En cours', 'Résolue'],
                             colors: ['#ef4444', '#f59e0b', '#10b981'],
                             legend: { show: false },
                             dataLabels: { enabled: false },
@@ -373,7 +372,7 @@
                             plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
                             colors: [colors.gray, colors.secondary, colors.primary],
                             legend: { show: false },
-                            xaxis: { categories: ['Wait', 'Run', 'End'], labels: { style: { fontSize: '9px', fontWeight: 900 } } },
+                            xaxis: { categories: ['Attente', 'En cours', 'Terminé'], labels: { style: { fontSize: '9px', fontWeight: 900 } } },
                             yaxis: { show: false },
                             grid: { show: false }
                         }).render();

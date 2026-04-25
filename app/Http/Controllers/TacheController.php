@@ -14,7 +14,13 @@ class TacheController extends Controller
     public function index()
     {   Gate::authorize('tache.view');
 
-        $query = Tache::with(['users', 'objectif', 'departement']);
+        $query = Tache::with(['users:idUser,firstName,lastName', 'objectif:idObjectif,titre', 'departement:idDepartement,title']);
+
+        // Limit completed tasks to prevent memory leaks over time
+        $query->where(function($q) {
+            $q->where('status', '!=', 'termine')
+              ->orWhere('updated_at', '>=', now()->subDays(30));
+        });
 
         if (auth()->user()->type === 'employee') {
             $user = auth()->user();
@@ -24,11 +30,17 @@ class TacheController extends Controller
             });
         }
 
-        $Taches = $query->get();
-        $users = User::all();
-        $objectifs = Objectif::all();
-        $departements = Departement::all();
-        return view('taches.index', compact('Taches', 'users', 'objectifs', 'departements'));
+        $TachesGrouped = $query->get()->groupBy('status');
+        
+        $todoTasks = $TachesGrouped->get('todo', collect());
+        $enCoursTasks = $TachesGrouped->get('en_cours', collect());
+        $termineTasks = $TachesGrouped->get('termine', collect());
+
+        $users = User::select('idUser', 'firstName', 'lastName')->get();
+        $objectifs = Objectif::select('idObjectif', 'titre')->get();
+        $departements = Departement::select('idDepartement', 'title')->get();
+        
+        return view('taches.index', compact('todoTasks', 'enCoursTasks', 'termineTasks', 'users', 'objectifs', 'departements'));
     }
 
 public function store(Request $request) {
@@ -53,32 +65,7 @@ public function store(Request $request) {
     $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->start_date) : null;
     $end = $request->filled('end_date') ? \Carbon\Carbon::parse($request->end_date) : null;
 
-    // Precise Human-Readable Duration Logic
-    $formattedDuration = '0 min';
-    if ($start && $end) {
-        if ($start->equalTo($end)) {
-            $formattedDuration = 'Short Task';
-        } else {
-            $totalMinutes = $start->diffInMinutes($end);
-            
-            if ($totalMinutes >= 1440) {
-                // Scenario A: More than 24 hours (Multiple Days)
-                $days = floor($totalMinutes / 1440);
-                $remMins = $totalMinutes % 1440;
-                $hours = floor($remMins / 60);
-                $formattedDuration = $hours > 0 ? "{$days}j {$hours}h" : "{$days} " . ($days > 1 ? 'Jours' : 'Jour');
-            } else {
-                // Scenario B: Less than 24 hours (Hours/Minutes)
-                if ($totalMinutes < 60) {
-                    $formattedDuration = $totalMinutes . ' min';
-                } else {
-                    $hours = floor($totalMinutes / 60);
-                    $mins = $totalMinutes % 60;
-                    $formattedDuration = $mins > 0 ? "{$hours}h {$mins}min" : "{$hours}h";
-                }
-            }
-        }
-    }
+
 
     // Prepare model data
     $tacheData = [
@@ -150,31 +137,7 @@ public function update(Request $request, $id) {
     $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->start_date) : null;
     $end = $request->filled('end_date') ? \Carbon\Carbon::parse($request->end_date) : null;
 
-    // Precise Human-Readable Duration Logic (Consistency)
-    $formattedDuration = '0 min';
-    if ($start && $end) {
-        if ($start->equalTo($end)) {
-            $formattedDuration = 'Short Task';
-        } else {
-            $totalMinutes = $start->diffInMinutes($end);
-            if ($totalMinutes >= 1440) {
-                // Scenario A: More than 24 hours (Multiple Days)
-                $days = floor($totalMinutes / 1440);
-                $remMins = $totalMinutes % 1440;
-                $hours = floor($remMins / 60);
-                $formattedDuration = $hours > 0 ? "{$days}j {$hours}h" : "{$days} " . ($days > 1 ? 'Jours' : 'Jour');
-            } else {
-                // Scenario B: Less than 24 hours (Hours/Minutes)
-                if ($totalMinutes < 60) {
-                    $formattedDuration = $totalMinutes . ' min';
-                } else {
-                    $hours = floor($totalMinutes / 60);
-                    $mins = $totalMinutes % 60;
-                    $formattedDuration = $mins > 0 ? "{$hours}h {$mins}min" : "{$hours}h";
-                }
-            }
-        }
-    }
+
 
     $tache->update([
         'titre'         => $request->titre,
@@ -208,16 +171,16 @@ public function assignUser(Request $request) {
     return redirect()->back()->with('msg', 'Employé assigné à la tâche avec succès');
 }
 
-public function unassignUser(Request $request) {
-    Gate::authorize('tache.edit');
-    $request->validate([
-        'idTache' => 'required|exists:taches,idTache',
-        'idUser'  => 'required|exists:users,idUser'
-    ]);
+    public function unassignUser(Request $request) {
+        Gate::authorize('tache.edit');
+        $request->validate([
+            'idTache' => 'required|exists:taches,idTache',
+            'idUser'  => 'required|exists:users,idUser'
+        ]);
 
-    $tache = Tache::findOrFail($request->idTache);
-    $tache->users()->detach($request->idUser);
+        $tache = Tache::findOrFail($request->idTache);
+        $tache->users()->detach($request->idUser);
 
-    return redirect()->back()->with('msg', 'Employé retiré de la tâche');
-}
+        return redirect()->back()->with('msg', 'Employé retiré de la tâche');
+    }
 }

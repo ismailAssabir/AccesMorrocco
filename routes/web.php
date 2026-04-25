@@ -205,29 +205,6 @@ Route::put('/paiements/{id}', [PaimentController::class, 'update'])->name('paiem
 Route::delete('/paiements/{id}', [PaimentController::class, 'destroy'])->name('paiements.destroy');
 
 
-# Tasks Route
-Route::get('/tasks', [TacheController::class, 'index'])->middleware(['auth', 'verified'])->name('tasks.index');
-Route::post('/tasks', [TacheController::class, 'store'])->middleware(['auth', 'verified'])->name('tasks.store');
-Route::delete('/tasks/{id}', [TacheController::class, 'destroy'])->middleware(['auth', 'verified'])->name('tasks.destroy');
-Route::post('/tasks/assign', [TacheController::class, 'assignUser'])->middleware(['auth', 'verified'])->name('tasks.assign');
-Route::post('/tasks/unassign', [TacheController::class, 'unassignUser'])->middleware(['auth', 'verified'])->name('tasks.unassign');
-Route::put('/tasks/{id}', [TacheController::class, 'update'])->middleware(['auth', 'verified'])->name('tasks.update');
-Route::patch('/tasks/{id}/status', function (Illuminate\Http\Request $request, $id) {
-    $tache = App\Models\Tache::findOrFail($id);
-    $tache->update(['status' => $request->status]);
-    return redirect()->back();
-})->middleware(['auth', 'verified'])->name('tasks.updateStatus');
-
-# Meetings Route
-Route::get('/meetings', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('meetings.index');
-
-# Reunion Routes (mapping to the same controller but using /reunions prefix as per views)
-Route::get('/reunions', [ReunionController::class, 'index'])->middleware(['auth', 'verified'])->name('reunions.index');
-Route::get('/reunions/create', [ReunionController::class, 'create'])->middleware(['auth', 'verified'])->name('reunions.create');
-Route::post('/reunions', [ReunionController::class, 'store'])->middleware(['auth', 'verified'])->name('reunions.store');
-Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middleware(['auth', 'verified'])->name('reunions.edit');
-Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
-Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
 
 // Lead Routes
 Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');

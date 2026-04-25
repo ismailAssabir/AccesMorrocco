@@ -1,41 +1,45 @@
 @php
-    $searchItems = [
-        ['title' => 'Accueil', 'url' => '/dashboard', 'type' => 'Page', 'keywords' => 'home dashboard tableau de bord accueil', 'icon' => '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />'],
-        ['title' => 'Ressources Humaines', 'url' => '/users', 'type' => 'Page', 'keywords' => 'rh users staff personnel collaborateurs employés utilisateurs', 'icon' => '<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
-        ['title' => 'Réclamations', 'url' => '/reclamations', 'type' => 'Page', 'keywords' => 'support plaintes tickets problemes', 'icon' => '<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />'],
-        ['title' => 'Département', 'url' => '/departements', 'type' => 'Page', 'keywords' => 'services bureaux organisation départements', 'icon' => '<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m5-10h1m-1 4h1m-1 4h1" />'],
-        ['title' => 'Pointage', 'url' => '/pointage', 'type' => 'Page', 'keywords' => 'heures temps retard presence pointages présence', 'icon' => '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-        ['title' => 'Gestion des tâches', 'url' => '/tasks', 'type' => 'Page', 'keywords' => 'missions work travail todo tâches projets', 'icon' => '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />'],
-        ['title' => 'Réunions', 'url' => '/meetings', 'type' => 'Page', 'keywords' => 'meetings calls visio calendrier', 'icon' => '<path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-        ['title' => 'Objectifs', 'url' => '/goals', 'type' => 'Page', 'keywords' => 'kpi performance cibles progression', 'icon' => '<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />'],
-        ['title' => 'Congés', 'url' => '/leaves', 'type' => 'Page', 'keywords' => 'absences vacances repos leaves', 'icon' => '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
-        ['title' => 'Clients', 'url' => '/clients', 'type' => 'Page', 'keywords' => 'crm clients acheteurs', 'icon' => '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />'],
-        ['title' => 'Catégories', 'url' => '/category', 'type' => 'Page', 'keywords' => 'tags types classification', 'icon' => '<path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />'],
-        ['title' => 'Mon Profil', 'url' => '/profile', 'type' => 'Page', 'keywords' => 'settings compte securite mon profil', 'icon' => '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />'],
-    ];
+    $searchItems = \Illuminate\Support\Facades\Cache::remember('global_search_items', 3600, function() {
+        $items = [
+            ['title' => 'Accueil', 'url' => '/dashboard', 'type' => 'Page', 'keywords' => 'home dashboard tableau de bord accueil', 'icon' => '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />'],
+            ['title' => 'Ressources Humaines', 'url' => '/users', 'type' => 'Page', 'keywords' => 'rh utilisateurs personnel collaborateurs employés', 'icon' => '<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
+            ['title' => 'Réclamations', 'url' => '/reclamations', 'type' => 'Page', 'keywords' => 'support plaintes tickets problemes', 'icon' => '<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />'],
+            ['title' => 'Département', 'url' => '/departements', 'type' => 'Page', 'keywords' => 'services bureaux organisation départements', 'icon' => '<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m5-10h1m-1 4h1m-1 4h1" />'],
+            ['title' => 'Pointage', 'url' => '/pointage', 'type' => 'Page', 'keywords' => 'heures temps retard presence pointages présence', 'icon' => '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+            ['title' => 'Gestion des tâches', 'url' => '/tasks', 'type' => 'Page', 'keywords' => 'missions work travail todo tâches projets', 'icon' => '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />'],
+            ['title' => 'Réunions', 'url' => '/meetings', 'type' => 'Page', 'keywords' => 'réunions appels visio calendrier', 'icon' => '<path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
+            ['title' => 'Objectifs', 'url' => '/goals', 'type' => 'Page', 'keywords' => 'kpi performance cibles progression', 'icon' => '<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />'],
+            ['title' => 'Congés', 'url' => '/leaves', 'type' => 'Page', 'keywords' => 'absences vacances repos congés', 'icon' => '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
+            ['title' => 'Clients', 'url' => '/clients', 'type' => 'Page', 'keywords' => 'crm clients acheteurs', 'icon' => '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />'],
+            ['title' => 'Catégories', 'url' => '/category', 'type' => 'Page', 'keywords' => 'tags types classification', 'icon' => '<path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />'],
+            ['title' => 'Mon Profil', 'url' => '/profile', 'type' => 'Page', 'keywords' => 'settings compte securite mon profil', 'icon' => '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />'],
+        ];
 
-    try {
-        $users = \App\Models\User::all();
-        foreach($users as $user) {
-            $searchItems[] = [
-                'title' => ($user->firstName ?? '') . ' ' . ($user->lastName ?? ''),
-                'url' => '/users?userId=' . $user->idUser,
-                'type' => 'Employé',
-                'icon' => '<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />'
-            ];
-        }
+        try {
+            $users = \App\Models\User::select('idUser', 'firstName', 'lastName')->get();
+            foreach($users as $user) {
+                $items[] = [
+                    'title' => ($user->firstName ?? '') . ' ' . ($user->lastName ?? ''),
+                    'url' => '/users?userId=' . $user->idUser,
+                    'type' => 'Employé',
+                    'icon' => '<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />'
+                ];
+            }
 
-        $reclamations = \App\Models\Reclamation::all();
-        foreach($reclamations as $rec) {
-            $searchItems[] = [
-                'title' => $rec->titre,
-                'url' => '/reclamation/' . $rec->idReclamation,
-                'type' => 'Réclamation',
-                'icon' => '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />'
-            ];
-        }
-    } catch (\Exception $e) {}
+            $reclamations = \App\Models\Reclamation::select('idReclamation', 'titre')->get();
+            foreach($reclamations as $rec) {
+                $items[] = [
+                    'title' => $rec->titre,
+                    'url' => '/reclamation/' . $rec->idReclamation,
+                    'type' => 'Réclamation',
+                    'icon' => '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />'
+                ];
+            }
+        } catch (\Exception $e) {}
+        return $items;
+    });
 @endphp
+
 
 <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-3">
     <div class="flex items-center justify-end">
@@ -67,6 +71,7 @@
 
                 <!-- Results Dropdown -->
                 <div x-show="search.length >= 2" 
+                    x-cloak
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-2"
                     x-transition:enter-end="opacity-100 translate-y-0"
@@ -123,6 +128,7 @@
                 </button>
 
                 <div x-show="open" 
+                    x-cloak
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"

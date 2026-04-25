@@ -77,7 +77,7 @@ class DashboardController extends Controller
 
         // Chart Data
         $tasksByStatus = [
-            'en_attente' => Tache::where('status', 'en_attente')->count(),
+            'en_attente' => Tache::where('status', 'todo')->count(),
             'en_cours' => Tache::where('status', 'en_cours')->count(),
             'termine' => Tache::where('status', 'termine')->count(),
         ];
