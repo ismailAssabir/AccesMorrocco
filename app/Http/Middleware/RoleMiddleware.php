@@ -13,16 +13,19 @@ class RoleMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  string  $roles
+     * @param  string  ...$roles
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
+        // التحقق من أن المستخدم مسجل الدخول
         if (!$request->user()) {
             return redirect()->route('login');
         }
 
-        // Check Spatie roles first if available (catch exception if roles don't exist yet)
+        $hasRole = false; // تعريف المتغير بقيمة افتراضية
+
+        // التحقق باستخدام Spatie Permission إذا كان متاحاً
         if (method_exists($request->user(), 'hasAnyRole')) {
             try {
                 $hasRole = $request->user()->hasAnyRole($roles);
@@ -31,11 +34,13 @@ class RoleMiddleware
             }
         }
 
-        // Fallback to 'type' column if not authorized by Spatie
+        // إذا لم يتحقق بعد، نتحقق باستخدام عمود 'type'
         if (!$hasRole) {
-            $hasRole = in_array($request->user()->type, $roles);
+            $userType = $request->user()->type ?? $request->user()->role ?? null;
+            $hasRole = in_array($userType, $roles);
         }
 
+        // إذا لم يكن للمستخدم الدور المطلوب
         if (!$hasRole) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => "Unauthorized access."], 403);

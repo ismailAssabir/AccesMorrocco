@@ -21,14 +21,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
-<<<<<<< HEAD
-=======
-            // --- Legacy / Plural / Custom (from HEAD) ---
-            'users.view', 'users.manage',
-            'reunions.view', 'reunions.manage',
-            'reclamations.view', 'reclamations.manage',
-            'dashboard.view',
->>>>>>> d604f3139fc712d5f7ead29025fd2e22ef010502
+        
 
             // --- Permission ---
             'permission.edit',
@@ -130,64 +123,18 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
-<<<<<<< HEAD
 
-=======
->>>>>>> d604f3139fc712d5f7ead29025fd2e22ef010502
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-<<<<<<< HEAD
 
-        $manager = Role::firstOrCreate(['name' => 'manager']);
-        $manager->syncPermissions([
-=======
         // Assign permissions to roles
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->syncPermissions(['permission.edit',
+            'permission.view',]);
 
-        // Sync Manager permissions (merged from both branches)
-        $managerRole->syncPermissions([
-            'dashboard.view',
-            'users.view', 'users.manage',
->>>>>>> d604f3139fc712d5f7ead29025fd2e22ef010502
-            'user.view',
-            'client.view', 'client.create', 'client.edit',
-            'lead.view', 'lead.create', 'lead.edit',
-            'dossier.view', 'dossier.create', 'dossier.edit',
-            'presentation.view', 'presentation.create', 'presentation.edit',
-            'paiement.view', 'paiement.create',
-            'objectif.view', 'objectif.create', 'objectif.edit',
-            'tache.view', 'tache.create', 'tache.edit',
-            'pointage.view',
-            'conge.view', 'conge.approve',
-            'reclamation.view', 'reclamation.respond', 'reclamations.view', 'reclamations.manage',
-            'document.view', 'document.approve',
-            'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
-            'prime.view', 'prime.create',
-<<<<<<< HEAD
-
-=======
->>>>>>> d604f3139fc712d5f7ead29025fd2e22ef010502
-        ]);
-        $employeeRole->givePermissionTo([
-            'reunions.view',
-            'reclamations.view',
-            'dashboard.view',
-            'objectif.view'
-        ]);
-
-        // Sync existing users
-        User::all()->each(function ($user) use ($adminRole, $managerRole, $employeeRole) {
-            if ($user->type === 'admin') {
-                $user->assignRole($adminRole);
-            } elseif ($user->type === 'manager') {
-                $user->assignRole($managerRole);
-            } else {
-                $user->assignRole($employeeRole);
-            }
-        });
+       
     }
 }

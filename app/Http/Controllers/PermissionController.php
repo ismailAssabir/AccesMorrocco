@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Gate;
 
@@ -37,7 +38,7 @@ class PermissionController extends Controller
         } else {
             $role->syncPermissions([]);
         }
-
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         return redirect()
             ->route('permissions.index')
             ->with('success', "Permissions du rôle '{$role->name}' mises à jour.");

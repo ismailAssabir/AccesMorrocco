@@ -8,9 +8,8 @@
                 <h1 class="text-2xl font-extrabold text-slate-800">Permissions du Rôle : <span class="text-[#b11d40]">{{ ucfirst($role->name) }}</span></h1>
             </div>
         </div>
+        
         @can('permission.edit')
-            
-        @endcan
         <form action="{{ route('permissions.update', $role->id) }}" method="POST">
             @csrf
             @method('PUT')
