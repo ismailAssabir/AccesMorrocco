@@ -8,7 +8,7 @@ use App\Models\Dossier;
 use Illuminate\Support\Facades\Gate;
 
 
-class PaiementController extends Controller
+class PaimentController extends Controller
 {
    
     public function index()

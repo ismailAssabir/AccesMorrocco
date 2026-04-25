@@ -73,12 +73,14 @@
             </a>
             @endcan
 @endif
+
             @can('pointage.view')
-            <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
+            <a href="{{ route('pointages.index') }}" 
+
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('pointages.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? '' : 'group-hover:rotate-12' }}">
+                    <svg class="w-5 h-5 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>

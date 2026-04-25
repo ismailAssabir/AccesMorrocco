@@ -14,6 +14,8 @@ use App\Http\Controllers\PointageController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
+use App\Http\Controllers\PaimentController;
+use App\Http\Controllers\LeadController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -148,14 +150,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/demandeDocuments', [DemandeController::class, 'store']);
     Route::get('/demandeDocuments/{id}', [DemandeController::class, 'show']);
 
-    # Pointage Route
-    Route::get('/pointage', function () {
-        $pointages = collect([
-            ['id' => 1, 'employe' => 'Karim Benali', 'checkin' => '08:00', 'checkout' => '17:00', 'status' => 'Présent'],
-            ['id' => 2, 'employe' => 'Sara Alaoui', 'checkin' => '08:15', 'checkout' => '17:05', 'status' => 'En retard']
-        ]);
-        return view('pointages.index', compact('pointages'));
-    })->name('pointages.index');
 
     # Tasks Route
     Route::get('/tasks', [TacheController::class, 'index'])->name('tasks.index');
@@ -188,32 +182,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 #Pointage Routes 
-
-
-Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
-Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
-Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
-Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
-Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
-Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/pointage', [PointageController::class, 'userPointage'])->name('pointages.index');
+    Route::get('/pointage/status', [PointageController::class, 'status'])->name('pointage.status');
+    Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
+    Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
+    Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
+    Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
+    
+    Route::middleware('role:admin')->group(function() {
+        Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+        Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+    });
+});
 #Paiment Routes
-Route::get('/paiements', [PaiementController::class, 'index'])->name('paiements.index');
-Route::post('/paiements/store', [PaiementController::class, 'store'])->name('paiements.store');
-Route::get('/paiements/{id}', [PaiementController::class, 'show'])->name('paiements.show');
-Route::get('/paiements/{id}/edit', [PaiementController::class, 'edit'])->name('paiements.edit');
-Route::put('/paiements/{id}', [PaiementController::class, 'update'])->name('paiements.update');
-Route::delete('/paiements/{id}', [PaiementController::class, 'destroy'])->name('paiements.destroy');
+Route::get('/paiements', [PaimentController::class, 'index'])->name('paiements.index');
+Route::post('/paiements/store', [PaimentController::class, 'store'])->name('paiements.store');
+Route::get('/paiements/{id}', [PaimentController::class, 'show'])->name('paiements.show');
+Route::get('/paiements/{id}/edit', [PaimentController::class, 'edit'])->name('paiements.edit');
+Route::put('/paiements/{id}', [PaimentController::class, 'update'])->name('paiements.update');
+Route::delete('/paiements/{id}', [PaimentController::class, 'destroy'])->name('paiements.destroy');
 
-# Pointage Route
-Route::get('/pointage', function () {
-    $pointages = collect([
-        ['id' => 1, 'employe' => 'Karim Benali', 'checkin' => '08:00', 'checkout' => '17:00', 'status' => 'Présent'],
-        ['id' => 2, 'employe' => 'Sara Alaoui', 'checkin' => '08:15', 'checkout' => '17:05', 'status' => 'En retard'],
-        ['id' => 3, 'employe' => 'Youssef Nouri', 'checkin' => '--:--', 'checkout' => '--:--', 'status' => 'Absent'],
-        ['id' => 4, 'employe' => 'Hassan IDRISSI', 'checkin' => '07:55', 'checkout' => '16:50', 'status' => 'Présent']
-    ]);
-    return view('pointages.index', compact('pointages'));
-})->middleware(['auth', 'verified'])->name('pointages.index');
 
 # Tasks Route
 Route::get('/tasks', [TacheController::class, 'index'])->middleware(['auth', 'verified'])->name('tasks.index');
@@ -239,6 +228,13 @@ Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middlewar
 Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
 Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
 
+// Lead Routes
+Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
+Route::get('/leads/export-pdf', [LeadController::class, 'exportPdf'])->name('leads.export-pdf');
+Route::get('/leads/{id}', [LeadController::class, 'show'])->name('leads.show');
+Route::put('/leads/{id}', [LeadController::class, 'update'])->name('leads.update');
+Route::delete('/leads/{id}', [LeadController::class, 'destroy'])->name('leads.destroy');
 
 
 
