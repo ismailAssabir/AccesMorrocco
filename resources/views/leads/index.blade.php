@@ -254,86 +254,92 @@
     </div>
 
     {{-- ===== MODAL CREATE ===== --}}
+    {{-- ===== MODAL CREATE ===== --}}
     @can('lead.create')
     <div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden">
-            <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-lg font-extrabold text-slate-800">Nouveau Lead</h2>
-                    <button onclick="document.getElementById('modal-create').classList.add('hidden')"
-                            class="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                <form method="POST" action="{{ route('leads.store') }}">
-                    @csrf
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233] shrink-0"></div>
+            
+            <div class="p-6 pb-0 flex justify-between items-center shrink-0">
+                <h2 class="text-lg font-extrabold text-slate-800">Nouveau Lead</h2>
+                <button onclick="document.getElementById('modal-create').classList.add('hidden')"
+                        class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('leads.store') }}" class="flex flex-col overflow-hidden">
+                @csrf
+                
+                <div class="p-6 overflow-y-auto custom-scrollbar">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Prénom *</label>
                             <input name="firstName" required placeholder="Prénom"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nom *</label>
                             <input name="lastName" required placeholder="Nom"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Email</label>
                             <input name="email" type="email" placeholder="email@exemple.com"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Téléphone</label>
                             <input name="phoneNumber" placeholder="+212..."
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">CNE</label>
                             <input name="CNE" placeholder="CNE"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nationalité</label>
                             <input name="nationalite" placeholder="Nationalité"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
                             <input name="adresse" placeholder="Adresse"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Source</label>
                             <input name="source" placeholder="Ex: LinkedIn, Référence..."
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
                             <input name="type" required placeholder="Type de lead"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Note</label>
                             <textarea name="note" rows="2" placeholder="Notes complémentaires..."
-                                      class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
                         </div>
                     </div>
-                    <div class="flex gap-3 justify-end mt-6">
-                        <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
-                                class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
-                            Annuler
-                        </button>
-                        <button type="submit"
-                                class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-                            Créer le Lead
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="p-6 border-t border-slate-100 flex gap-3 justify-end bg-slate-50 shrink-0">
+                    <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
+                            class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
+                        Créer le Lead
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
     @endcan
