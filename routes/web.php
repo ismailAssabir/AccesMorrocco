@@ -171,6 +171,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     # Meetings & Reunion Routes
     Route::get('/meetings', [ReunionController::class, 'index'])->name('meetings.index');
     Route::get('/reunions', [ReunionController::class, 'index'])->name('reunions.index');
+    Route::get('/reunions/{id}', [ReunionController::class, 'show'])->name('reunions.show');
     
     Route::middleware('role:admin|manager')->group(function() {
         Route::get('/reunions/create', [ReunionController::class, 'create'])->name('reunions.create');

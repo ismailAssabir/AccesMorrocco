@@ -116,14 +116,18 @@
                             <h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-6">Prochaines Réunions</h2>
                             <div class="space-y-4">
                                 @forelse($upcomingReunions as $reunion)
-                                    <div class="flex gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
+                                     onclick='viewReunionDetails({!! e(json_encode($reunion)) !!})'>
                                         <div class="bg-gray-100 rounded-lg p-2 h-12 w-12 flex flex-col items-center justify-center text-[#be2346]">
-                                            <span class="text-xs font-bold uppercase">{{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('M') }}</span>
-                                            <span class="text-sm font-black">{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('d') }}</span>
+                                            <span class="text-xs font-bold uppercase">{{ $reunion->dateHeure->translatedFormat('M') }}</span>
+                                            <span class="text-sm font-black">{{ $reunion->dateHeure->format('d') }}</span>
                                         </div>
-                                        <div>
-                                            <p class="text-sm font-bold text-gray-900">{{ $reunion->titre }}</p>
-                                            <p class="text-[10px] text-gray-400 font-medium uppercase mt-0.5">{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }} • {{ $reunion->lieu ?? 'Visioconférence' }}</p>
+                                        <div class="flex-1 px-4">
+                                            <p class="text-sm font-bold text-gray-900 truncate">{{ $reunion->titre }}</p>
+                                            <p class="text-[10px] text-gray-400 font-medium uppercase mt-0.5">{{ $reunion->dateHeure->format('H:i') }} • {{ $reunion->lieu ?? 'Visioconférence' }}</p>
+                                        </div>
+                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                         </div>
                                     </div>
                                 @empty
@@ -271,7 +275,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
                             @forelse($upcomingReunions->take(6) as $reunion)
                                 <div class="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-[#be2346]/20 hover:shadow-xl hover:shadow-[#be2346]/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer group/item relative h-full flex flex-col justify-between"
-                                     onclick="window.location='{{ route('reunions.index') }}'">
+                                     onclick="window.location='{{ route('reunions.show', $reunion->idReunion) }}'">
                                      <div>
                                          @if(\Carbon\Carbon::parse($reunion->dateHeure)->isPast())
                                              <div class="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 text-[7px] font-black text-gray-500 rounded uppercase tracking-tighter">Passé</div>
@@ -320,7 +324,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="font-bold text-gray-900 group-hover:text-[#be2346] transition-colors">{{ $reclamation->titre ?? 'Requête' }}</div>
-                                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{{ $reclamation->user->firstName }} • {{ \Carbon\Carbon::parse($reclamation->created_at)->diffForHumans() }}</div>
+                                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{{ $reclamation->user->firstName }} • {{ $reclamation->created_at->diffForHumans() }}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -431,6 +435,163 @@
                 </style>
             @endif
 
+    {{-- Meeting Detail Modal --}}
+    <div id="viewReunionModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeReunionModal()"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden flex flex-col z-10 animate-modal-in border border-white/20">
+            <div class="p-8 md:p-10">
+                <div class="flex justify-between items-start mb-8">
+                    <div id="modal_reunion_type_badge" class="px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm"></div>
+                    <button onclick="closeReunionModal()" class="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all active:scale-90">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                
+                <h3 id="modal_reunion_title" class="text-3xl font-black text-gray-900 mb-2 leading-tight"></h3>
+                <p id="modal_reunion_objectif" class="text-sm font-bold text-[#be2346] mb-8 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#be2346] animate-pulse"></span>
+                    <span id="objectif_text"></span>
+                </p>
+
+                <div class="space-y-6 mb-10">
+                    <div class="flex items-center gap-5 p-4 bg-gray-50 rounded-3xl border border-transparent hover:border-gray-100 transition-all">
+                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#be2346]">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Date & Heure de début</p>
+                            <p id="modal_reunion_date" class="text-sm font-black text-gray-900"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-5 p-4 bg-gray-50 rounded-3xl border border-transparent hover:border-gray-100 transition-all">
+                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#be2346]">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Lieu de la réunion</p>
+                            <p id="modal_reunion_lieu" class="text-sm font-black text-gray-900"></p>
+                        </div>
+                    </div>
+
+                    {{-- Description block if exists --}}
+                    <div id="modal_reunion_desc_container" class="p-4 bg-slate-50 rounded-3xl">
+                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Description</p>
+                         <p id="modal_reunion_description" class="text-xs text-gray-600 leading-relaxed font-medium"></p>
+                    </div>
+
+                    <div id="modal_reunion_link_container" class="hidden">
+                        <a id="modal_reunion_link" href="#" target="_blank" class="flex items-center justify-between p-5 bg-gray-900 rounded-[24px] text-white hover:bg-[#be2346] transition-all group shadow-xl shadow-gray-900/10">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <span class="text-sm font-black uppercase tracking-[0.1em]">Rejoindre la réunion</span>
+                            </div>
+                            <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="closeReunionModal()" class="flex-1 py-5 bg-gray-100 hover:bg-gray-200 rounded-[24px] text-xs font-black text-gray-500 transition-all active:scale-95 uppercase tracking-widest">Fermer</button>
+                    <a id="modal_view_full" href="#" class="flex-1 py-5 bg-[#be2346] hover:bg-[#a01d3a] rounded-[24px] text-xs font-black text-white text-center transition-all shadow-xl shadow-[#be2346]/20 active:scale-95 uppercase tracking-widest">Voir plus</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewReunionDetails(reunionData) {
+            let reunion = typeof reunionData === 'string' ? JSON.parse(reunionData) : reunionData;
+            const modal = document.getElementById('viewReunionModal');
+            if (!modal) return;
+
+            document.getElementById('modal_reunion_title').textContent = reunion.titre || 'Sans titre';
+            document.getElementById('objectif_text').textContent = reunion.objectif || 'Aucun objectif spécifié';
+            let defaultLieu = 'Visioconférence';
+            if (reunion.type === 'Interne') defaultLieu = 'Enterprise';
+            else if (reunion.type === 'Externe') defaultLieu = 'Meeting online';
+            
+            document.getElementById('modal_reunion_lieu').textContent = reunion.lieu || defaultLieu;
+            
+            // Description
+            const descContainer = document.getElementById('modal_reunion_desc_container');
+            const descText = document.getElementById('modal_reunion_description');
+            if (reunion.description) {
+                descContainer.classList.remove('hidden');
+                descText.textContent = reunion.description;
+            } else {
+                descContainer.classList.add('hidden');
+            }
+
+            // Format Date
+            if (reunion.dateHeure) {
+                const date = new Date(reunion.dateHeure);
+                const formattedDate = date.toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                document.getElementById('modal_reunion_date').textContent = formattedDate;
+            }
+
+            // Badge
+            const badge = document.getElementById('modal_reunion_type_badge');
+            if (badge) {
+                badge.textContent = reunion.type || 'Interne';
+                if (reunion.type === 'Interne') {
+                    badge.className = 'px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-slate-100 text-slate-600 border border-slate-200';
+                } else {
+                    badge.className = 'px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-indigo-50 text-indigo-600 border border-indigo-100';
+                }
+            }
+
+            // Link
+            const linkContainer = document.getElementById('modal_reunion_link_container');
+            const link = document.getElementById('modal_reunion_link');
+            if (reunion.lien) {
+                linkContainer.classList.remove('hidden');
+                let url = reunion.lien;
+                if (!url.startsWith('http')) {
+                    url = 'https://' + url;
+                }
+                link.href = url;
+            } else {
+                linkContainer.classList.add('hidden');
+            }
+
+            // Full View Link
+            const fullView = document.getElementById('modal_view_full');
+            if (fullView) {
+                fullView.href = `/reunions/${reunion.idReunion}`;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReunionModal() {
+            const modal = document.getElementById('viewReunionModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+
+    @verbatim
+    <style>
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-in { animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    </style>
+    @endverbatim
         </div>
     </div>
 </x-app-layout>

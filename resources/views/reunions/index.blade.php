@@ -37,7 +37,7 @@
                         <h3 class="text-base font-bold text-slate-800 truncate">{{ $reunion->titre }}</h3>
                         <p class="text-sm text-slate-500 mt-1 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('d M Y, H:i') }}
+                            {{ $reunion->dateHeure->translatedFormat('d M Y, H:i') }}
                             @if($reunion->lieu)
                                 <span class="text-slate-300 mx-1">|</span>
                                 <span class="text-xs font-medium">{{ $reunion->lieu }}</span>
@@ -47,20 +47,17 @@
 
                     {{-- Meta & Actions --}}
                     <div class="flex items-center gap-4 sm:ml-auto">
-                        @php
-                            $typeColor = match($reunion->type) {
-                                'Interne' => 'bg-slate-200 text-slate-700',
-                                'Externe' => 'bg-blue-100 text-blue-700',
-                                default => 'bg-[#b11d40]/10 text-[#b11d40]'
-                            };
-                        @endphp
-                        <span class="{{ $typeColor }} font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider">{{ $reunion->type }}</span>
+                        <span class="{{ $reunion->type_color }} font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider">{{ $reunion->type }}</span>
 
                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button" onclick='viewReunionDetails({!! e(json_encode($reunion)) !!})' class="flex items-center gap-2 px-4 py-2 bg-slate-200/50 text-slate-600 rounded-xl hover:bg-slate-200 hover:text-slate-800 transition-all font-bold text-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                Voir
+                            </button>
+
                             @if(auth()->user()->type !== 'employee')
-                            {{-- THE FIX: Escape the JSON to prevent HTML breakage --}}
                             <button type="button" onclick='openEditModal({!! e(json_encode($reunion)) !!})' class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Modifier
                             </button>
                             <button type="button" onclick="confirmDeleteReunion({{ $reunion->idReunion }})" class="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
@@ -89,7 +86,7 @@
     {{-- Add Reunion Modal --}}
     <div id="addReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addReunionModal', 'close')"></div>
-        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-modal-in">
             
             {{-- Header --}}
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
@@ -120,14 +117,50 @@
                                 <option value="Autre">Autre</option>
                             </select>
                         </div>
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
+                        <div class="md:col-span-2 space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type d'Invitation <span class="text-[#be2346]">*</span></label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" value="all" checked onchange="toggleInvitationFields('add')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Tout les employés</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" value="department" onchange="toggleInvitationFields('add')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Par département</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" value="individual" onchange="toggleInvitationFields('add')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Individuel</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="add_dept_field" class="hidden space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département <span class="text-[#be2346]">*</span></label>
                             <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                <option value="">-- Aucun --</option>
+                                <option value="">-- Sélectionner --</option>
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div id="add_individual_field" class="hidden md:col-span-2 space-y-3">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 text-left block">Sélectionner les employés <span class="text-[#be2346]">*</span></label>
+                            <div class="relative">
+                                <input type="text" placeholder="Rechercher un employé..." onkeyup="filterUsers(this, 'add_user_list')" class="w-full bg-slate-50 border border-slate-200 rounded-t-2xl px-4 py-3 text-sm outline-none focus:border-[#be2346] transition-all">
+                                <div id="add_user_list" class="max-h-48 overflow-y-auto border-x border-b border-slate-200 rounded-b-2xl bg-white p-2 grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-hide">
+                                    @foreach($users as $user)
+                                        <label class="user-item flex items-center gap-3 p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-100">
+                                            <input type="checkbox" name="participant_ids[]" value="{{ $user->idUser }}" class="w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
+                                            <div class="flex flex-col">
+                                                <span class="text-xs font-black text-slate-700">{{ $user->firstName }} {{ $user->lastName }}</span>
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{{ $user->post }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Date et Heure <span class="text-[#be2346]">*</span></label>
@@ -174,7 +207,7 @@
     {{-- Edit Reunion Modal --}}
     <div id="editReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editReunionModal', 'close')"></div>
-        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-modal-in">
             
             {{-- Header --}}
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
@@ -209,14 +242,50 @@
                             </select>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département</label>
+                        <div class="md:col-span-2 space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type d'Invitation <span class="text-[#be2346]">*</span></label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" id="edit_invitation_all" value="all" onchange="toggleInvitationFields('edit')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Tout les employés</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" id="edit_invitation_department" value="department" onchange="toggleInvitationFields('edit')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Par département</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <input type="radio" name="invitation_type" id="edit_invitation_individual" value="individual" onchange="toggleInvitationFields('edit')" class="w-4 h-4 text-[#be2346] focus:ring-[#be2346]">
+                                    <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Individuel</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="edit_dept_field" class="hidden space-y-1.5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département <span class="text-[#be2346]">*</span></label>
                             <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                                <option value="">-- Aucun --</option>
+                                <option value="">-- Sélectionner --</option>
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div id="edit_individual_field" class="hidden md:col-span-2 space-y-3">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 text-left block">Sélectionner les employés <span class="text-[#be2346]">*</span></label>
+                            <div class="relative">
+                                <input type="text" placeholder="Rechercher un employé..." onkeyup="filterUsers(this, 'edit_user_list')" class="w-full bg-slate-50 border border-slate-200 rounded-t-2xl px-4 py-3 text-sm outline-none focus:border-[#be2346] transition-all">
+                                <div id="edit_user_list" class="max-h-48 overflow-y-auto border-x border-b border-slate-200 rounded-b-2xl bg-white p-2 grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-hide">
+                                    @foreach($users as $user)
+                                        <label class="user-item flex items-center gap-3 p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-100">
+                                            <input type="checkbox" name="participant_ids[]" value="{{ $user->idUser }}" class="edit-user-checkbox w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
+                                            <div class="flex flex-col">
+                                                <span class="text-xs font-black text-slate-700">{{ $user->firstName }} {{ $user->lastName }}</span>
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{{ $user->post }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
 
                         <div class="space-y-1.5">
@@ -268,6 +337,7 @@
 
 
 
+
     <script>
         function toggleLienField(mode) {
             const typeSelect = document.getElementById(mode + '_type');
@@ -292,14 +362,193 @@
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
                 document.body.style.overflow = 'hidden';
-                
-                // Initialize field visibility
                 if (id === 'addReunionModal') toggleLienField('add');
                 if (id === 'editReunionModal') toggleLienField('edit');
             } else {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
                 document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+
+    {{-- Meeting Detail Modal --}}
+    <div id="viewReunionModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeReunionModal()"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden flex flex-col z-10 animate-modal-in border border-white/20">
+            <div class="p-8 md:p-10">
+                <div class="flex justify-between items-start mb-8">
+                    <div id="modal_reunion_type_badge" class="px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm"></div>
+                    <button onclick="closeReunionModal()" class="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all active:scale-90">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                
+                <h3 id="modal_reunion_title" class="text-3xl font-black text-gray-900 mb-2 leading-tight"></h3>
+                <p id="modal_reunion_objectif" class="text-sm font-bold text-[#be2346] mb-8 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#be2346] animate-pulse"></span>
+                    <span id="objectif_text"></span>
+                </p>
+
+                <div class="space-y-6 mb-10">
+                    <div class="flex items-center gap-5 p-4 bg-gray-50 rounded-3xl border border-transparent hover:border-gray-100 transition-all">
+                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#be2346]">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Date & Heure de début</p>
+                            <p id="modal_reunion_date" class="text-sm font-black text-gray-900"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-5 p-4 bg-gray-50 rounded-3xl border border-transparent hover:border-gray-100 transition-all">
+                        <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#be2346]">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Lieu de la réunion</p>
+                            <p id="modal_reunion_lieu" class="text-sm font-black text-gray-900"></p>
+                        </div>
+                    </div>
+
+                    {{-- Description block if exists --}}
+                    <div id="modal_reunion_desc_container" class="p-4 bg-slate-50 rounded-3xl">
+                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Description</p>
+                         <p id="modal_reunion_description" class="text-xs text-gray-600 leading-relaxed font-medium"></p>
+                    </div>
+
+                    <div id="modal_reunion_link_container" class="hidden">
+                        <a id="modal_reunion_link" href="#" target="_blank" class="flex items-center justify-between p-5 bg-gray-900 rounded-[24px] text-white hover:bg-[#be2346] transition-all group shadow-xl shadow-gray-900/10">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
+                                <span class="text-sm font-black uppercase tracking-[0.1em]">Rejoindre la réunion</span>
+                            </div>
+                            <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="closeReunionModal()" class="flex-1 py-5 bg-gray-100 hover:bg-gray-200 rounded-[24px] text-xs font-black text-gray-500 transition-all active:scale-95 uppercase tracking-widest">Fermer</button>
+                    <a id="modal_view_full" href="#" class="flex-1 py-5 bg-[#be2346] hover:bg-[#a01d3a] rounded-[24px] text-xs font-black text-white text-center transition-all shadow-xl shadow-[#be2346]/20 active:scale-95 uppercase tracking-widest">Voir plus</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewReunionDetails(reunionData) {
+            let reunion = typeof reunionData === 'string' ? JSON.parse(reunionData) : reunionData;
+            const modal = document.getElementById('viewReunionModal');
+            if (!modal) return;
+
+            document.getElementById('modal_reunion_title').textContent = reunion.titre || 'Sans titre';
+            document.getElementById('objectif_text').textContent = reunion.objectif || 'Aucun objectif spécifié';
+            let defaultLieu = 'Visioconférence';
+            if (reunion.type === 'Interne') defaultLieu = 'Enterprise';
+            else if (reunion.type === 'Externe') defaultLieu = 'Meeting online';
+            
+            document.getElementById('modal_reunion_lieu').textContent = reunion.lieu || defaultLieu;
+            
+            // Description
+            const descContainer = document.getElementById('modal_reunion_desc_container');
+            const descText = document.getElementById('modal_reunion_description');
+            if (reunion.description) {
+                descContainer.classList.remove('hidden');
+                descText.textContent = reunion.description;
+            } else {
+                descContainer.classList.add('hidden');
+            }
+
+            // Format Date
+            if (reunion.dateHeure) {
+                const date = new Date(reunion.dateHeure);
+                const formattedDate = date.toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                document.getElementById('modal_reunion_date').textContent = formattedDate;
+            }
+
+            // Badge
+            const badge = document.getElementById('modal_reunion_type_badge');
+            if (badge) {
+                badge.textContent = reunion.type || 'Interne';
+                if (reunion.type === 'Interne') {
+                    badge.className = 'px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-slate-100 text-slate-600 border border-slate-200';
+                } else {
+                    badge.className = 'px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-indigo-50 text-indigo-600 border border-indigo-100';
+                }
+            }
+
+            // Link
+            const linkContainer = document.getElementById('modal_reunion_link_container');
+            const link = document.getElementById('modal_reunion_link');
+            if (reunion.lien) {
+                linkContainer.classList.remove('hidden');
+                let url = reunion.lien;
+                if (!url.startsWith('http')) {
+                    url = 'https://' + url;
+                }
+                link.href = url;
+            } else {
+                linkContainer.classList.add('hidden');
+            }
+
+            // Full View Link
+            const fullView = document.getElementById('modal_view_full');
+            if (fullView) {
+                fullView.href = `/reunions/${reunion.idReunion}`;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReunionModal() {
+            const modal = document.getElementById('viewReunionModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleInvitationFields(prefix) {
+            const form = prefix === 'add' ? document.querySelector('#addReunionModal form') : document.getElementById('editReunionForm');
+            const checkedRadio = form.querySelector('input[name="invitation_type"]:checked');
+            const currentType = checkedRadio ? checkedRadio.value : 'all';
+
+            const deptField = document.getElementById(`${prefix}_dept_field`);
+            const individualField = document.getElementById(`${prefix}_individual_field`);
+
+            if (deptField) deptField.classList.add('hidden');
+            if (individualField) individualField.classList.add('hidden');
+
+            if (currentType === 'department' && deptField) {
+                deptField.classList.remove('hidden');
+            } else if (currentType === 'individual' && individualField) {
+                individualField.classList.remove('hidden');
+            }
+        }
+
+        function filterUsers(input, listId) {
+            const filter = input.value.toLowerCase();
+            const list = document.getElementById(listId);
+            const items = list.getElementsByClassName('user-item');
+
+            for (let i = 0; i < items.length; i++) {
+                const text = items[i].textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    items[i].style.display = "";
+                } else {
+                    items[i].style.display = "none";
+                }
             }
         }
 
@@ -309,7 +558,22 @@
             
             document.getElementById('edit_titre').value = reunion.titre || '';
             document.getElementById('edit_type').value = reunion.type || 'Interne';
-            document.getElementById('edit_idDepartement').value = reunion.idDepartement || '';
+            
+            // Invitation Type Logic
+            if (reunion.idDepartement) {
+                document.getElementById('edit_invitation_department').checked = true;
+                document.getElementById('edit_idDepartement').value = reunion.idDepartement;
+            } else if (reunion.participants && reunion.participants.length > 0) {
+                document.getElementById('edit_invitation_individual').checked = true;
+                // Check the checkboxes
+                const participantIds = reunion.participants.map(p => p.idUser);
+                document.querySelectorAll('.edit-user-checkbox').forEach(cb => {
+                    cb.checked = participantIds.includes(parseInt(cb.value));
+                });
+            } else {
+                document.getElementById('edit_invitation_all').checked = true;
+            }
+            toggleInvitationFields('edit');
             
             // Precise date/time conversion for datetime-local
             if (reunion.dateHeure) {
@@ -340,4 +604,14 @@
             }
         });
     </script>
+
+    @verbatim
+    <style>
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-in { animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    </style>
+    @endverbatim
 </x-app-layout>

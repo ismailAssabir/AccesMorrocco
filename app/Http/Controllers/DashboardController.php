@@ -22,7 +22,11 @@ class DashboardController extends Controller
                 'myPendingReclamations' => $user->reclamations()->whereIn('status', ['ouverte', 'en_cours'])->count(),
                 'myDepartmentMeetings' => Reunion::where('dateHeure', '>=', now())
                     ->where(function($q) use ($user) {
-                        $q->whereNull('idDepartement')->orWhere('idDepartement', $user->idDepartement);
+                        $q->whereNull('idDepartement')
+                          ->orWhere('idDepartement', $user->idDepartement)
+                          ->orWhereHas('participants', function($sq) use ($user) {
+                              $sq->where('reunion_participants.idUser', $user->idUser);
+                          });
                     })->count(),
                 'myPoints' => 0 // Mocking points for now if applicable
             ];
@@ -30,17 +34,25 @@ class DashboardController extends Controller
             $myRecentTasks = $user->taches()->latest()->take(5)->get();
             $myRecentReclamations = $user->reclamations()->latest()->take(5)->get();
             
-            $upcomingReunions = Reunion::where('dateHeure', '>=', now())
+            $upcomingReunions = Reunion::with('participants')->where('dateHeure', '>=', now())
                 ->where(function($q) use ($user) {
-                    $q->whereNull('idDepartement')->orWhere('idDepartement', $user->idDepartement);
+                    $q->whereNull('idDepartement')
+                      ->orWhere('idDepartement', $user->idDepartement)
+                      ->orWhereHas('participants', function($sq) use ($user) {
+                          $sq->where('reunion_participants.idUser', $user->idUser);
+                      });
                 })
                 ->orderBy('dateHeure', 'asc')
                 ->take(6)
                 ->get();
 
             if ($upcomingReunions->isEmpty()) {
-                $upcomingReunions = Reunion::where(function($q) use ($user) {
-                        $q->whereNull('idDepartement')->orWhere('idDepartement', $user->idDepartement);
+                $upcomingReunions = Reunion::with('participants')->where(function($q) use ($user) {
+                        $q->whereNull('idDepartement')
+                          ->orWhere('idDepartement', $user->idDepartement)
+                          ->orWhereHas('participants', function($sq) use ($user) {
+                              $sq->where('reunion_participants.idUser', $user->idUser);
+                          });
                     })
                     ->latest('dateHeure')
                     ->take(6)
@@ -70,7 +82,7 @@ class DashboardController extends Controller
 
         // Logic for Agenda Flash: Show up to 6 relevant meetings
         // 1. Get upcoming meetings (closest first)
-        $upcomingReunions = Reunion::where('dateHeure', '>=', now())
+        $upcomingReunions = Reunion::with('participants')->where('dateHeure', '>=', now())
             ->orderBy('dateHeure', 'asc')
             ->take(6)
             ->get();
@@ -78,7 +90,7 @@ class DashboardController extends Controller
         // 2. If less than 6, fill with recent past meetings
         if ($upcomingReunions->count() < 6) {
             $needed = 6 - $upcomingReunions->count();
-            $pastReunions = Reunion::where('dateHeure', '<', now())
+            $pastReunions = Reunion::with('participants')->where('dateHeure', '<', now())
                 ->latest('dateHeure')
                 ->take($needed)
                 ->get();
