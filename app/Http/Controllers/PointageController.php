@@ -26,9 +26,11 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
    
     public function index()
     {
-        $today = now()->toDateString();
-        $pointages = Pointage::with('user')->get();
-        return view('Adminpointage', compact('pointages'));
+        Gate::authorize('pointage.view');
+
+        $pointages = Pointage::with('user')->orderBy('date', 'desc')->orderBy('heureEntree', 'desc')->get();
+        $settings = Company::first();
+        return view('Adminpointage', compact('pointages', 'settings'));
     }
 
    
@@ -87,7 +89,22 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     
     public function checkIn(Request $request)
     {
-        $request->validate(['gps' => 'required|string']);
+        Gate::authorize('pointage.create');
+
+        if ($request->has('gps') && !empty($request->gps)) {
+            $gps = str_replace(' ', '', $request->gps);
+            $parts = explode(',', $gps);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            $request->merge(['gps' => $gps]);
+        }
+
+        $request->validate([
+            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
+        ], [
+            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
+        ]);
 
         
         $settings = Company::first();
@@ -149,7 +166,22 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     
     public function checkOut(Request $request) 
     {
-        $request->validate(['gps' => 'required|string']);
+        Gate::authorize('pointage.edit');
+
+        if ($request->has('gps') && !empty($request->gps)) {
+            $gps = str_replace(' ', '', $request->gps);
+            $parts = explode(',', $gps);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            $request->merge(['gps' => $gps]);
+        }
+
+        $request->validate([
+            'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
+        ], [
+            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
+        ]);
 
         $settings = Company::first();
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
@@ -244,6 +276,18 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     
     public function updateSettings(Request $request)
     {
+        Gate::authorize('pointage.create');
+
+        if ($request->has('companyGps') && !empty($request->companyGps)) {
+            $gps = str_replace(' ', '', $request->companyGps);
+            $parts = explode(',', $gps);
+            
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
+            }
+            
+            $request->merge(['companyGps' => $gps]);
+        }
         $validatedData = $request->validate([
             'companyGps'       => 'nullable|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/',
             'companyEntryTime' => 'nullable',

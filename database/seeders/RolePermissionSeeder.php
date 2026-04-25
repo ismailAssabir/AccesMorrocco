@@ -26,14 +26,17 @@ class RolePermissionSeeder extends Seeder
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
             'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete',
+
             // --- Permission ---
             'permission.edit',
             'permission.view',
-            // --- Ctegory ---
+
+            // --- Category ---
             'category.view',
             'category.create',
             'category.delete',
             'category.edit',
+
             // --- Users ---
             'user.view',
             'user.create',
@@ -75,12 +78,6 @@ class RolePermissionSeeder extends Seeder
             'paiement.create',
             'paiement.edit',
             'paiement.delete',
-
-            // --- Objectifs ---
-            'objectif.view',
-            'objectif.create',
-            'objectif.edit',
-            'objectif.delete',
 
             // --- Tâches ---
             'tache.view',
@@ -136,6 +133,8 @@ class RolePermissionSeeder extends Seeder
         $adminRole->givePermissionTo(Permission::all());
 
         $managerRole->syncPermissions([
+            'dashboard.view',
+            'users.view', 'users.manage',
             'user.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
@@ -150,9 +149,9 @@ class RolePermissionSeeder extends Seeder
             'document.view', 'document.approve',
             'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
             'prime.view', 'prime.create', 'prime.delete',
-            'dashboard.view'
         ]);
-        $employeeRole->givePermissionTo([
+
+        $employeeRole->syncPermissions([
             'reunions.view',
             'reclamations.view',
             'dashboard.view',

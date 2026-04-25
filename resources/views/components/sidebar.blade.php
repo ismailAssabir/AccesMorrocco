@@ -75,6 +75,7 @@
 @endif
             @can('pointage.view')
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
+
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? '' : 'group-hover:rotate-12' }}">

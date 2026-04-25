@@ -15,6 +15,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\PaimentController;
+use App\Http\Controllers\LeadController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -228,6 +229,13 @@ Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->middlewar
 Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->middleware(['auth', 'verified'])->name('reunions.update');
 Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('reunions.destroy');
 
+// Lead Routes
+Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
+Route::get('/leads/export-pdf', [LeadController::class, 'exportPdf'])->name('leads.export-pdf');
+Route::get('/leads/{id}', [LeadController::class, 'show'])->name('leads.show');
+Route::put('/leads/{id}', [LeadController::class, 'update'])->name('leads.update');
+Route::delete('/leads/{id}', [LeadController::class, 'destroy'])->name('leads.destroy');
 
 
 
