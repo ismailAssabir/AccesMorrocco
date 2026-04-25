@@ -149,18 +149,52 @@
 </a>
 @endcan
 
-            @if(auth()->user()->type === 'admin')
-            <a href="{{ route('permissions.index') }}" 
-               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('permissions.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('permissions.*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('permissions.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <span class="font-medium text-sm">Permissions</span>
-            </a>
-            @endif
+{{-- ═══════════════ COMMERCIAL SECTION ═══════════════ --}}
+@canany(['client.view', 'lead.view', 'category.view'])
+<div class="px-4 mt-8 mb-6">
+    <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+        Gestion Commerciale
+    </p>
+</div>
+
+<nav class="space-y-1">
+    @can('lead.view')
+    <a href="{{ route('leads.index') }}" 
+       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+       {{ request()->routeIs('leads.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+        <div class="transition-transform duration-300 {{ request()->routeIs('leads.*') ? '' : 'group-hover:rotate-12' }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('leads.*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <span class="font-medium text-sm">Leads</span>
+    </a>
+    @endcan
+</nav>
+@endcanany
+
+{{-- ═══════════════ SYSTEM SECTION ═══════════════ --}}
+@can('permission.view')
+<div class="px-4 mt-8 mb-6">
+    <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+        Système
+    </p>
+</div>
+<nav class="space-y-1">
+    <a href="{{ route('permissions.index') }}" 
+       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+       {{ request()->routeIs('permissions.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+        <div class="transition-transform duration-300 {{ request()->routeIs('permissions.*') ? '' : 'group-hover:rotate-12' }}">
+            <svg class="w-5 h-5 {{ request()->routeIs('permissions.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <span class="font-medium text-sm">Permissions</span>
+    </a>
+</nav>
+@endcan
         </nav>
     </div>
 

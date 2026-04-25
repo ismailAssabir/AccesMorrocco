@@ -114,6 +114,12 @@ class RolePermissionSeeder extends Seeder
             'reunion.edit',
             'reunion.delete',
 
+            // --- Objectifs ---
+            'objectif.view',
+            'objectif.create',
+            'objectif.edit',
+            'objectif.delete',
+
             // --- Primes ---
             'prime.view',
             'prime.create',
@@ -125,8 +131,34 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Assign permissions to roles
-        $adminRole->syncPermissions(['permission.edit',
-            'permission.view',]);
+        // Assign all permissions to admin
+        $adminRole->syncPermissions(Permission::all());
+
+        // Assign permissions to manager
+        $managerRole->syncPermissions([
+            'user.view', 'user.create', 'user.edit',
+            'departement.view', 'departement.create', 'departement.edit',
+            'client.view', 'client.create', 'client.edit',
+            'lead.view', 'lead.create', 'lead.edit',
+            'dossier.view', 'dossier.create', 'dossier.edit',
+            'tache.view', 'tache.create', 'tache.edit', 'tache.delete',
+            'pointage.view', 'pointage.create', 'pointage.edit',
+            'conge.view', 'conge.create', 'conge.edit', 'conge.approve',
+            'reclamation.view', 'reclamation.create', 'reclamation.edit', 'reclamation.respond',
+            'document.view', 'document.create', 'document.edit', 'document.approve',
+            'reunion.view', 'reunion.create', 'reunion.edit', 'reunion.delete',
+            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete',
+        ]);
+
+        // Assign permissions to employee
+        $employeeRole->syncPermissions([
+            'tache.view',
+            'pointage.view', 'pointage.create',
+            'conge.view', 'conge.create',
+            'reclamation.view', 'reclamation.create',
+            'document.view', 'document.create',
+            'reunion.view',
+            'objectif.view',
+        ]);
     }
 }
