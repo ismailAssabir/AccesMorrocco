@@ -9,6 +9,7 @@
             </div>
             @if(auth()->user()->type !== 'employee')
             <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
+
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -614,4 +615,5 @@
         .animate-modal-in { animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
     @endverbatim
+
 </x-app-layout>

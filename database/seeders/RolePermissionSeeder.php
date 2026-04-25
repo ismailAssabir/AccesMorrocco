@@ -21,6 +21,7 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
+            'dashboard.view',
 
 
             // --- Permission ---
@@ -125,6 +126,7 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
+
         ];
 
         foreach ($permissions as $permission) {
@@ -135,6 +137,7 @@ class RolePermissionSeeder extends Seeder
         $adminRole->syncPermissions(Permission::all());
 
         // Assign permissions to manager
+
         $managerRole->syncPermissions([
             'user.view', 'user.create', 'user.edit',
             'departement.view', 'departement.create', 'departement.edit',
@@ -160,5 +163,17 @@ class RolePermissionSeeder extends Seeder
             'reunion.view',
             'objectif.view',
         ]);
+
+        // Sync existing users
+        User::all()->each(function ($user) use ($adminRole, $managerRole, $employeeRole) {
+            if ($user->type === 'admin') {
+                $user->assignRole($adminRole);
+            } elseif ($user->type === 'manager') {
+                $user->assignRole($managerRole);
+            } else {
+                $user->assignRole($employeeRole);
+            }
+        });
+
     }
 }

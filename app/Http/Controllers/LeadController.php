@@ -135,7 +135,6 @@ class LeadController extends Controller
 
         $statut = $request->statut;
 
-        // Logique métier
         if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
             $lead->statut = '1er_appel';
 
@@ -143,14 +142,12 @@ class LeadController extends Controller
             $lead->statut = '2eme_appel';
 
         } elseif ($statut === 'lost') {
-            // Pas de réponse après 2 appels OU refus explicite
             $lead->statut = 'lost';
 
         } elseif ($statut === 'promis') {
             $lead->statut = 'promis';
 
         } elseif ($statut === 'ok') {
-            // Conversion en client
             $lead->statut = 'ok';
 
             if ($request->filled('idDepartement')) {
@@ -159,6 +156,31 @@ class LeadController extends Controller
             if ($request->filled('idUser')) {
                 $lead->idUser = $request->idUser;
             }
+
+            // Vérifier si un client avec cet email existe déjà
+            $clientExiste = false;
+            if ($lead->email) {
+                $clientExiste = Client::where('email', $lead->email)->exists();
+            }
+
+            if (!$clientExiste) {
+                // Créer le client à partir des données du lead
+                Client::create([
+                    'firstName'     => $lead->firstName,
+                    'lastName'      => $lead->lastName,
+                    'email'         => $lead->email,
+                    'phoneNumber'   => $lead->phoneNumber,
+                    'adresse'       => $lead->adresse,
+                    'CNE'           => $lead->CNE,
+                    'nationalite'   => $lead->nationalite,
+                    'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
+                    'idUser'        => $request->idUser ?? $lead->idUser,
+                    'dateCreation'  => now()->toDateString(),
+                    // Ajoute ici d'autres champs si ta table clients en a
+                ]);
+                
+            }
+
         } else {
             return redirect()->back()->with('error', 'Transition de statut non autorisée.');
         }
