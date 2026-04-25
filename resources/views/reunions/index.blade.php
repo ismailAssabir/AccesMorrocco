@@ -114,7 +114,7 @@
                         </div>
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type <span class="text-[#be2346]">*</span></label>
-                            <select name="type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            <select name="type" id="add_type" required onchange="toggleLienField('add')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="Interne">Interne</option>
                                 <option value="Externe">Externe</option>
                                 <option value="Autre">Autre</option>
@@ -141,7 +141,7 @@
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lieu / Salle</label>
                             <input type="text" name="lieu" placeholder="Ex: Salle A" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5" id="add_lien_container">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
                             <input type="url" name="lien" placeholder="Ex: https://meet..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
@@ -202,7 +202,7 @@
 
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type *</label>
-                            <select name="type" id="edit_type" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            <select name="type" id="edit_type" required onchange="toggleLienField('edit')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="Interne">Interne</option>
                                 <option value="Externe">Externe</option>
                                 <option value="Autre">Autre</option>
@@ -234,7 +234,7 @@
                             <input type="text" name="lieu" id="edit_lieu" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5" id="edit_lien_container">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Lien Visioconférence</label>
                             <input type="url" name="lien" id="edit_lien" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
@@ -269,6 +269,18 @@
 
 
     <script>
+        function toggleLienField(mode) {
+            const typeSelect = document.getElementById(mode + '_type');
+            const container = document.getElementById(mode + '_lien_container');
+            if (!typeSelect || !container) return;
+
+            if (typeSelect.value === 'Interne') {
+                container.style.display = 'none';
+            } else {
+                container.style.display = 'block';
+            }
+        }
+
         function toggleModal(id, action = 'toggle') {
             const modal = document.getElementById(id);
             if (!modal) return;
@@ -280,6 +292,10 @@
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
                 document.body.style.overflow = 'hidden';
+                
+                // Initialize field visibility
+                if (id === 'addReunionModal') toggleLienField('add');
+                if (id === 'editReunionModal') toggleLienField('edit');
             } else {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
@@ -309,6 +325,7 @@
             document.getElementById('edit_objectif').value = reunion.objectif || '';
             document.getElementById('edit_description').value = reunion.description || '';
             
+            toggleLienField('edit');
             toggleModal('editReunionModal', 'open');
         }
 
