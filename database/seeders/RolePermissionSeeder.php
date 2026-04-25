@@ -21,11 +21,14 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
+<<<<<<< HEAD
             // --- Legacy / Plural / Custom (from HEAD) ---
             'users.view', 'users.manage',
             'reunions.view', 'reunions.manage',
             'reclamations.view', 'reclamations.manage',
             'dashboard.view',
+=======
+>>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
 
             // --- Permission ---
             'permission.edit',
@@ -127,12 +130,17 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+<<<<<<< HEAD
         // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
 
@@ -140,6 +148,11 @@ class RolePermissionSeeder extends Seeder
         $managerRole->syncPermissions([
             'dashboard.view',
             'users.view', 'users.manage',
+=======
+
+        $manager = Role::firstOrCreate(['name' => 'manager']);
+        $manager->syncPermissions([
+>>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
             'user.view',
             'client.view', 'client.create', 'client.edit',
             'lead.view', 'lead.create', 'lead.edit',
@@ -154,6 +167,10 @@ class RolePermissionSeeder extends Seeder
             'document.view', 'document.approve',
             'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
             'prime.view', 'prime.create',
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
         ]);
         $employeeRole->givePermissionTo([
             'reunions.view',

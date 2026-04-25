@@ -7,6 +7,7 @@ use App\Models\Tache;
 use App\Models\User;
 use App\Models\Objectif;
 use App\Models\Departement;
+use Illuminate\Support\Facades\Gate;
 
 class TacheController extends Controller
 {

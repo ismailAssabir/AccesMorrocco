@@ -42,6 +42,7 @@
         <nav class="space-y-1">
             
 @if(auth()->user()->type !== 'employee')
+    @can('user.view')
       <a href="{{ url('/users') }}" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
    {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -53,10 +54,12 @@
     </div>
     <span class="font-medium text-sm">Ressources Humaines</span>
 </a>
+@endcan
 @endif
 
 
 @if(auth()->user()->type !== 'employee')
+            @can('departement.view')
             <a href="/departements" 
 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
@@ -68,9 +71,15 @@
                 </div>
                 <span class="font-medium text-sm">Département</span>
             </a>
+            @endcan
 @endif
+<<<<<<< HEAD
 
             <a href="{{ route('pointages.index') }}" 
+=======
+            @can('pointage.view')
+            <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
+>>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? '' : 'group-hover:rotate-12' }}">
@@ -80,7 +89,8 @@
                 </div>
                 <span class="font-medium text-sm">Pointage</span>
             </a>
-
+            @endcan
+            @can('tache.view')
             <a href="{{ Route::has('tasks.index') ? route('tasks.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('tasks.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -91,7 +101,8 @@
                 </div>
                 <span class="font-medium text-sm">Gestion des tâches</span>
             </a>
-
+            @endcan
+            @can('reunion.view')
             <a href="{{ Route::has('meetings.index') ? route('meetings.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('meetings.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -102,7 +113,8 @@
                 </div>
                 <span class="font-medium text-sm">Réunions</span>
             </a>
-
+            @endcan
+            @can('objectif.view')
             <a href="{{ Route::has('goals.index') ? route('goals.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('goals.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -113,7 +125,8 @@
                 </div>
                 <span class="font-medium text-sm">Objectifs</span>
             </a>
-
+            @endcan
+            @can('conge.view')
             <a href="{{ Route::has('conge.index') ? route('conge.index') : '#' }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('conge.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -124,7 +137,8 @@
                 </div>
                 <span class="font-medium text-sm">Congés</span>
             </a>
-
+            @endcan
+            @can('reclamation.view')
        <a href="/reclamations" 
    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
    {{ request()->is('reclamations') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -137,7 +151,7 @@
     
     <span class="font-medium text-sm">Réclamations</span>
 </a>
-
+@endcan
         </nav>
     </div>
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Departement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -42,6 +43,8 @@ public function store(Request $request) {
 
     DB::transaction(function () use ($newUser) {
         $user = User::create($newUser);
+
+        $user->assignRole($user->type);
 
         if ($user->type === 'manager' && $user->idDepartement) {
             $departement = Departement::find($user->idDepartement);

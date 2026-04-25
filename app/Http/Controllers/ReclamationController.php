@@ -11,7 +11,7 @@ class ReclamationController extends Controller
     public function index()
          
     {   
-                Gate::authorize('reclamation.view');
+        Gate::authorize('reclamation.view');
 
         
         $query = Reclamation::with('user');

@@ -12,7 +12,7 @@ class PaimentController extends Controller
 {
    
     public function index()
-    {           Gate::authorize('paiment.view');
+    {           Gate::authorize('paiement.view');
 
         $paiements = Paiement::with('dossier')->latest()->get();
         return view('paiements.index', compact('paiements'));
@@ -20,7 +20,7 @@ class PaimentController extends Controller
 
     
     public function store(Request $request)
-    {       Gate::authorize('paiment.create');
+    {       Gate::authorize('paiement.create');
 
         $validatedData = $request->validate([
             'idDossier'    => 'required|exists:dossiers,idDossier',
@@ -45,7 +45,7 @@ class PaimentController extends Controller
 
   
     public function update(Request $request, $id)
-    {    Gate::authorize('paiment.edit');
+    {    Gate::authorize('paiement.edit');
         $paiement = Paiement::findOrFail($id);
 
         $validatedData = $request->validate([
@@ -66,7 +66,7 @@ class PaimentController extends Controller
 
     
     public function show($id)
-    {           Gate::authorize('paiment.view');
+    {           Gate::authorize('paiement.view');
 
         $paiement = Paiement::with('dossier')->findOrFail($id);
         return view('paiements.show', compact('paiement'));
@@ -74,7 +74,7 @@ class PaimentController extends Controller
 
    
     public function destroy($id)
-    {   Gate::authorize('paiment.delete');
+    {   Gate::authorize('paiement.delete');
         $paiement = Paiement::findOrFail($id);
         $paiement->delete();
 
