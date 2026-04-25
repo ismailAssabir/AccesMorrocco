@@ -152,176 +152,250 @@
             @else
                 {{-- ═══════════ ADMIN/MANAGER DASHBOARD ═══════════ --}}
                 
+                {{-- ApexCharts CDN --}}
+                <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
                 {{-- Page Header --}}
-                <div class="mb-8 border-b border-gray-200 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Tableau de bord de gestion</h1>
-                        <p class="text-sm text-gray-500 mt-1">Bienvenue, {{ Auth::user()->firstName }} {{ Auth::user()->lastName }} | Session active : {{ now()->format('d/m/Y') }}</p>
+                <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="animate-fade-in">
+                        <h1 class="text-3xl font-black text-gray-900 tracking-tight">Intelligence <span class="text-[#be2346]">Opérationnelle</span></h1>
+                        <div class="flex items-center gap-4 mt-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#be2346]/10 text-[#be2346] uppercase tracking-widest border border-[#be2346]/20">Admin Panel</span>
+                            <span class="text-xs text-gray-400 font-medium tracking-wide italic">Dernière analyse : {{ now()->format('H:i') }}</span>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <a href="{{ route('reunions.index') }}" class="inline-flex items-center px-4 py-2 bg-[#be2346] text-white text-sm font-semibold rounded-lg hover:bg-[#a01d3a] transition-colors shadow-sm">
-                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Nouvelle Réunion
+                    <div class="flex items-center gap-4">
+                         <a href="{{ route('reunions.index') }}" class="group relative inline-flex items-center px-6 py-3 bg-gray-900 text-white text-xs font-bold rounded-xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-xl shadow-gray-900/20">
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#be2346] to-rose-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span class="relative flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                Action Stratégique
+                            </span>
                         </a>
                     </div>
                 </div>
 
-                {{-- Metric Cards --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
-                        <div class="p-3 bg-blue-50 text-blue-600 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                {{-- TOP SECTION: PRIMARY GRAPHS --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    {{-- Large Growth Trend Chart --}}
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Growth</span>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Effectif Total</p>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ $stats['totalEmployees'] }}</h3>
-                        </div>
+                        <h2 class="text-xl font-black text-gray-900 mb-2">Croissance de l'Effectif</h2>
+                        <p class="text-xs text-gray-400 mb-8 font-medium">Évolution des inscriptions sur les 6 derniers mois</p>
+                        <div id="trendChart" class="min-h-[250px]"></div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
-                        <div class="p-3 bg-amber-50 text-amber-600 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                    {{-- Compact Quick Stats --}}
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-gradient-to-br from-[#be2346] to-rose-700 p-8 rounded-[2rem] text-white shadow-xl shadow-rose-900/20 relative overflow-hidden group">
+                            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+                            <p class="text-[10px] font-bold text-rose-100 uppercase tracking-widest mb-1 opacity-80">Effectif Global</p>
+                            <h3 class="text-5xl font-black">{{ $stats['totalEmployees'] }}</h3>
+                            <div class="mt-6 flex items-center text-xs font-bold text-rose-100/70">
+                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                +4% ce mois
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Missions Actives</p>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ $stats['totalTasks'] }}</h3>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
-                        <div class="p-3 bg-purple-50 text-purple-600 rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Réunions Prévues</p>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ $stats['upcomingMeetings'] }}</h3>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
-                        <div class="p-3 bg-[#be2346]/10 text-[#be2346] rounded-lg mr-4">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Requêtes en cours</p>
-                            <h3 class="text-2xl font-bold text-gray-900">{{ $stats['pendingReclamations'] }}</h3>
+                        
+                        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/40 cursor-pointer group/item"
+                            onclick="window.location='{{ route('tasks.index') }}'">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover/item:bg-amber-500 group-hover/item:text-white transition-all">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Missions</p>
+                                    <h3 class="text-2xl font-black text-gray-900 group-hover/item:text-amber-600 transition-colors">{{ $stats['totalTasks'] }}</h3>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded-full" style="width: 65%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                {{-- SECONDARY ANALYTICS --}}
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                    {{-- Reclamation Status (Small Donut) --}}
+                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Requêtes</h2>
+                        <div id="reclamationsChart" class="py-2"></div>
+                    </div>
+
+                    {{-- Task Status (Small Bar) --}}
+                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 cursor-pointer group/task"
+                        onclick="window.location='{{ route('tasks.index') }}'">
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 group-hover/task:text-[#be2346] transition-colors">Statut Tâches</h2>
+                        <div id="tasksChart" class="py-2"></div>
+                    </div>
+
+                    {{-- Upcoming Events (Simplified) --}}
+                    <div class="lg:col-span-2 bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4">
+                            <a href="{{ route('reunions.index') }}" class="text-[10px] font-bold text-[#be2346] uppercase hover:underline">Voir tout</a>
+                        </div>
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Agenda Flash</h2>
+                        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                            @forelse($upcomingReunions->take(3) as $reunion)
+                                <div class="flex-shrink-0 w-48 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-[#be2346]/20 transition-all cursor-pointer group/item relative"
+                                     onclick="window.location='{{ route('reunions.index') }}'">
+                                     @if(\Carbon\Carbon::parse($reunion->dateHeure)->isPast())
+                                         <div class="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 text-[7px] font-black text-gray-500 rounded uppercase tracking-tighter">Passé</div>
+                                     @endif
+                                     <div class="flex items-center gap-3 mb-2">
+                                         <div class="w-8 h-8 bg-white rounded-lg flex flex-col items-center justify-center text-[10px] font-bold text-[#be2346] shadow-sm group-hover/item:bg-[#be2346] group-hover/item:text-white transition-colors">
+                                             <span>{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('d') }}</span>
+                                             <span class="uppercase text-[8px] opacity-60">{{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('M') }}</span>
+                                         </div>
+                                         <div class="text-[10px] font-black text-gray-900 truncate group-hover/item:text-[#be2346] transition-colors">{{ Str::limit($reunion->titre, 15) }}</div>
+                                     </div>
+                                     <div class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
+                                         {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }} • {{ $reunion->lieu ?? 'Bureau' }}
+                                     </div>
+                                 </div>
+                            @empty
+                                <p class="text-[10px] text-gray-400 italic">Rien à signaler.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                {{-- BOTTOM SECTION: DATA LISTS --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 space-y-8">
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                                <h2 class="text-lg font-bold text-gray-900">Réclamations Récentes</h2>
-                                <a href="{{ url('/reclamations') }}" class="text-sm font-semibold text-[#be2346] hover:underline">Voir tout</a>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left">
-                                    <thead class="bg-gray-50 border-b border-gray-100">
-                                        <tr>
-                                            <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Titre / Demandeur</th>
-                                            <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase">Date</th>
-                                            <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase text-center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        @forelse($recentReclamations as $reclamation)
-                                            <tr class="hover:bg-gray-50 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="font-bold text-gray-900">{{ $reclamation->titre ?? 'Requête' }}</div>
-                                                    <div class="text-xs text-gray-400">{{ $reclamation->user->firstName }} {{ $reclamation->user->lastName }}</div>
-                                                </td>
-                                                <td class="px-6 py-4 text-sm text-gray-600">
-                                                    {{ \Carbon\Carbon::parse($reclamation->created_at)->format('d/m/Y') }}
-                                                </td>
-                                                <td class="px-6 py-4 text-center">
-                                                    <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-full 
-                                                        {{ $reclamation->status === 'resolue' ? 'bg-green-100 text-green-700' : ($reclamation->status === 'en_cours' ? 'bg-amber-100 text-amber-700' : 'bg-red-50 text-red-700') }}">
-                                                        {{ str_replace('_', ' ', $reclamation->status) }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="3" class="px-6 py-12 text-center text-gray-400 italic">Aucune donnée disponible.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                    {{-- Recent Activity --}}
+                    <div class="lg:col-span-2 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                        <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
+                            <h2 class="text-lg font-black text-gray-900">Requêtes Récentes</h2>
+                            <span class="px-3 py-1 bg-gray-100 text-[10px] font-bold text-gray-500 rounded-full uppercase tracking-tighter">Live Feed</span>
                         </div>
-
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100">
-                                <h2 class="text-lg font-bold text-gray-900">Agenda des Réunions</h2>
-                            </div>
-                            <div class="p-6 space-y-6">
-                                @forelse($upcomingReunions as $reunion)
-                                    <div class="flex gap-6 pb-6 border-b border-gray-50 last:border-0 last:pb-0">
-                                        <div class="flex-shrink-0 w-16 text-center">
-                                            <div class="text-xs font-bold text-gray-400 uppercase">{{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('M') }}</div>
-                                            <div class="text-2xl font-black text-gray-900">{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('d') }}</div>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="font-bold text-gray-900">{{ $reunion->titre }}</h4>
-                                            <div class="flex items-center text-xs text-gray-500 mt-1 gap-4">
-                                                <span class="flex items-center"><svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3" stroke-width="2" /></svg> {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}</span>
-                                                <span class="flex items-center"><svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2" /></svg> {{ $reunion->lieu ?? 'Visioconférence' }}</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <a href="{{ route('reunions.index') }}" class="p-2 text-gray-400 hover:text-[#be2346]">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <p class="text-center text-gray-400 italic py-4">Pas de réunion à l'agenda.</p>
-                                @endforelse
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <tbody class="divide-y divide-gray-50">
+                                    @forelse($recentReclamations as $reclamation)
+                                        <tr class="group hover:bg-[#be2346]/[0.02] transition-colors cursor-pointer" 
+                                            onclick="window.location='{{ url('/reclamation/' . $reclamation->idReclamation) }}'">
+                                            <td class="px-8 py-5">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center text-xs font-black text-gray-400 group-hover:bg-[#be2346]/10 group-hover:text-[#be2346] transition-colors">
+                                                        {{ substr($reclamation->user->firstName, 0, 1) }}{{ substr($reclamation->user->lastName, 0, 1) }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-bold text-gray-900 group-hover:text-[#be2346] transition-colors">{{ $reclamation->titre ?? 'Requête' }}</div>
+                                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{{ $reclamation->user->firstName }} • {{ \Carbon\Carbon::parse($reclamation->created_at)->diffForHumans() }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-5 text-right">
+                                                <span class="px-3 py-1.5 text-[9px] font-black uppercase rounded-lg 
+                                                    {{ $reclamation->status === 'resolue' ? 'bg-green-50 text-green-700' : ($reclamation->status === 'en_cours' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700') }}">
+                                                    {{ str_replace('_', ' ', $reclamation->status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td class="px-8 py-10 text-center text-gray-400 italic text-sm">Silence radio...</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="space-y-8">
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-6">Direction & Management</h2>
-                            <div class="space-y-4">
-                                @forelse($managers as $manager)
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden">
-                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($manager->firstName . ' ' . $manager->lastName) }}&background=E5E7EB&color=4B5563&bold=true" alt="">
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-bold text-gray-900">{{ $manager->firstName }} {{ $manager->lastName }}</p>
-                                            <p class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{{ $manager->post ?? 'Responsable' }}</p>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <p class="text-xs text-gray-400 italic">Aucun membre répertorié.</p>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-900 rounded-xl p-6 text-white shadow-lg">
-                            <h2 class="text-sm font-bold uppercase tracking-widest mb-6 text-gray-400">Accès Rapide</h2>
-                            <div class="grid grid-cols-1 gap-3">
-                                <a href="{{ route('users.index') }}" class="flex items-center p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5">
-                                    <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center text-blue-400 mr-3">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                                    </div>
-                                    <span class="text-sm font-medium">Inscrire Employé</span>
-                                </a>
-                                <a href="{{ route('goals.index') }}" class="flex items-center p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5">
-                                    <div class="w-8 h-8 rounded bg-amber-500/20 flex items-center justify-center text-amber-400 mr-3">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                    </div>
-                                    <span class="text-sm font-medium">Définir Objectifs</span>
-                                </a>
-                            </div>
-                        </div>
+                    {{-- Departments --}}
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50">
+                        <h2 class="text-lg font-black text-gray-900 mb-6">Répartition Dept.</h2>
+                        <div id="deptChart"></div>
                     </div>
                 </div>
+
+                {{-- Chart Initialization Scripts --}}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const colors = { primary: '#be2346', secondary: '#fbbf24', success: '#10b981', gray: '#94a3b8' };
+
+                        // 1. GROWTH TREND CHART (Stylish Area Chart)
+                        new ApexCharts(document.querySelector("#trendChart"), {
+                            series: [{
+                                name: 'Nouveaux Inscrits',
+                                data: [@foreach($trendData as $data) {{ $data['count'] }}, @endforeach]
+                            }],
+                            chart: {
+                                type: 'area',
+                                height: 250,
+                                toolbar: { show: false },
+                                sparkline: { enabled: false },
+                                dropShadow: { enabled: true, top: 10, left: 0, blur: 4, color: colors.primary, opacity: 0.1 }
+                            },
+                            stroke: { curve: 'smooth', width: 4, colors: [colors.primary] },
+                            fill: {
+                                type: 'gradient',
+                                gradient: {
+                                    shadeIntensity: 1,
+                                    opacityFrom: 0.4,
+                                    opacityTo: 0,
+                                    stops: [0, 90, 100],
+                                    colorStops: [
+                                        { offset: 0, color: colors.primary, opacity: 0.4 },
+                                        { offset: 100, color: colors.primary, opacity: 0 }
+                                    ]
+                                }
+                            },
+                            dataLabels: { enabled: false },
+                            xaxis: {
+                                categories: [@foreach($trendData as $data) '{{ $data['month'] }}', @endforeach],
+                                axisBorder: { show: false },
+                                axisTicks: { show: false }
+                            },
+                            yaxis: { show: false },
+                            grid: { show: false }
+                        }).render();
+
+                        // 2. RECLAMATIONS DONUT
+                        new ApexCharts(document.querySelector("#reclamationsChart"), {
+                            series: [{{ $reclamationsByStatus['ouverte'] }}, {{ $reclamationsByStatus['en_cours'] }}, {{ $reclamationsByStatus['resolue'] }}],
+                            chart: { type: 'donut', height: 180 },
+                            labels: ['Ouvert', 'Process', 'Done'],
+                            colors: ['#ef4444', '#f59e0b', '#10b981'],
+                            legend: { show: false },
+                            dataLabels: { enabled: false },
+                            plotOptions: { pie: { donut: { size: '80%' } } }
+                        }).render();
+
+                        // 3. TASKS BAR
+                        new ApexCharts(document.querySelector("#tasksChart"), {
+                            series: [{ data: [{{ $tasksByStatus['en_attente'] }}, {{ $tasksByStatus['en_cours'] }}, {{ $tasksByStatus['termine'] }}] }],
+                            chart: { type: 'bar', height: 150, toolbar: { show: false } },
+                            plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
+                            colors: [colors.gray, colors.secondary, colors.primary],
+                            legend: { show: false },
+                            xaxis: { categories: ['Wait', 'Run', 'End'], labels: { style: { fontSize: '9px', fontWeight: 900 } } },
+                            yaxis: { show: false },
+                            grid: { show: false }
+                        }).render();
+
+                        // 4. DEPT CHART
+                        new ApexCharts(document.querySelector("#deptChart"), {
+                            series: [{ data: [@foreach($deptStats as $dept) {{ $dept['count'] }}, @endforeach] }],
+                            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+                            plotOptions: { bar: { borderRadius: 6, horizontal: true, barHeight: '25%' } },
+                            colors: [colors.primary],
+                            xaxis: { categories: [@foreach($deptStats as $dept) '{{ $dept['name'] }}', @endforeach] },
+                            dataLabels: { enabled: true, style: { fontSize: '9px' } }
+                        }).render();
+                    });
+                </script>
+
+                <style>
+                    .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+                    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+                    .scrollbar-hide::-webkit-scrollbar { display: none; }
+                    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+                </style>
             @endif
 
         </div>
