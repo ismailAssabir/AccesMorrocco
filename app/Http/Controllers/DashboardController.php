@@ -35,7 +35,7 @@ class DashboardController extends Controller
                     $q->whereNull('idDepartement')->orWhere('idDepartement', $user->idDepartement);
                 })
                 ->orderBy('dateHeure', 'asc')
-                ->take(5)
+                ->take(6)
                 ->get();
 
             if ($upcomingReunions->isEmpty()) {
@@ -43,16 +43,22 @@ class DashboardController extends Controller
                         $q->whereNull('idDepartement')->orWhere('idDepartement', $user->idDepartement);
                     })
                     ->latest('dateHeure')
-                    ->take(5)
+                    ->take(6)
                     ->get();
             }
 
             return view('dashboard', compact('stats', 'myRecentTasks', 'myRecentReclamations', 'upcomingReunions'));
         }
 
+        $totalTasks = Tache::count();
+        $completedTasks = Tache::where('status', 'termine')->count();
+        $completionPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+
         $stats = [
             'totalEmployees' => User::count(),
-            'totalTasks' => Tache::count(),
+            'totalTasks' => $totalTasks,
+            'completedTasks' => $completedTasks,
+            'completionPercentage' => round($completionPercentage),
             'upcomingMeetings' => Reunion::where('dateHeure', '>=', now())->count(),
             'pendingReclamations' => Reclamation::whereIn('status', ['ouverte', 'en_cours'])->count(),
         ];
@@ -62,13 +68,23 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Logic for Agenda Flash: Show up to 6 relevant meetings
+        // 1. Get upcoming meetings (closest first)
         $upcomingReunions = Reunion::where('dateHeure', '>=', now())
             ->orderBy('dateHeure', 'asc')
-            ->take(5)
+            ->take(6)
             ->get();
 
-        if ($upcomingReunions->isEmpty()) {
-            $upcomingReunions = Reunion::latest('dateHeure')->take(5)->get();
+        // 2. If less than 6, fill with recent past meetings
+        if ($upcomingReunions->count() < 6) {
+            $needed = 6 - $upcomingReunions->count();
+            $pastReunions = Reunion::where('dateHeure', '<', now())
+                ->latest('dateHeure')
+                ->take($needed)
+                ->get();
+            
+            // Merge them: Upcoming first, then past
+            $upcomingReunions = $upcomingReunions->concat($pastReunions);
         }
 
         $managers = User::where('type', 'manager')

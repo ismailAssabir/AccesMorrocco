@@ -21,7 +21,7 @@
 
                 {{-- Personal Metrics --}}
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-2xl hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Mes Tâches</p>
                         <div class="flex items-center justify-between">
                             <h3 class="text-2xl font-bold text-gray-900">{{ $stats['myTasks'] }}</h3>
@@ -30,7 +30,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-2xl hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Réunions Dept.</p>
                         <div class="flex items-center justify-between">
                             <h3 class="text-2xl font-bold text-gray-900">{{ $stats['myDepartmentMeetings'] }}</h3>
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-2xl hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Réclamations</p>
                         <div class="flex items-center justify-between">
                             <h3 class="text-2xl font-bold text-gray-900">{{ $stats['myPendingReclamations'] }}</h3>
@@ -169,7 +169,7 @@
                             <div class="absolute inset-0 bg-gradient-to-r from-[#be2346] to-rose-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <span class="relative flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                Action Stratégique
+                                Planifier une Réunion
                             </span>
                         </a>
                     </div>
@@ -178,7 +178,7 @@
                 {{-- TOP SECTION: PRIMARY GRAPHS --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     {{-- Large Growth Trend Chart --}}
-                    <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50 relative overflow-hidden">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50 relative overflow-hidden hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <div class="absolute top-0 right-0 p-8">
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Évolution Directe</span>
@@ -201,19 +201,47 @@
                             </div>
                         </div>
                         
-                        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/40 cursor-pointer group/item"
+                        @php
+                            $perc = $stats['completionPercentage'];
+                            $colorTheme = $perc >= 80 ? 'green' : ($perc >= 40 ? 'amber' : 'red');
+                            $themes = [
+                                'green' => [
+                                    'bg' => 'bg-emerald-50', 
+                                    'text' => 'text-emerald-600', 
+                                    'bar' => 'bg-emerald-500', 
+                                    'hoverBg' => 'group-hover/item:bg-emerald-500',
+                                    'glow' => 'group-hover/item:shadow-emerald-500/20'
+                                ],
+                                'amber' => [
+                                    'bg' => 'bg-amber-50', 
+                                    'text' => 'text-amber-600', 
+                                    'bar' => 'bg-amber-500', 
+                                    'hoverBg' => 'group-hover/item:bg-amber-500',
+                                    'glow' => 'group-hover/item:shadow-amber-500/20'
+                                ],
+                                'red' => [
+                                    'bg' => 'bg-rose-50', 
+                                    'text' => 'text-rose-600', 
+                                    'bar' => 'bg-rose-500', 
+                                    'hoverBg' => 'group-hover/item:bg-rose-500',
+                                    'glow' => 'group-hover/item:shadow-rose-500/20'
+                                ],
+                            ];
+                            $theme = $themes[$colorTheme];
+                        @endphp
+                        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/40 cursor-pointer group/item hover:shadow-2xl hover:shadow-[#be2346]/20 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300"
                             onclick="window.location='{{ route('tasks.index') }}'">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover/item:bg-amber-500 group-hover/item:text-white transition-all">
+                                <div class="p-3 {{ $theme['bg'] }} {{ $theme['text'] }} rounded-2xl {{ $theme['hoverBg'] }} group-hover/item:text-white transition-all duration-300 group-hover/item:scale-110 shadow-sm {{ $theme['glow'] }}">
                                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Missions</p>
-                                    <h3 class="text-2xl font-black text-gray-900 group-hover/item:text-amber-600 transition-colors">{{ $stats['totalTasks'] }}</h3>
+                                    <h3 class="text-2xl font-black text-gray-900 group-hover/item:{{ $theme['text'] }} transition-colors duration-300">{{ $stats['completedTasks'] }} / {{ $stats['totalTasks'] }}</h3>
                                 </div>
                             </div>
                             <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-amber-500 h-full rounded-full" style="width: 65%"></div>
+                                <div class="{{ $theme['bar'] }} h-full rounded-full transition-all duration-1000" style="width: {{ $stats['completionPercentage'] }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -222,40 +250,46 @@
                 {{-- SECONDARY ANALYTICS --}}
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                     {{-- Reclamation Status (Small Donut) --}}
-                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50">
+                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#be2346]/15 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Requêtes</h2>
                         <div id="reclamationsChart" class="py-2"></div>
                     </div>
 
                     {{-- Task Status (Small Bar) --}}
-                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 cursor-pointer group/task"
+                    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 cursor-pointer group/task hover:shadow-2xl hover:shadow-[#be2346]/15 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300"
                         onclick="window.location='{{ route('tasks.index') }}'">
                         <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 group-hover/task:text-[#be2346] transition-colors">Statut Tâches</h2>
                         <div id="tasksChart" class="py-2"></div>
                     </div>
 
                     {{-- Upcoming Events (Simplified) --}}
-                    <div class="lg:col-span-2 bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 relative overflow-hidden">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 relative overflow-hidden hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <div class="absolute top-0 right-0 p-4">
                             <a href="{{ route('reunions.index') }}" class="text-[10px] font-bold text-[#be2346] uppercase hover:underline">Voir tout</a>
                         </div>
-                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Agenda Flash</h2>
-                        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            @forelse($upcomingReunions->take(3) as $reunion)
-                                <div class="flex-shrink-0 w-48 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-[#be2346]/20 transition-all cursor-pointer group/item relative"
+                        <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Calendrier des Réunions</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
+                            @forelse($upcomingReunions->take(6) as $reunion)
+                                <div class="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-[#be2346]/20 hover:shadow-xl hover:shadow-[#be2346]/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer group/item relative h-full flex flex-col justify-between"
                                      onclick="window.location='{{ route('reunions.index') }}'">
-                                     @if(\Carbon\Carbon::parse($reunion->dateHeure)->isPast())
-                                         <div class="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 text-[7px] font-black text-gray-500 rounded uppercase tracking-tighter">Passé</div>
-                                     @endif
-                                     <div class="flex items-center gap-3 mb-2">
-                                         <div class="w-8 h-8 bg-white rounded-lg flex flex-col items-center justify-center text-[10px] font-bold text-[#be2346] shadow-sm group-hover/item:bg-[#be2346] group-hover/item:text-white transition-colors">
-                                             <span>{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('d') }}</span>
-                                             <span class="uppercase text-[8px] opacity-60">{{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('M') }}</span>
+                                     <div>
+                                         @if(\Carbon\Carbon::parse($reunion->dateHeure)->isPast())
+                                             <div class="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 text-[7px] font-black text-gray-500 rounded uppercase tracking-tighter">Passé</div>
+                                         @endif
+                                         <div class="flex items-center gap-3 mb-3">
+                                             <div class="w-10 h-10 bg-white rounded-xl flex flex-col items-center justify-center text-[10px] font-bold text-[#be2346] shadow-sm group-hover/item:bg-[#be2346] group-hover/item:text-white transition-colors border border-gray-50">
+                                                 <span class="leading-none">{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('d') }}</span>
+                                                 <span class="uppercase text-[8px] opacity-60 leading-none mt-1">{{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('M') }}</span>
+                                             </div>
+                                             <div>
+                                                 <div class="text-[11px] font-black text-gray-900 group-hover/item:text-[#be2346] transition-colors line-clamp-1">{{ $reunion->titre }}</div>
+                                                 <span class="inline-block px-1.5 py-0.5 bg-white text-[7px] font-bold text-gray-400 rounded border border-gray-100 uppercase tracking-tighter mt-1">{{ $reunion->type }}</span>
+                                             </div>
                                          </div>
-                                         <div class="text-[10px] font-black text-gray-900 truncate group-hover/item:text-[#be2346] transition-colors">{{ Str::limit($reunion->titre, 15) }}</div>
                                      </div>
-                                     <div class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
-                                         {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }} • {{ $reunion->lieu ?? 'Bureau' }}
+                                     <div class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter flex items-center justify-between border-t border-gray-100 pt-2">
+                                         <span>{{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}</span>
+                                         <span class="truncate ml-2 max-w-[80px]">{{ $reunion->lieu ?? 'Bureau' }}</span>
                                      </div>
                                  </div>
                             @empty
@@ -268,7 +302,7 @@
                 {{-- BOTTOM SECTION: DATA LISTS --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {{-- Recent Activity --}}
-                    <div class="lg:col-span-2 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                    <div class="lg:col-span-2 bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <div class="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
                             <h2 class="text-lg font-black text-gray-900">Requêtes Récentes</h2>
                             <span class="px-3 py-1 bg-gray-100 text-[10px] font-bold text-gray-500 rounded-full uppercase tracking-tighter">Flux en direct</span>
@@ -306,7 +340,7 @@
                     </div>
 
                     {{-- Departments --}}
-                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 hover:shadow-[#be2346]/10 hover:-translate-y-1 hover:border-[#be2346]/20 transition-all duration-300 cursor-pointer">
                         <h2 class="text-lg font-black text-gray-900 mb-6">Répartition Dept.</h2>
                         <div id="deptChart"></div>
                     </div>

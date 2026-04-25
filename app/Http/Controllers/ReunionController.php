@@ -12,7 +12,7 @@ class ReunionController extends Controller
 {
     public function index()
     {   Gate::authorize('reunion.view');
-        $query = Reunion::with('departement');
+        $query = Reunion::with('departement')->latest();
 
         if (auth()->user()->type === 'employee') {
             $user = auth()->user();
