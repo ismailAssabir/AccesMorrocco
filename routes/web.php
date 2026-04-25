@@ -84,7 +84,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 | ADMIN & MANAGER ROUTES
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified', 'role:admin,manager'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin|manager'])->group(function () {
+
     #Departement Routes
     Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
     Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
@@ -158,7 +159,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect()->back();
     })->name('tasks.updateStatus');
 
-    Route::middleware('role:admin,manager')->group(function() {
+    Route::middleware('role:admin|manager')->group(function() {
         Route::post('/tasks', [TacheController::class, 'store'])->name('tasks.store');
         Route::delete('/tasks/{id}', [TacheController::class, 'destroy'])->name('tasks.destroy');
         Route::post('/tasks/assign', [TacheController::class, 'assignUser'])->name('tasks.assign');
@@ -170,7 +171,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/meetings', [ReunionController::class, 'index'])->name('meetings.index');
     Route::get('/reunions', [ReunionController::class, 'index'])->name('reunions.index');
     
-    Route::middleware('role:admin,manager')->group(function() {
+    Route::middleware('role:admin|manager')->group(function() {
         Route::get('/reunions/create', [ReunionController::class, 'create'])->name('reunions.create');
         Route::post('/reunions', [ReunionController::class, 'store'])->name('reunions.store');
         Route::get('/reunions/edit/{id}', [ReunionController::class, 'edit'])->name('reunions.edit');

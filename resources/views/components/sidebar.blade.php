@@ -74,12 +74,17 @@
             @endcan
 @endif
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             <a href="{{ route('pointages.index') }}" 
 =======
             @can('pointage.view')
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
 >>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
+=======
+            @can('pointage.view')
+            <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
+>>>>>>> 04a6baae2143338c3134c3b358acc68e030686a7
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
                 <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? '' : 'group-hover:rotate-12' }}">

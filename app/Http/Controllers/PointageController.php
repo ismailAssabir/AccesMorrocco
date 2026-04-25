@@ -10,11 +10,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
-
 class PointageController extends Controller
 {
-
-private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 6371000;
         $dLat = deg2rad($lat2 - $lat1);
@@ -23,22 +21,22 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
-   
     public function index()
-    {   Gate::authorize('pointage.view');
-
-        $today = now()->toDateString();
-        $pointages = Pointage::with('user')->get();
-        return view('Adminpointage', compact('pointages'));
     {
-        $pointages = Pointage::with('user')->orderBy('date', 'desc')->orderBy('heureEntree', 'desc')->get();
+        Gate::authorize('pointage.view');
+
+        $pointages = Pointage::with('user')
+            ->orderBy('date', 'desc')
+            ->orderBy('heureEntree', 'desc')
+            ->get();
+            
         $settings = Company::first();
         return view('Adminpointage', compact('pointages', 'settings'));
     }
 
-   
     public function userPointage()
-    {           Gate::authorize('pointage.view');
+    {
+        Gate::authorize('pointage.view');
 
         $idUser = auth()->id();
         $today  = now()->toDateString();
@@ -62,9 +60,6 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return view('pointages.index', compact('todayPointage', 'recentPointages', 'settings'));
     }
 
-    /**
-     * JSON endpoint — returns today's check-in/out state for AJAX.
-     */
     public function status()
     {
         $idUser = auth()->id();
@@ -88,13 +83,11 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         ]);
     }
 
-    
-    
     public function checkIn(Request $request)
-    {       Gate::authorize('pointage.create');
-
-        $request->validate(['gps' => 'required|string']);
     {
+        Gate::authorize('pointage.create');
+
+        // Nettoyage et formatage du GPS avant validation
         if ($request->has('gps') && !empty($request->gps)) {
             $gps = str_replace(' ', '', $request->gps);
             $parts = explode(',', $gps);
@@ -110,7 +103,6 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             'gps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);
 
-        
         $settings = Company::first();
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
         $companyEntryTime = $settings->companyEntryTime ?? "08:00:00";
@@ -119,25 +111,23 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         $idUser = auth()->id();
         $today = now()->toDateString();
 
-        
         $userLoc = $this->parseGps($request->gps);
         $compLoc = $this->parseGps($companyGps);
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
         if ($distance > $maxDistance) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => "Trop loin de l'entreprise. Distance: " . round($distance) . "m."], 422);
-            }
-            return redirect()->route('pointages.index')->with('error', "Trop loin de l'entreprise.");
+            $msg = "Trop loin de l'entreprise. Distance: " . round($distance) . "m.";
+            return $request->expectsJson() 
+                ? response()->json(['success' => false, 'message' => $msg], 422) 
+                : redirect()->route('pointages.index')->with('error', $msg);
         }
 
-        
         $already = Pointage::where('idUser', $idUser)->where('date', $today)->whereNotNull('heureEntree')->exists();
         if ($already) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => "Vous avez déjà pointé votre arrivée aujourd'hui."], 422);
-            }
-            return redirect()->route('pointages.index')->with('error', 'Déjà pointé aujourd\'hui.');
+            $msg = "Vous avez déjà pointé votre arrivée aujourd'hui.";
+            return $request->expectsJson() 
+                ? response()->json(['success' => false, 'message' => $msg], 422) 
+                : redirect()->route('pointages.index')->with('error', $msg);
         }
 
         $currentTime = now();
@@ -152,26 +142,22 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             'gps'         => $request->gps,
         ]);
 
-        $heureFormatted = $currentTime->format('H:i');
-        $statusLabel = $status === 'retard' ? 'Retard' : 'Présent';
-
         if ($request->expectsJson()) {
             return response()->json([
                 'success'     => true,
                 'message'     => 'Entrée enregistrée avec succès.',
-                'heureEntree' => $heureFormatted,
+                'heureEntree' => $currentTime->format('H:i'),
                 'status'      => $status,
-                'statusLabel' => $statusLabel,
+                'statusLabel' => $status === 'retard' ? 'Retard' : 'Présent',
             ]);
         }
         return redirect()->route('pointages.index')->with('success', 'Entrée enregistrée avec succès.');
     }
 
-    
     public function checkOut(Request $request) 
-    {     Gate::authorize('pointage.edit');
-        $request->validate(['gps' => 'required|string']);
     {
+        Gate::authorize('pointage.edit');
+
         if ($request->has('gps') && !empty($request->gps)) {
             $gps = str_replace(' ', '', $request->gps);
             $parts = explode(',', $gps);
@@ -183,8 +169,6 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
 
         $request->validate([
             'gps' => 'required|string|regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'
-        ], [
-            'gps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);
 
         $settings = Company::first();
@@ -200,19 +184,19 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         $distance = $this->calculateDistance($userLoc[0], $userLoc[1], $compLoc[0], $compLoc[1]);
 
         if ($distance > $maxDistance) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Trop loin pour la sortie. Distance: ' . round($distance) . 'm.'], 422);
-            }
-            return redirect()->route('pointages.index')->with('error', "Trop loin pour la sortie.");
+            $msg = 'Trop loin pour la sortie. Distance: ' . round($distance) . 'm.';
+            return $request->expectsJson() 
+                ? response()->json(['success' => false, 'message' => $msg], 422) 
+                : redirect()->route('pointages.index')->with('error', $msg);
         }
 
         $pointage = Pointage::where('idUser', $idUser)->where('date', $today)->whereNull('heureSortie')->first();
 
         if (!$pointage) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => "Aucun pointage d'entrée actif trouvé pour aujourd'hui."], 422);
-            }
-            return redirect()->route('pointages.index')->with('error', 'Aucun pointage actif trouvé.');
+            $msg = "Aucun pointage d'entrée actif trouvé.";
+            return $request->expectsJson() 
+                ? response()->json(['success' => false, 'message' => $msg], 422) 
+                : redirect()->route('pointages.index')->with('error', $msg);
         }
 
         $currentTime = now();
@@ -222,8 +206,8 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             'heureSortie' => $currentTime->toTimeString(),
             'gps'         => $request->gps,
         ];
+        
         $msg = 'Sortie enregistrée.';
-
         if ($currentTime->lt($officialExit)) {
             $updateData['status'] = 'retard';
             $msg = 'Sortie enregistrée (Retard : sortie anticipée).';
@@ -231,35 +215,27 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
 
         $pointage->update($updateData);
 
-        $heureFormatted = $currentTime->format('H:i');
-
         if ($request->expectsJson()) {
             return response()->json([
                 'success'     => true,
                 'message'     => $msg,
-                'heureSortie' => $heureFormatted,
+                'heureSortie' => $currentTime->format('H:i'),
                 'status'      => $pointage->status,
             ]);
         }
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
-    
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
         $parts = explode(',', $gpsString);
-        return [
-            (float)($parts[0] ?? 0),
-            (float)($parts[1] ?? 0)
-        ];
+        return [(float)($parts[0] ?? 0), (float)($parts[1] ?? 0)];
     }
 
-    
-    
-    
     public function submitJustification(Request $request)
-    {    Gate::authorize('pointage.edit');
+    {
+        Gate::authorize('pointage.edit');
         $validatedData = $request->validate([
             'idPointage'    => 'required|exists:pointages,idPointage',
             'justification' => 'required|string|max:500',
@@ -277,18 +253,16 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->back()->with('msg', 'Justification envoyée.');
     }
 
-    
     public function updateSettings(Request $request)
-    {        Gate::authorize('pointage.create');
     {
+        Gate::authorize('pointage.create');
+        
         if ($request->has('companyGps') && !empty($request->companyGps)) {
             $gps = str_replace(' ', '', $request->companyGps);
             $parts = explode(',', $gps);
-            
             if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
                 $gps = round((float)$parts[0], 8) . ',' . round((float)$parts[1], 8);
             }
-            
             $request->merge(['companyGps' => $gps]);
         }
 
@@ -298,12 +272,10 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
         ], [
-            'companyGps.regex' => 'Le format GPS doit être: latitude,longitude (ex: 32.93,-6.02)'
+            'companyGps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);
 
-        $updateData = array_filter($validatedData, function($val) {
-            return !is_null($val);
-        });
+        $updateData = array_filter($validatedData, fn($val) => !is_null($val));
 
         Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');

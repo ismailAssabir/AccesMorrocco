@@ -8,6 +8,7 @@
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
             @if(auth()->user()->type !== 'employee')
             <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
 =======
@@ -24,6 +25,10 @@
 >>>>>>> 471c433cd9fa924606d5d223d68bd7d3fcf6adde
 >>>>>>> 887fbb5b143a1f1ad16f41a4a2db322b56d858c0
 >>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
+=======
+            @if(auth()->user()->type !== 'employee')
+            <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
+>>>>>>> 04a6baae2143338c3134c3b358acc68e030686a7
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -339,6 +344,7 @@
         });
     </script>
 <<<<<<< HEAD
+<<<<<<< HEAD
 </x-app-layout>
 =======
 <<<<<<< HEAD
@@ -351,3 +357,6 @@
 >>>>>>> 471c433cd9fa924606d5d223d68bd7d3fcf6adde
 >>>>>>> 887fbb5b143a1f1ad16f41a4a2db322b56d858c0
 >>>>>>> 7f66f8f966f514da8a3288712e728d31919943c9
+=======
+</x-app-layout>
+>>>>>>> 04a6baae2143338c3134c3b358acc68e030686a7
