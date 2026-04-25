@@ -20,7 +20,27 @@ class Reunion extends Model
         'lien', 
         'lieu'
     ];
-    function departement(){
+
+    protected $casts = [
+        'dateHeure' => 'datetime',
+    ];
+
+    public function departement()
+    {
         return $this->belongsTo(Departement::class, 'idDepartement', 'idDepartement');
+    }
+
+    public function participants()
+    {
+        return $this->belongsToMany(User::class, 'reunion_participants', 'idReunion', 'idUser')->withTimestamps();
+    }
+
+    public function getTypeColorAttribute()
+    {
+        return match($this->type) {
+            'Interne' => 'bg-slate-200 text-slate-700',
+            'Externe' => 'bg-blue-100 text-blue-700',
+            default => 'bg-[#b11d40]/10 text-[#b11d40]'
+        };
     }
 }

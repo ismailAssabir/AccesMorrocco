@@ -1,19 +1,8 @@
-@php
-    $priorityColors = [
-        'haute' => ['border' => 'bg-red-500', 'bg' => 'bg-red-50', 'text' => 'text-red-700', 'label' => 'HAUTE'],
-        'moyenne' => ['border' => 'bg-amber-500', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'label' => 'MOYENNE'],
-        'basse' => ['border' => 'bg-emerald-500', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'label' => 'BASSE'],
-    ];
-    $pConfig = $priorityColors[$tache->priorite] ?? $priorityColors['moyenne'];
-    
-    $start = $tache->dateDebut;
-    $end = $tache->duree;
-    $isOverdue = $end && $end->isPast() && $tache->status !== 'termine';
-@endphp
+
 
 <div class="relative bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
     {{-- Vertical Priority Accent --}}
-    <div class="absolute left-0 top-6 bottom-6 w-1.5 {{ $pConfig['border'] }} rounded-r-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"></div>
+    <div class="absolute left-0 top-6 bottom-6 w-1.5 {{ $tache->priority_config['border'] }} rounded-r-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"></div>
 
     {{-- Header: Title & Actions --}}
     <div class="flex justify-between items-start mb-2 pl-2">
@@ -40,8 +29,8 @@
     {{-- Badges & Metadata --}}
     <div class="flex flex-wrap items-center gap-2 mb-5 pl-2">
         {{-- Priority Badge --}}
-        <span class="{{ $pConfig['bg'] }} {{ $pConfig['text'] }} text-[9px] font-black tracking-widest px-2.5 py-1 rounded-lg border {{ str_replace('bg-', 'border-', $pConfig['bg']) }} shadow-sm uppercase">
-            {{ $pConfig['label'] }}
+        <span class="{{ $tache->priority_config['bg'] }} {{ $tache->priority_config['text'] }} text-[9px] font-black tracking-widest px-2.5 py-1 rounded-lg border {{ str_replace('bg-', 'border-', $tache->priority_config['bg']) }} shadow-sm uppercase">
+            {{ $tache->priority_config['label'] }}
         </span>
 
         {{-- Department Badge --}}
@@ -60,14 +49,14 @@
                 <div class="flex items-center gap-2 text-[10px] font-bold text-slate-600">
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <div class="flex items-center gap-1.5">
-                        <span>{{ $start->format('d M, H:i') }}</span>
+                        <span>{{ $tache->dateDebut->format('d M, H:i') }}</span>
                         <span class="text-slate-300">→</span>
-                        <span>{{ $end->format('d M, H:i') }}</span>
+                        <span>{{ $tache->duree->format('d M, H:i') }}</span>
                     </div>
                 </div>
             </div>
             
-            <div class="w-fit flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight {{ $isOverdue ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-white text-[#be2346] border border-slate-200' }}">
+            <div class="w-fit flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight {{ $tache->is_overdue ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-white text-[#be2346] border border-slate-200' }}">
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ $tache->formatted_duration }}
             </div>
@@ -101,25 +90,15 @@
         {{-- Status Transition Buttons --}}
         <div class="flex gap-1.5">
             @if($tache->status != 'todo')
-                <form action="{{ route('tasks.updateStatus', $tache->idTache) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="{{ $tache->status == 'termine' ? 'en_cours' : 'todo' }}">
-                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all shadow-sm" title="Précédent">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                </form>
+                <button type="button" @click.prevent="changeStatus('{{ $tache->idTache }}', '{{ $tache->status == 'termine' ? 'en_cours' : 'todo' }}', $event)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all shadow-sm" title="Précédent">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
             @endif
 
             @if($tache->status != 'termine')
-                <form action="{{ route('tasks.updateStatus', $tache->idTache) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="{{ $tache->status == 'todo' ? 'en_cours' : 'termine' }}">
-                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-xl bg-[#be2346]/5 text-[#be2346] hover:bg-[#be2346] hover:text-white transition-all shadow-sm" title="Suivant">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                </form>
+                <button type="button" @click.prevent="changeStatus('{{ $tache->idTache }}', '{{ $tache->status == 'todo' ? 'en_cours' : 'termine' }}', $event)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-[#be2346]/5 text-[#be2346] hover:bg-[#be2346] hover:text-white transition-all shadow-sm" title="Suivant">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
             @endif
         </div>
     </div>

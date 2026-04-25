@@ -21,16 +21,26 @@ class RolePermissionSeeder extends Seeder
 
         // Create basic permissions if needed
         $permissions = [
+<<<<<<< HEAD
         
+=======
+            'users.view', 'users.manage',
+            'reunions.view', 'reunions.manage',
+            'reclamations.view', 'reclamations.manage',
+            'dashboard.view',
+            'objectif.view', 'objectif.create', 'objectif.edit', 'objectif.delete',
+>>>>>>> 7c796e9f5a864443e53e933abdac9c3335d98aea
 
             // --- Permission ---
             'permission.edit',
             'permission.view',
-            // --- Ctegory ---
+
+            // --- Category ---
             'category.view',
             'category.create',
             'category.delete',
             'category.edit',
+
             // --- Users ---
             'user.view',
             'user.create',
@@ -72,12 +82,6 @@ class RolePermissionSeeder extends Seeder
             'paiement.create',
             'paiement.edit',
             'paiement.delete',
-
-            // --- Objectifs ---
-            'objectif.view',
-            'objectif.create',
-            'objectif.edit',
-            'objectif.delete',
 
             // --- Tâches ---
             'tache.view',
@@ -123,18 +127,63 @@ class RolePermissionSeeder extends Seeder
             'prime.create',
             'prime.edit',
             'prime.delete',
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c796e9f5a864443e53e933abdac9c3335d98aea
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c796e9f5a864443e53e933abdac9c3335d98aea
         // Assign permissions to roles
         $adminRole->syncPermissions(['permission.edit',
             'permission.view',]);
 
+<<<<<<< HEAD
        
+=======
+        $managerRole->syncPermissions([
+            'dashboard.view',
+            'users.view', 'users.manage',
+            'user.view',
+            'client.view', 'client.create', 'client.edit',
+            'lead.view', 'lead.create', 'lead.edit',
+            'dossier.view', 'dossier.create', 'dossier.edit',
+            'presentation.view', 'presentation.create', 'presentation.edit',
+            'paiement.view', 'paiement.create',
+            'objectif.view', 'objectif.create', 'objectif.edit',
+            'tache.view', 'tache.create', 'tache.edit',
+            'pointage.view',
+            'conge.view', 'conge.approve',
+            'reclamation.view', 'reclamation.respond', 'reclamations.view', 'reclamations.manage',
+            'document.view', 'document.approve',
+            'reunion.view', 'reunion.create', 'reunion.edit', 'reunions.view', 'reunions.manage',
+            'prime.view', 'prime.create', 'prime.delete',
+        ]);
+
+        $employeeRole->syncPermissions([
+            'reunions.view',
+            'reclamations.view',
+            'dashboard.view',
+            'objectif.view'
+        ]);
+
+        // Sync existing users
+        User::all()->each(function ($user) use ($adminRole, $managerRole, $employeeRole) {
+            if ($user->type === 'admin') {
+                $user->assignRole($adminRole);
+            } elseif ($user->type === 'manager') {
+                $user->assignRole($managerRole);
+            } else {
+                $user->assignRole($employeeRole);
+            }
+        });
+>>>>>>> 7c796e9f5a864443e53e933abdac9c3335d98aea
     }
 }

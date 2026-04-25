@@ -94,4 +94,9 @@ class User extends Authenticatable
     {
         return $this->type;
     }
+
+    public function reunions()
+    {
+        return $this->belongsToMany(Reunion::class, 'reunion_participants', 'idUser', 'idReunion')->withTimestamps();
+    }
 }

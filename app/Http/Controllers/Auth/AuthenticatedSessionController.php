@@ -36,7 +36,6 @@ class AuthenticatedSessionController extends Controller
             case 'manager':
                 return redirect()->intended(route('dashboard', absolute: false));
             case 'employee':
-                return redirect()->intended(route('tasks.index', absolute: false));
             default:
                 return redirect()->intended(route('dashboard', absolute: false));
         }

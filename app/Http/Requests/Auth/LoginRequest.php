@@ -50,6 +50,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Check if user is deactivated
+        if (Auth::user()->status === 'desactive') {
+            Auth::logout();
+            
+            throw ValidationException::withMessages([
+                'email' => 'votre compte est désactivee.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

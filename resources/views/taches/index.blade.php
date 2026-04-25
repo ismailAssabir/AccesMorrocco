@@ -14,6 +14,40 @@
             },
             confirmDelete(id) {
                 window.confirmDelete('/tasks/' + id, 'tâche');
+            },
+            changeStatus(id, newStatus, event) {
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<svg class=\'animate-spin w-4 h-4\' xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg>';
+                btn.disabled = true;
+
+                fetch(`/tasks/${id}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => {
+                    return fetch(window.location.href);
+                })
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newBoard = doc.getElementById('kanban-board');
+                    if(newBoard) {
+                        document.getElementById('kanban-board').innerHTML = newBoard.innerHTML;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
             }
          }">
 
@@ -35,8 +69,10 @@
 
         <x-status-messages />
 
+
+
         {{-- ═══════════ KANBAN BOARD ═══════════ --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="kanban-board" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {{-- À FAIRE --}}
             <div class="flex flex-col gap-4">
@@ -45,12 +81,10 @@
                         <span class="w-2 h-2 rounded-full bg-slate-300"></span>
                         À FAIRE
                     </h2>
-                    <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'todo')->count() }}</span>
+                    <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $todoTasks->count() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    @foreach($Taches->where('status', 'todo') as $tache)
-                        @include('taches.card', ['tache' => $tache])
-                    @endforeach
+                    @each('taches.card', $todoTasks, 'tache')
                 </div>
             </div>
 
@@ -61,12 +95,10 @@
                         <span class="w-2 h-2 rounded-full bg-blue-400"></span>
                         EN COURS
                     </h2>
-                    <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'en_cours')->count() }}</span>
+                    <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $enCoursTasks->count() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    @foreach($Taches->where('status', 'en_cours') as $tache)
-                        @include('taches.card', ['tache' => $tache])
-                    @endforeach
+                    @each('taches.card', $enCoursTasks, 'tache')
                 </div>
             </div>
 
@@ -77,12 +109,10 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                         TERMINÉ
                     </h2>
-                    <span class="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $Taches->where('status', 'termine')->count() }}</span>
+                    <span class="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $termineTasks->count() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    @foreach($Taches->where('status', 'termine') as $tache)
-                        @include('taches.card', ['tache' => $tache])
-                    @endforeach
+                    @each('taches.card', $termineTasks, 'tache')
                 </div>
             </div>
 

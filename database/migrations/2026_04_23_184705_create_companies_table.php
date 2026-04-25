@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('companyGps');
             $table->time('companyEntryTime');
             $table->time('companyExitTime');
-            $table->decimal('distance',6,2);
+            $table->decimal('distance', 6, 2)->default(200.00)->nullable();
             $table->timestamps();
         });
     }
