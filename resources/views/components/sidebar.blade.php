@@ -72,12 +72,6 @@
                 <span class="font-medium text-sm">Département</span>
             </a>
             @endcan
-<<<<<<< HEAD
-@endif
-=======
-
-
->>>>>>> 902eae50e825771163336ffc8f5158d767daa782
             @can('pointage.view')
             <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
 
