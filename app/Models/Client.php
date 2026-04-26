@@ -31,4 +31,13 @@ class Client extends Model
     function dossiers(){
         return $this->hasMany(Dossier::class, 'idClient', 'idClient');
     }
+    public function departement()
+    {
+        return $this->belongsTo(\App\Models\Departement::class, 'idDepartement', 'idDepartement');
+    }
+
+    public function assignedUser()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'idUser', 'idUser');
+    }
 }
