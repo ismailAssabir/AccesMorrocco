@@ -91,6 +91,7 @@ Route::middleware(['auth', 'verified', 'role:admin|manager'])->group(function ()
     Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
     Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
     Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('departements.show');
+    Route::get('/departements/{id}/export-pdf', [DepartementController::class, 'exportPdf'])->name('departements.export-pdf');
     Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
     Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
     Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');

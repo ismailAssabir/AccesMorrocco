@@ -143,14 +143,14 @@
             <div style="text-align: center; margin-bottom: 30px;">
                 <div class="tag" style="margin-bottom: 0;">Invitation à une réunion</div>
             </div>
-            <h1 style="margin: 0; margin-bottom: 8px; text-align: left; color: #0f172a; font-size: 28px; font-weight: 800;">{{ $reunion->titre }}</h1>
-            <p class="objectif" style="margin: 0; text-align: left; color: #be2346; font-size: 16px; font-weight: 600;">{{ $reunion->objectif }}</p>
+            <h1 style="margin: 0; margin-bottom: 8px; text-align: left; color: #0f172a; font-size: 28px; font-weight: 800;"><?php echo e($reunion->titre); ?></h1>
+            <p class="objectif" style="margin: 0; text-align: left; color: #be2346; font-size: 16px; font-weight: 600;"><?php echo e($reunion->objectif); ?></p>
         </div>
         
         <div class="content">
-            @if($reunion->description)
-                <p class="description">{{ $reunion->description }}</p>
-            @endif
+            <?php if($reunion->description): ?>
+                <p class="description"><?php echo e($reunion->description); ?></p>
+            <?php endif; ?>
             
             <div class="info-grid">
                 <table role="presentation" width="100%">
@@ -158,10 +158,12 @@
                         <td style="padding-bottom: 20px;">
                             <div class="info-label">📅 Date & Heure</div>
                             <div class="info-value" style="color: #1e293b; font-size: 15px;">
-                                {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y') }} à {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}
-                                @if($reunion->heureFin)
-                                    - {{ \Carbon\Carbon::parse($reunion->heureFin)->format('H:i') }}
-                                @endif
+                                <?php echo e(\Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y')); ?> à <?php echo e(\Carbon\Carbon::parse($reunion->dateHeure)->format('H:i')); ?>
+
+                                <?php if($reunion->heureFin): ?>
+                                    - <?php echo e(\Carbon\Carbon::parse($reunion->heureFin)->format('H:i')); ?>
+
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -169,43 +171,44 @@
                         <td style="padding-bottom: 20px;">
                             <div class="info-label">📍 Lieu</div>
                             <div class="info-value" style="color: #1e293b; font-size: 15px;">
-                                @if($reunion->lieu)
-                                    {{ $reunion->lieu }}
-                                @elseif($reunion->type === 'Interne')
+                                <?php if($reunion->lieu): ?>
+                                    <?php echo e($reunion->lieu); ?>
+
+                                <?php elseif($reunion->type === 'Interne'): ?>
                                     Enterprise
-                                @elseif($reunion->type === 'Externe')
+                                <?php elseif($reunion->type === 'Externe'): ?>
                                     Meeting online
-                                @else
+                                <?php else: ?>
                                     Visioconférence
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <div class="info-label">🏷️ Type</div>
-                            <div class="info-value" style="color: #1e293b; font-size: 15px;">{{ $reunion->type }}</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;"><?php echo e($reunion->type); ?></div>
                         </td>
                     </tr>
                 </table>
             </div>
 
-            @if($reunion->lien)
-                <a href="{{ str_starts_with($reunion->lien, 'http') ? $reunion->lien : 'https://' . $reunion->lien }}" class="btn-primary">
+            <?php if($reunion->lien): ?>
+                <a href="<?php echo e(str_starts_with($reunion->lien, 'http') ? $reunion->lien : 'https://' . $reunion->lien); ?>" class="btn-primary">
                     Rejoindre la réunion
                 </a>
-            @else
-                <a href="{{ config('app.url') }}/reunions/{{ $reunion->idReunion }}" class="btn-primary">
+            <?php else: ?>
+                <a href="<?php echo e(config('app.url')); ?>/reunions/<?php echo e($reunion->idReunion); ?>" class="btn-primary">
                     Voir les détails
                 </a>
-            @endif
+            <?php endif; ?>
         </div>
         <div class="footer">
             <span class="footer-logo">Access Morocco</span>
             
             <!-- Footer Action -->
             <div style="margin: 20px 0; text-align: center;">
-                <a href="{{ config('app.url') }}/reunions/{{ $reunion->idReunion }}" 
+                <a href="<?php echo e(config('app.url')); ?>/reunions/<?php echo e($reunion->idReunion); ?>" 
                    style="display: inline-block; background-color: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #e2e8f0;">
                     Ouvrir dans l'application
                 </a>
@@ -218,7 +221,7 @@
             <table role="presentation" width="100%" style="border-top: 1px solid #f1f5f9; padding-top: 24px;">
                 <tr>
                     <td style="text-align: center; color: #cbd5e1; font-size: 11px; font-weight: 500;">
-                        &copy; {{ date('Y') }} Access Morocco Travel Agency. Tous droits réservés.
+                        &copy; <?php echo e(date('Y')); ?> Access Morocco Travel Agency. Tous droits réservés.
                     </td>
                 </tr>
             </table>
@@ -226,3 +229,4 @@
     </div>
 </body>
 </html>
+<?php /**PATH C:\Users\ABA SOLUTIONS\Desktop\PROJET STAGE Travel Agency\AccesMorrocco\resources\views/emails/meeting-invitation.blade.php ENDPATH**/ ?>

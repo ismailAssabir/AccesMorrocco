@@ -1,94 +1,123 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
-        {{-- ═══════════ TOP BAR ═══════════ --}}
+        
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Planification des Réunions</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
-            @if(auth()->user()->type !== 'employee')
+            <?php if(auth()->user()->type !== 'employee'): ?>
             <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
                 Ajouter
             </button>
-            @endif
+            <?php endif; ?>
         </div>
         
-        {{-- Alert Messages --}}
-        <x-status-messages />
+        
+        <?php if (isset($component)) { $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-messages','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-messages'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $attributes = $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $component = $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
 
-        {{-- ═══════════ MAIN CONTENT ═══════════ --}}
+        
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden p-6">
             <h2 class="text-lg font-extrabold text-slate-800 mb-6">Prochaines Réunions</h2>
             <div class="space-y-4">
-                @forelse($reunions as $reunion)
+                <?php $__empty_1 = true; $__currentLoopData = $reunions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reunion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="flex flex-col md:flex-row md:items-center gap-4 bg-slate-50 border border-slate-100 p-5 rounded-2xl hover:shadow-md transition-shadow relative group">
                     
-                    {{-- Avatar / Icon --}}
+                    
                     <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex flex-col items-center justify-center text-indigo-600 shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     </div>
 
-                    {{-- Info --}}
+                    
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-bold text-slate-800 truncate">{{ $reunion->titre }}</h3>
+                        <h3 class="text-base font-bold text-slate-800 truncate"><?php echo e($reunion->titre); ?></h3>
                         <p class="text-sm text-slate-500 mt-1 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            {{ $reunion->dateHeure->translatedFormat('d M Y, H:i') }}
-                            @if($reunion->lieu)
+                            <?php echo e($reunion->dateHeure->translatedFormat('d M Y, H:i')); ?>
+
+                            <?php if($reunion->lieu): ?>
                                 <span class="text-slate-300 mx-1">|</span>
-                                <span class="text-xs font-medium">{{ $reunion->lieu }}</span>
-                            @endif
+                                <span class="text-xs font-medium"><?php echo e($reunion->lieu); ?></span>
+                            <?php endif; ?>
                         </p>
                     </div>
 
-                    {{-- Meta & Actions --}}
+                    
                     <div class="flex items-center gap-4 sm:ml-auto">
-                        <span class="{{ $reunion->type_color }} font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider">{{ $reunion->type }}</span>
+                        <span class="<?php echo e($reunion->type_color); ?> font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider"><?php echo e($reunion->type); ?></span>
 
                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" onclick='viewReunionDetails({!! e(json_encode($reunion)) !!})' class="flex items-center gap-2 px-4 py-2 bg-slate-200/50 text-slate-600 rounded-xl hover:bg-slate-200 hover:text-slate-800 transition-all font-bold text-xs">
+                            <button type="button" onclick='viewReunionDetails(<?php echo e(json_encode($reunion)); ?>)' class="flex items-center gap-2 px-4 py-2 bg-slate-200/50 text-slate-600 rounded-xl hover:bg-slate-200 hover:text-slate-800 transition-all font-bold text-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 Voir
                             </button>
 
-                            @if(auth()->user()->type !== 'employee')
-                            <button type="button" onclick='openEditModal({!! e(json_encode($reunion)) !!})' class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
+                            <?php if(auth()->user()->type !== 'employee'): ?>
+                            <button type="button" onclick='openEditModal(<?php echo e(json_encode($reunion)); ?>)' class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Modifier
                             </button>
-                            <button type="button" onclick="confirmDeleteReunion({{ $reunion->idReunion }})" class="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
+                            <button type="button" onclick="confirmDeleteReunion(<?php echo e($reunion->idReunion); ?>)" class="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
-                            @endif
-                            @if($reunion->lien)
-                            <a href="{{ $reunion->lien }}" target="_blank" class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm" title="Rejoindre">
+                            <?php endif; ?>
+                            <?php if($reunion->lien): ?>
+                            <a href="<?php echo e($reunion->lien); ?>" target="_blank" class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm" title="Rejoindre">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="py-20 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
                     <p class="text-slate-400 font-medium">Aucune réunion prévue.</p>
                 </div>
-                @endforelse
+                <?php endif; ?>
             </div>
         </div>
     </div>
 
-    {{-- ═══════════ MODALS ═══════════ --}}
+    
 
-    {{-- Add Reunion Modal --}}
+    
     <div id="addReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('addReunionModal', 'close')"></div>
         <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-modal-in">
             
-            {{-- Header --}}
+            
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-lg font-black text-slate-800">Planifier une Réunion</h2>
@@ -100,10 +129,10 @@
                 </button>
             </div>
 
-            {{-- Form Content --}}
+            
             <div class="overflow-y-auto">
-                <form action="{{ url('/reunions') }}" method="POST" class="p-7 space-y-5">
-                    @csrf
+                <form action="<?php echo e(url('/reunions')); ?>" method="POST" class="p-7 space-y-5">
+                    <?php echo csrf_field(); ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="md:col-span-2 space-y-1.5">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Titre de la réunion <span class="text-[#be2346]">*</span></label>
@@ -139,9 +168,9 @@
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département <span class="text-[#be2346]">*</span></label>
                             <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="">-- Sélectionner --</option>
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title ?? $dept->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
 
@@ -150,15 +179,15 @@
                             <div class="relative">
                                 <input type="text" placeholder="Rechercher un employé..." onkeyup="filterUsers(this, 'add_user_list')" class="w-full bg-slate-50 border border-slate-200 rounded-t-2xl px-4 py-3 text-sm outline-none focus:border-[#be2346] transition-all">
                                 <div id="add_user_list" class="max-h-48 overflow-y-auto border-x border-b border-slate-200 rounded-b-2xl bg-white p-2 grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-hide">
-                                    @foreach($users as $user)
+                                    <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <label class="user-item flex items-center gap-3 p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-100">
-                                            <input type="checkbox" name="participant_ids[]" value="{{ $user->idUser }}" class="w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
+                                            <input type="checkbox" name="participant_ids[]" value="<?php echo e($user->idUser); ?>" class="w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
                                             <div class="flex flex-col">
-                                                <span class="text-xs font-black text-slate-700">{{ $user->firstName }} {{ $user->lastName }}</span>
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{{ $user->post }}</span>
+                                                <span class="text-xs font-black text-slate-700"><?php echo e($user->firstName); ?> <?php echo e($user->lastName); ?></span>
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight"><?php echo e($user->post); ?></span>
                                             </div>
                                         </label>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
                         </div>
@@ -188,7 +217,7 @@
                         </div>
                     </div>
 
-                    {{-- Footer Buttons --}}
+                    
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="toggleModal('addReunionModal', 'close')"
                             class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
@@ -204,12 +233,12 @@
         </div>
     </div>
 
-    {{-- Edit Reunion Modal --}}
+    
     <div id="editReunionModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editReunionModal', 'close')"></div>
         <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-modal-in">
             
-            {{-- Header --}}
+            
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-lg font-black text-slate-800">Modifier la Réunion</h2>
@@ -221,11 +250,11 @@
                 </button>
             </div>
 
-            {{-- Form Content --}}
+            
             <div class="overflow-y-auto">
                 <form id="editReunionForm" method="POST" class="p-7 space-y-5">
-                    @csrf
-                    @method('PUT')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         
                         <div class="md:col-span-2 space-y-1.5">
@@ -264,9 +293,9 @@
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département <span class="text-[#be2346]">*</span></label>
                             <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="">-- Sélectionner --</option>
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title ?? $dept->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
 
@@ -275,15 +304,15 @@
                             <div class="relative">
                                 <input type="text" placeholder="Rechercher un employé..." onkeyup="filterUsers(this, 'edit_user_list')" class="w-full bg-slate-50 border border-slate-200 rounded-t-2xl px-4 py-3 text-sm outline-none focus:border-[#be2346] transition-all">
                                 <div id="edit_user_list" class="max-h-48 overflow-y-auto border-x border-b border-slate-200 rounded-b-2xl bg-white p-2 grid grid-cols-1 md:grid-cols-2 gap-2 scrollbar-hide">
-                                    @foreach($users as $user)
+                                    <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <label class="user-item flex items-center gap-3 p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-100">
-                                            <input type="checkbox" name="participant_ids[]" value="{{ $user->idUser }}" class="edit-user-checkbox w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
+                                            <input type="checkbox" name="participant_ids[]" value="<?php echo e($user->idUser); ?>" class="edit-user-checkbox w-4 h-4 text-[#be2346] rounded focus:ring-[#be2346]">
                                             <div class="flex flex-col">
-                                                <span class="text-xs font-black text-slate-700">{{ $user->firstName }} {{ $user->lastName }}</span>
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{{ $user->post }}</span>
+                                                <span class="text-xs font-black text-slate-700"><?php echo e($user->firstName); ?> <?php echo e($user->lastName); ?></span>
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight"><?php echo e($user->post); ?></span>
                                             </div>
                                         </label>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
                         </div>
@@ -319,7 +348,7 @@
                         </div>
                     </div>
 
-                    {{-- Footer Buttons --}}
+                    
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="toggleModal('editReunionModal', 'close')"
                             class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">
@@ -372,12 +401,12 @@
         }
     </script>
 
-    {{-- Meeting Detail Modal --}}
+    
     <div id="viewReunionModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeReunionModal()"></div>
         <div class="relative bg-white w-11/12 md:max-w-lg rounded-[40px] shadow-2xl overflow-hidden flex flex-col z-10 animate-modal-in border border-white/20 max-h-[90vh]">
             
-            {{-- Scrollable Container --}}
+            
             <div class="overflow-y-auto p-8 md:p-10 scrollbar-hide">
                 <div class="flex justify-between items-start mb-8">
                     <div id="modal_reunion_type_badge" class="px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm"></div>
@@ -413,7 +442,7 @@
                         </div>
                     </div>
 
-                    {{-- Description block if exists --}}
+                    
                     <div id="modal_reunion_desc_container" class="p-4 bg-slate-50 rounded-3xl">
                          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Description</p>
                          <p id="modal_reunion_description" class="text-xs text-gray-600 leading-relaxed font-medium"></p>
@@ -607,7 +636,7 @@
         });
     </script>
 
-    @verbatim
+    
     <style>
         @keyframes modal-in {
             from { opacity: 0; transform: scale(0.95) translateY(20px); }
@@ -615,5 +644,15 @@
         }
         .animate-modal-in { animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
-    @endverbatim
-</x-app-layout>
+    
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php /**PATH C:\Users\ABA SOLUTIONS\Desktop\PROJET STAGE Travel Agency\AccesMorrocco\resources\views/reunions/index.blade.php ENDPATH**/ ?>
