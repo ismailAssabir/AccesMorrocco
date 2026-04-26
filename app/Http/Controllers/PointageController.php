@@ -134,12 +134,8 @@ class PointageController extends Controller
 
         $currentTime = now();
         $officialTime = Carbon::createFromTimeString($companyEntryTime);
-<<<<<<< HEAD
-        $status = $currentTime->gt($officialTime->addMinutes($MaxDelay)) ? 'retard' : 'present';
-=======
         $graceMinutes = $settings->maxDelay ?? 15;
         $status = $currentTime->gt($officialTime->addMinutes($graceMinutes)) ? 'retard' : 'present';
->>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
 
         Pointage::create([
             'idUser'      => $idUser,

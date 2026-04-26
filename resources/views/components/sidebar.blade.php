@@ -32,7 +32,7 @@
     </div>
 
     {{-- ═══════════════ MIDDLE SECTION (scrollable) ═══════════════ --}}
-    <div class="flex-1 overflow-y-auto custom-scrollbar min-h-0 px-4">
+    <div id="sidebar-scroll-container" class="flex-1 overflow-y-auto custom-scrollbar min-h-0 px-4">
         <div class="px-4 mb-6">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
@@ -41,76 +41,31 @@
         </div>
 
         <nav class="space-y-1">
-            
-
-    @can('user.view')
-      <a href="{{ url('/users') }}" 
-   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-   {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-    
-    <div class="transition-transform duration-300 {{ request()->is('users*') ? '' : 'group-hover:rotate-12' }}">
-        <svg class="w-5 h-5 {{ request()->is('users*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-    </div>
-    <span class="font-medium text-sm">Ressources Humaines</span>
-</a>
-@endcan
-
-            
-                @can('user.view')
-                    <a href="{{ url('/users') }}" 
-                       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-                       {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                        <div class="transition-transform duration-300 {{ request()->is('users*') ? '' : 'group-hover:rotate-12' }}">
-                            <svg class="w-5 h-5 {{ request()->is('users*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <span class="font-medium text-sm">Ressources Humaines</span>
-                    </a>
-                @endcan
-          
-                @can('departement.view')
-                    <a href="/departements" 
-                       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-                       {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                        <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
-                            <svg class="w-5 h-5 {{ request()->is('departements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                        <span class="font-medium text-sm">Département</span>
-                    </a>
-                @endcan
-
-
-            @can('departement.view')
-            <a href="/departements" 
-
-               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->is('departements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <span class="font-medium text-sm">Département</span>
-            </a>
+            @can('user.view')
+                <a href="{{ url('/users') }}" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->is('users*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->is('users*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->is('users*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Ressources Humaines</span>
+                </a>
             @endcan
-
-            @can('pointage.view')
-            <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
-
-               class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('pointages.index') || request()->routeIs('admin.pointages.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <span class="font-medium text-sm">Pointage</span>
-            </a>
+      
+            @can('departement.view')
+                <a href="/departements" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->is('departements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->is('departements*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->is('departements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Département</span>
+                </a>
+            @endcan
 
             @can('pointage.view')
                 <a href="{{ Route::has('pointages.index') ? route('pointages.index') : '#' }}" 
@@ -123,7 +78,6 @@
                     </div>
                     <span class="font-medium text-sm">Pointage</span>
                 </a>
-
             @endcan
 
             @can('tache.view')
@@ -179,25 +133,75 @@
             @endcan
 
             @can('reclamation.view')
-
-       <a href="/reclamations" 
-   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-   {{ request()->is('reclamations') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-    
-    <div class="transition-transform duration-300 {{ request()->is('reclamations') ? '' : 'group-hover:rotate-12' }}">
-        <svg class="w-5 h-5 {{ request()->is('reclamations') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-    </div>
-    
-    <span class="font-medium text-sm">Réclamations</span>
-</a>
-@endcan
-
-
-            @can('permission.view')
-                
+                <a href="/reclamations" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->is('reclamations*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->is('reclamations*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->is('reclamations*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Réclamations</span>
+                </a>
             @endcan
+
+            {{-- ═══════════════ COMMERCIAL SECTION ═══════════════ --}}
+            @canany(['client.view', 'lead.view', 'dossier.view'])
+            <div class="px-4 mt-8 mb-6">
+                <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    Gestion Commerciale
+                </p>
+            </div>
+
+            @can('client.view')
+                <a href="{{ Route::has('clients.index') ? route('clients.index') : '/clients' }}" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->is('clients*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->is('clients*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->is('clients*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Clients</span>
+                </a>
+            @endcan
+
+            @can('lead.view')
+                <a href="{{ route('leads.index') }}" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->routeIs('leads.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->routeIs('leads.*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('leads.*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Leads</span>
+                </a>
+            @endcan
+
+            @can('dossier.view')
+                <a href="{{ Route::has('dossiers.index') ? route('dossiers.index') : '/dossiers' }}" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   {{ request()->is('dossiers*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->is('dossiers*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->is('dossiers*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Dossiers</span>
+                </a>
+            @endcan
+            @endcanany
+
+            {{-- ═══════════════ SYSTEM SECTION ═══════════════ --}}
+            @can('permission.view')
+            <div class="px-4 mt-8 mb-6">
+                <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Système
+                </p>
+            </div>
             <a href="{{ route('permissions.index') }}" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
                {{ request()->routeIs('permissions.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
@@ -209,69 +213,6 @@
                 <span class="font-medium text-sm">Permissions</span>
             </a>
             @endcan
-                
-                    
-                @can('reclamation.view')
-                <a href="/reclamations" 
-                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-                   {{ request()->is('reclamations') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                    <div class="transition-transform duration-300 {{ request()->is('reclamations') ? '' : 'group-hover:rotate-12' }}">
-                        <svg class="w-5 h-5 {{ request()->is('reclamations') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <span class="font-medium text-sm">Réclamations</span>
-                </a>
-            @endcan
-
-
-{{-- ═══════════════ COMMERCIAL SECTION ═══════════════ --}}
-@canany(['client.view', 'lead.view', 'category.view'])
-<div class="px-4 mt-8 mb-6">
-    <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-        Gestion Commerciale
-    </p>
-</div>
-
-<nav class="space-y-1">
-    @can('lead.view')
-    <a href="{{ route('leads.index') }}" 
-       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-       {{ request()->routeIs('leads.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-        <div class="transition-transform duration-300 {{ request()->routeIs('leads.*') ? '' : 'group-hover:rotate-12' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('leads.*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-        </div>
-        <span class="font-medium text-sm">Leads</span>
-    </a>
-    @endcan
-</nav>
-@endcanany
-
-{{-- ═══════════════ SYSTEM SECTION ═══════════════ --}}
-@can('permission.view')
-<div class="px-4 mt-8 mb-6">
-    <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-        Système
-    </p>
-</div>
-<nav class="space-y-1">
-    <a href="{{ route('permissions.index') }}" 
-       class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-       {{ request()->routeIs('permissions.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-        <div class="transition-transform duration-300 {{ request()->routeIs('permissions.*') ? '' : 'group-hover:rotate-12' }}">
-            <svg class="w-5 h-5 {{ request()->routeIs('permissions.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-        </div>
-        <span class="font-medium text-sm">Permissions</span>
-    </a>
-</nav>
-@endcan
-
         </nav>
     </div>
 
@@ -306,3 +247,23 @@
         </div>
     </div>
 </aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarScroll = document.getElementById('sidebar-scroll-container');
+        if (sidebarScroll) {
+            // Restore scroll position
+            const scrollPos = sessionStorage.getItem('sidebar-scroll-pos');
+            if (scrollPos) {
+                sidebarScroll.scrollTop = scrollPos;
+            }
+
+            // Save scroll position on click of any link inside sidebar
+            sidebarScroll.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('sidebar-scroll-pos', sidebarScroll.scrollTop);
+                });
+            });
+        }
+    });
+</script>

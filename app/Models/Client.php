@@ -22,6 +22,8 @@ class Client extends Model
         'dateNaissance',
         'status',
         'type',
+        'idLead',
+        'note',
     ];
     function lead(){
         return $this->hasOne(Lead::class, 'idClient');
