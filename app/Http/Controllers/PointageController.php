@@ -32,7 +32,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         $settings = Company::first();
         return view('Adminpointage', compact('pointages', 'settings'));
     }
-    }
+
    
     public function userPointage()
     {           Gate::authorize('pointage.view');
@@ -138,7 +138,8 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
 
         $currentTime = now();
         $officialTime = Carbon::createFromTimeString($companyEntryTime);
-        $status = $currentTime->gt($officialTime->addMinutes(15)) ? 'retard' : 'present';
+        $graceMinutes = $settings->maxDelay ?? 15;
+        $status = $currentTime->gt($officialTime->addMinutes($graceMinutes)) ? 'retard' : 'present';
 
         Pointage::create([
             'idUser'      => $idUser,
@@ -163,7 +164,6 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', 'Entrée enregistrée avec succès.');
     }
 
-    }
     public function checkOut(Request $request) 
     {
         Gate::authorize('pointage.edit');
@@ -240,7 +240,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
-    }
+
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
@@ -293,6 +293,8 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
             'companyEntryTime' => 'nullable',
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
+            'maxDelay'         => 'nullable|integer|min:0',
+            'absenceTime'      => 'nullable',
         ], [
             'companyGps.regex' => 'Le format GPS doit être: latitude,longitude (ex: 32.93,-6.02)'
         ]);
@@ -304,4 +306,4 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');
     }
-}}
+}

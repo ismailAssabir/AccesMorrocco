@@ -309,11 +309,23 @@
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
             </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance max (m)</label>
+                    <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Délai de grâce (min)</label>
+                    <input type="number" name="maxDelay" placeholder="Ex: 15" min="0" value="{{ $settings->maxDelay ?? '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+            </div>
             <div class="space-y-1.5">
-                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (mètres)</label>
-                <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure limite pour absence</label>
+                <input type="time" name="absenceTime" value="{{ $settings->absenceTime ?? '' }}"
                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                <p class="text-[10px] text-slate-400 ml-1">Rayon autorisé autour de l'entreprise pour le pointage GPS.</p>
+                <p class="text-[10px] text-slate-400 ml-1">Heure après laquelle l'absence est enregistrée automatiquement.</p>
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeSettingsModal()"

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('companies', function (Blueprint $table) {
-           $table->integer('maxDelay')->default(0);
-           $table->time('absenceTime')->nullable();
+            $table->integer('maxDelay')->default(0)->change();
+            $table->time('absenceTime')->nullable()->change();
         });
     }
 

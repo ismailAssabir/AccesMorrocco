@@ -150,35 +150,41 @@
             @endif
             
             <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">📅 Date & Heure</div>
-                    <div class="info-value">
-                        {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y') }} à {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}
-                        @if($reunion->heureFin)
-                            - {{ \Carbon\Carbon::parse($reunion->heureFin)->format('H:i') }}
-                        @endif
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-label">📍 Lieu</div>
-                    <div class="info-value">
-                        @if($reunion->lieu)
-                            {{ $reunion->lieu }}
-                        @elseif($reunion->type === 'Interne')
-                            Enterprise
-                        @elseif($reunion->type === 'Externe')
-                            Meeting online
-                        @else
-                            Visioconférence
-                        @endif
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">🏷️ Type</div>
-                    <div class="info-value">{{ $reunion->type }}</div>
-                </div>
+                <table role="presentation" width="100%">
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <div class="info-label">📅 Date & Heure</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">
+                                {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y') }} à {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}
+                                @if($reunion->heureFin)
+                                    - {{ \Carbon\Carbon::parse($reunion->heureFin)->format('H:i') }}
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <div class="info-label">📍 Lieu</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">
+                                @if($reunion->lieu)
+                                    {{ $reunion->lieu }}
+                                @elseif($reunion->type === 'Interne')
+                                    Enterprise
+                                @elseif($reunion->type === 'Externe')
+                                    Meeting online
+                                @else
+                                    Visioconférence
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="info-label">🏷️ Type</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">{{ $reunion->type }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             @if($reunion->lien)
