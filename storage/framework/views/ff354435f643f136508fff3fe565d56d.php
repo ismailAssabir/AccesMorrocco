@@ -1,10 +1,10 @@
-{{-- Global Delete Confirmation Modal --}}
+
 <div id="globalDeleteModal" class="fixed inset-0 z-[150] hidden overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeGlobalDeleteModal()"></div>
     <div class="relative flex items-center justify-center min-h-screen p-4">
         <div class="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden text-center border-t-4 border-red-600 transition-all transform scale-95 opacity-0" id="globalDeleteModalContent">
             <div class="p-8">
-                {{-- Branded Icon --}}
+                
                 <div id="deleteModalIconContainer" class="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-red-600">
                     <div id="deleteModalIcon">
                         <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -13,19 +13,19 @@
                     </div>
                 </div>
 
-                {{-- Content --}}
+                
                 <h2 id="deleteModalTitle" class="text-xl font-black text-slate-800 mb-2">Confirmer la suppression</h2>
                 <p id="deleteModalDescription" class="text-slate-500 text-sm mb-8 font-medium px-4 leading-relaxed">
                     Cette action est irréversible. Voulez-vous vraiment supprimer cet élément ?
                 </p>
                 
-                {{-- Actions --}}
+                
                 <div class="flex gap-3">
                     <button type="button" onclick="closeGlobalDeleteModal()" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all active:scale-[0.98]">
                         Annuler
                     </button>
                     <form id="globalDeleteForm" method="POST" class="flex-1">
-                        @csrf
+                        <?php echo csrf_field(); ?>
                         <div id="methodPlaceholder"></div>
                         <button type="submit" id="deleteModalConfirmBtn" class="w-full py-3.5 rounded-xl bg-red-600 text-white font-extrabold hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all active:scale-[0.98]">
                             Supprimer
@@ -149,7 +149,7 @@
 
     window.confirmLogout = function() {
         openGlobalDeleteModal(
-            "{{ route('logout') }}", 
+            "<?php echo e(route('logout')); ?>", 
             "Quitter la session ?", 
             "Êtes-vous sûr de vouloir vous déconnecter de votre compte Access Morocco ?", 
             "Se déconnecter", 
@@ -159,3 +159,4 @@
         );
     };
 </script>
+<?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/components/delete-confirmation-modal.blade.php ENDPATH**/ ?>

@@ -133,11 +133,11 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Assign all permissions to admin
-        $adminRole->syncPermissions(Permission::all());
+        // Assign permissions to admin (All except pointage creation/edit)
+        $adminPermissions = Permission::whereNotIn('name', ['pointage.create', 'pointage.edit'])->get();
+        $adminRole->syncPermissions($adminPermissions);
 
         // Assign permissions to manager
-
         $managerRole->syncPermissions([
             'user.view', 'user.create', 'user.edit',
             'departement.view', 'departement.create', 'departement.edit',
@@ -156,7 +156,7 @@ class RolePermissionSeeder extends Seeder
         // Assign permissions to employee
         $employeeRole->syncPermissions([
             'tache.view',
-            'pointage.view', 'pointage.create',
+            'pointage.view', 'pointage.create', 'pointage.edit',
             'conge.view', 'conge.create',
             'reclamation.view', 'reclamation.create',
             'document.view', 'document.create',
