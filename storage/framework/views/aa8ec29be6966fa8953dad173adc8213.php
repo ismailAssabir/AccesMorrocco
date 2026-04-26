@@ -1,14 +1,23 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
 <div class="p-6 md:p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
-    {{-- ═══════════ TOP BAR ═══════════ --}}
+    
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Tableau de Pointage</h1>
             <p class="text-slate-500 text-sm mt-1 font-medium">Suivi des présences, retards et absences de l'équipe.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('pointages.index') }}"
+            <a href="<?php echo e(route('pointages.index')); ?>"
                class="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Mon Pointage
@@ -21,16 +30,35 @@
         </div>
     </div>
 
-    <x-status-messages />
+    <?php if (isset($component)) { $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-messages','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-messages'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $attributes = $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $component = $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
 
-    {{-- ═══════════ KPI STATS ═══════════ --}}
-    @php
+    
+    <?php
         $total    = $pointages->count();
         $presents = $pointages->where('status', 'present')->count();
         $retards  = $pointages->where('status', 'retard')->count();
         $absents  = $pointages->where('status', 'absent')->count();
         $withJustif = $pointages->whereNotNull('justification')->count();
-    @endphp
+    ?>
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
             <span class="p-2.5 rounded-xl bg-slate-100 text-slate-500 shrink-0">
@@ -38,7 +66,7 @@
             </span>
             <div>
                 <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total</p>
-                <p class="text-2xl font-extrabold text-slate-800">{{ $total }}</p>
+                <p class="text-2xl font-extrabold text-slate-800"><?php echo e($total); ?></p>
             </div>
         </div>
         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-emerald-400">
@@ -47,7 +75,7 @@
             </span>
             <div>
                 <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Présents</p>
-                <p class="text-2xl font-extrabold text-emerald-500">{{ $presents }}</p>
+                <p class="text-2xl font-extrabold text-emerald-500"><?php echo e($presents); ?></p>
             </div>
         </div>
         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-amber-400">
@@ -56,7 +84,7 @@
             </span>
             <div>
                 <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Retards</p>
-                <p class="text-2xl font-extrabold text-amber-500">{{ $retards }}</p>
+                <p class="text-2xl font-extrabold text-amber-500"><?php echo e($retards); ?></p>
             </div>
         </div>
         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-[#b11d40]">
@@ -65,7 +93,7 @@
             </span>
             <div>
                 <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Absents</p>
-                <p class="text-2xl font-extrabold text-[#b11d40]">{{ $absents }}</p>
+                <p class="text-2xl font-extrabold text-[#b11d40]"><?php echo e($absents); ?></p>
             </div>
         </div>
         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4 border-l-4 border-l-indigo-400">
@@ -74,12 +102,12 @@
             </span>
             <div>
                 <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Justifiés</p>
-                <p class="text-2xl font-extrabold text-indigo-500">{{ $withJustif }}</p>
+                <p class="text-2xl font-extrabold text-indigo-500"><?php echo e($withJustif); ?></p>
             </div>
         </div>
     </div>
 
-    {{-- ═══════════ FILTER ROW ═══════════ --}}
+    
     <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3 items-center">
         <input type="text" id="search-input" oninput="filterTable()" placeholder="🔍 Rechercher un employé, une date..."
             class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all">
@@ -103,7 +131,7 @@
         </button>
     </div>
 
-    {{-- ═══════════ MAIN TABLE ═══════════ --}}
+    
     <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
         
@@ -135,8 +163,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100" id="pointage-tbody">
-                    @forelse($pointages as $pointage)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $pointages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pointage): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $user = $pointage->user;
                         $empName = $user ? trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? '')) : 'Employé inconnu';
                         $initial = $user ? strtoupper(substr($user->firstName ?? 'E', 0, 1)) : 'E';
@@ -169,138 +197,144 @@
                                 if ($diff > 0) $delayOut = "- " . $diff . " min";
                             }
                         }
-                    @endphp
+                    ?>
                     <tr class="hover:bg-slate-50 transition-colors pointage-row"
-                        data-name="{{ strtolower($empName) }}"
-                        data-role="{{ strtolower($user->type ?? 'employee') }}"
-                        data-date="{{ $pointage->date }}"
-                        data-status="{{ $pointage->status }}">
+                        data-name="<?php echo e(strtolower($empName)); ?>"
+                        data-role="<?php echo e(strtolower($user->type ?? 'employee')); ?>"
+                        data-date="<?php echo e($pointage->date); ?>"
+                        data-status="<?php echo e($pointage->status); ?>">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c1233] to-[#be2346] flex items-center justify-center text-white font-black text-xs shrink-0">
-                                    {{ $initial }}
+                                    <?php echo e($initial); ?>
+
                                 </div>
                                 <div>
-                                    <p class="font-bold text-slate-800 text-sm leading-tight">{{ $empName }}</p>
-                                    @if($user)
+                                    <p class="font-bold text-slate-800 text-sm leading-tight"><?php echo e($empName); ?></p>
+                                    <?php if($user): ?>
                                     <div class="flex items-center gap-2 mt-0.5">
-                                        <p class="text-[10px] text-slate-400 font-medium">{{ $user->email ?? '' }}</p>
+                                        <p class="text-[10px] text-slate-400 font-medium"><?php echo e($user->email ?? ''); ?></p>
                                         <span class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border
-                                            {{ ($user->type ?? '') === 'admin' ? 'bg-red-50 text-[#be2346] border-red-100' : (($user->type ?? '') === 'manager' ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-100') }}">
-                                            {{ $user->type ?? 'User' }}
+                                            <?php echo e(($user->type ?? '') === 'admin' ? 'bg-red-50 text-[#be2346] border-red-100' : (($user->type ?? '') === 'manager' ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-100')); ?>">
+                                            <?php echo e($user->type ?? 'User'); ?>
+
                                         </span>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 font-medium text-slate-700">
-                            {{ $pointage->date ? \Carbon\Carbon::parse($pointage->date)->translatedFormat('d M Y') : '--' }}
+                            <?php echo e($pointage->date ? \Carbon\Carbon::parse($pointage->date)->translatedFormat('d M Y') : '--'); ?>
+
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
                                 <span class="font-mono text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-bold w-fit">
-                                    {{ $pointage->heureEntree ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i') : '--:--' }}
+                                    <?php echo e($pointage->heureEntree ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i') : '--:--'); ?>
+
                                 </span>
-                                @if($delayIn)
-                                    <span class="text-[9px] font-black text-amber-500 mt-1 ml-1 uppercase tracking-tighter">{{ $delayIn }}</span>
-                                @endif
+                                <?php if($delayIn): ?>
+                                    <span class="text-[9px] font-black text-amber-500 mt-1 ml-1 uppercase tracking-tighter"><?php echo e($delayIn); ?></span>
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
                                 <span class="font-mono text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-bold w-fit">
-                                    {{ $pointage->heureSortie ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i') : '--:--' }}
+                                    <?php echo e($pointage->heureSortie ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i') : '--:--'); ?>
+
                                 </span>
-                                @if($delayOut)
-                                    <span class="text-[9px] font-black text-[#be2346] mt-1 ml-1 uppercase tracking-tighter">Anticipé: {{ $delayOut }}</span>
-                                @endif
+                                <?php if($delayOut): ?>
+                                    <span class="text-[9px] font-black text-[#be2346] mt-1 ml-1 uppercase tracking-tighter">Anticipé: <?php echo e($delayOut); ?></span>
+                                <?php endif; ?>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-slate-500 font-medium text-xs">{{ $duree }}</td>
+                        <td class="px-6 py-4 text-slate-500 font-medium text-xs"><?php echo e($duree); ?></td>
                         <td class="px-6 py-4 text-xs text-slate-400 font-mono">
-                            @if($pointage->gps)
-                            <a href="https://www.google.com/maps/search/?api=1&query={{ $pointage->gps }}" target="_blank" 
+                            <?php if($pointage->gps): ?>
+                            <a href="https://www.google.com/maps/search/?api=1&query=<?php echo e($pointage->gps); ?>" target="_blank" 
                                class="flex items-center gap-1.5 hover:text-[#be2346] transition-colors group">
                                 <svg class="w-3 h-3 text-slate-300 group-hover:text-[#be2346]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                <span>{{ substr($pointage->gps, 0, 12) }}...</span>
+                                <span><?php echo e(substr($pointage->gps, 0, 12)); ?>...</span>
                             </a>
-                            @else
+                            <?php else: ?>
                                 —
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-6 py-4">
-                            @if($pointage->status === 'present')
+                            <?php if($pointage->status === 'present'): ?>
                                 <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200">Présent</span>
-                            @elseif($pointage->status === 'retard')
+                            <?php elseif($pointage->status === 'retard'): ?>
                                 <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">Retard</span>
-                            @else
+                            <?php else: ?>
                                 <span class="bg-red-50 text-[#b11d40] font-bold px-3 py-1 rounded-full text-xs border border-red-200">Absent</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-6 py-4 max-w-xs">
-                            @if($pointage->justification)
+                            <?php if($pointage->justification): ?>
                                 <div class="space-y-2">
                                     <div class="flex items-start justify-between gap-2">
-                                        <p class="text-xs text-slate-600 truncate max-w-[150px]" title="{{ $pointage->justification }}">
-                                            {{ $pointage->justification }}
+                                        <p class="text-xs text-slate-600 truncate max-w-[150px]" title="<?php echo e($pointage->justification); ?>">
+                                            <?php echo e($pointage->justification); ?>
+
                                         </p>
-                                        @if($pointage->justification_status === 'en_attente')
+                                        <?php if($pointage->justification_status === 'en_attente'): ?>
                                             <span class="bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">En attente</span>
-                                        @elseif($pointage->justification_status === 'accepte')
+                                        <?php elseif($pointage->justification_status === 'accepte'): ?>
                                             <span class="bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">Acceptée</span>
-                                        @elseif($pointage->justification_status === 'refuse')
+                                        <?php elseif($pointage->justification_status === 'refuse'): ?>
                                             <span class="bg-red-100 text-red-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">Refusée</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
 
                                     <div class="flex flex-wrap items-center gap-2">
-                                        @if($pointage->typejustif)
-                                            <span class="inline-block text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">{{ $pointage->typejustif }}</span>
-                                        @endif
-                                        @if($pointage->fichier)
-                                            <a href="{{ Storage::url($pointage->fichier) }}" target="_blank"
+                                        <?php if($pointage->typejustif): ?>
+                                            <span class="inline-block text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full uppercase"><?php echo e($pointage->typejustif); ?></span>
+                                        <?php endif; ?>
+                                        <?php if($pointage->fichier): ?>
+                                            <a href="<?php echo e(Storage::url($pointage->fichier)); ?>" target="_blank"
                                                 class="inline-flex items-center gap-1 text-[10px] font-bold text-[#be2346] hover:underline">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                                 Fichier
                                             </a>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
 
-                                    @if($pointage->justification_status === 'en_attente')
+                                    <?php if($pointage->justification_status === 'en_attente'): ?>
                                         <div class="flex items-center gap-2 pt-1">
-                                            <form action="{{ route('admin.pointages.validate', $pointage->idPointage) }}" method="POST">
-                                                @csrf
+                                            <form action="<?php echo e(route('admin.pointages.validate', $pointage->idPointage)); ?>" method="POST">
+                                                <?php echo csrf_field(); ?>
                                                 <input type="hidden" name="action" value="accepte">
                                                 <button type="submit" class="text-[10px] bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-2 py-1 rounded transition-colors">Accepter</button>
                                             </form>
-                                            <form action="{{ route('admin.pointages.validate', $pointage->idPointage) }}" method="POST">
-                                                @csrf
+                                            <form action="<?php echo e(route('admin.pointages.validate', $pointage->idPointage)); ?>" method="POST">
+                                                <?php echo csrf_field(); ?>
                                                 <input type="hidden" name="action" value="refuse">
                                                 <button type="submit" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded transition-colors">Refuser</button>
                                             </form>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <span class="text-slate-300 text-xs italic">—</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="8" class="px-6 py-20 text-center text-slate-400 font-medium">
                             Aucun enregistrement de pointage trouvé.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-{{-- ═══════════ SETTINGS MODAL ═══════════ --}}
+
 <div id="settingsModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
     <div class="relative bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
@@ -316,40 +350,40 @@
             </button>
         </div>
 
-        <form action="{{ route('admin.settings.update') }}" method="POST" class="p-7 space-y-5">
-            @csrf
+        <form action="<?php echo e(route('admin.settings.update')); ?>" method="POST" class="p-7 space-y-5">
+            <?php echo csrf_field(); ?>
             <div class="space-y-1.5">
                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">GPS de l'entreprise</label>
-                <input type="text" name="companyGps" placeholder="Ex: 32.9348,-6.0234" value="{{ $settings->companyGps ?? '' }}"
+                <input type="text" name="companyGps" placeholder="Ex: 32.9348,-6.0234" value="<?php echo e($settings->companyGps ?? ''); ?>"
                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 font-mono">
                 <p class="text-[10px] text-slate-400 ml-1">Format: latitude,longitude</p>
             </div>
             <div class="grid grid-cols-3 gap-3">
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Entrée</label>
-                    <input type="time" name="companyEntryTime" value="{{ $settings->companyEntryTime ?? '' }}"
+                    <input type="time" name="companyEntryTime" value="<?php echo e($settings->companyEntryTime ?? ''); ?>"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Sortie</label>
-                    <input type="time" name="companyExitTime" value="{{ $settings->companyExitTime ?? '' }}"
+                    <input type="time" name="companyExitTime" value="<?php echo e($settings->companyExitTime ?? ''); ?>"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Absence</label>
-                    <input type="time" name="absenceTime" value="{{ $settings->absenceTime ?? '' }}"
+                    <input type="time" name="absenceTime" value="<?php echo e($settings->absenceTime ?? ''); ?>"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (m)</label>
-                    <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
+                    <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="<?php echo e($settings->distance ?? ''); ?>"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Délai de grâce (min)</label>
-                    <input type="number" name="maxDelay" placeholder="Ex: 15" min="0" max="120" value="{{ $settings->maxDelay ?? '' }}"
+                    <input type="number" name="maxDelay" placeholder="Ex: 15" min="0" max="120" value="<?php echo e($settings->maxDelay ?? ''); ?>"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
             </div>
@@ -409,4 +443,14 @@
         });
     }
 </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/Adminpointage.blade.php ENDPATH**/ ?>
