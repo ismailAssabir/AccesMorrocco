@@ -211,9 +211,11 @@
 
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
+
         <select name="idDepartement" id="select-dept"
             class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
             onchange="loadEmployees(this.value)">
+
             <option value="">— Choisir un département —</option>
             <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
@@ -223,19 +225,12 @@
 
     
     <div>
-        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Employé</label>
-        <select name="idUser" id="select-user"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700">
-            <option value="">— Choisir un employé —</option>
-        </select>
-    </div>
-
-    
-    <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Mot de passe client</label>
         <input type="password" name="password" id="password"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
-            placeholder="Entrer un mot de passe">
+
+        class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
+        placeholder="Entrer un mot de passe">
+
     </div>
 
 </div>
@@ -376,27 +371,7 @@
         }
 
         // Charger les employés du département via fetch
-        function loadEmployees(deptId) {
-            const select = document.getElementById('select-user');
-            select.innerHTML = '<option value="">Chargement...</option>';
 
-            if (!deptId) {
-                select.innerHTML = '<option value="">— Choisir un employé —</option>';
-                return;
-            }
-
-            fetch(`/departements/${deptId}/users`)
-                .then(r => r.json())
-                .then(users => {
-                    select.innerHTML = '<option value="">— Choisir un employé —</option>';
-                    users.forEach(u => {
-                        select.innerHTML += `<option value="${u.idUser}">${u.firstName} ${u.lastName}</option>`;
-                    });
-                })
-                .catch(() => {
-                    select.innerHTML = '<option value="">Erreur de chargement</option>';
-                });
-        }
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

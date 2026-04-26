@@ -107,7 +107,7 @@
                     <span class="avatar"><?php echo e(strtoupper(substr($lead->firstName,0,1))); ?><?php echo e(strtoupper(substr($lead->lastName,0,1))); ?></span>
                     <span class="name-block">
                         <div class="name"><?php echo e($lead->firstName); ?> <?php echo e($lead->lastName); ?></div>
-                        <div class="sub"><?php echo e($lead->adresse ?? '—'); ?></div>
+                        <div class="sub"><?php echo e($lead->address ?? '—'); ?></div>
                     </span>
                 </td>
                 <td><?php echo e($lead->email ?? '—'); ?></td>
@@ -115,7 +115,7 @@
                 <td><span class="pill"><?php echo e($lead->type); ?></span></td>
                 <td><?php echo e($lead->source ?? '—'); ?></td>
                 <td><?php echo e($lead->nationalite ?? '—'); ?></td>
-                <td><?php echo e($lead->departements->name ?? '—'); ?></td>
+                <td><?php echo e($lead->departements->title ?? '—'); ?></td>
                 <td><?php echo e($lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—'); ?></td>
             </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
