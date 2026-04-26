@@ -16,6 +16,7 @@ use App\Http\Controllers\ObjectifController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\PaimentController;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\DossierController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'verified', 'role:admin|manager'])->group(function ()
     Route::get('/departements', [DepartementController::class, 'index'])->name('departements.index');
     Route::post('/departements', [DepartementController::class, 'store'])->name('departements.store');
     Route::get('/departements/{id}', [DepartementController::class, 'show'])->name('departements.show');
+    Route::get('/departements/{id}/export-pdf', [DepartementController::class, 'exportPdf'])->name('departements.export-pdf');
     Route::get('/departements/edit/{id}', [DepartementController::class, 'edit'])->name('departements.edit');
     Route::put('/departements/edit/{id}', [DepartementController::class, 'update'])->name('departements.update');
     Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
@@ -222,7 +224,14 @@ Route::get('/departements/{id}/users', function ($id) {
                 ->get(['idUser', 'firstName', 'lastName']);
     return response()->json($users);
 })->name('departements.users');
-
+//Dossier Routes
+Route::get('/dossiers', [DossierController::class, 'index'])->name('dossiers.index');
+Route::post('/dossiers', [DossierController::class, 'store'])->name('dossiers.store');
+Route::get('/dossiers/export-pdf', [DossierController::class, 'exportPdf'])->name('dossiers.export-pdf');
+Route::get('/dossiers/{id}', [DossierController::class, 'show'])->name('dossiers.show');
+Route::get('/dossiers/{id}/edit',[DossierController::class, 'edit'])->name('dossiers.edit');
+Route::put('/dossiers/{id}', [DossierController::class, 'update'])->name('dossiers.update');
+Route::delete('/dossiers/{id}',[DossierController::class, 'destroy'])->name('dossiers.destroy');
 
 
 require __DIR__.'/auth.php';

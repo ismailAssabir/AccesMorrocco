@@ -8,13 +8,14 @@
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                 </a>
                 <div>
-                    <div class="flex items-center gap-2">
+                    <h1 class="text-3xl font-black text-slate-800 tracking-tight">{{ $departement->title }}</h1>
+                    <div class="flex items-center gap-2 mt-1 mb-1">
                         <span class="text-[10px] font-black uppercase text-[#b11d40] tracking-widest bg-[#b11d40]/10 px-2 py-0.5 rounded-md">Département</span>
                     </div>
-                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-800 mt-1">{{ $departement->title }}</h1>
-                    <p class="text-slate-500 text-sm mt-1 font-medium">{{ $departement->description ?? 'Aucune description disponible pour ce département.' }}</p>
+                    <p class="text-slate-500 font-medium text-sm">Gestion et suivi des membres du département</p>
                 </div>
             </div>
+
             <button type="button" onclick="openEditDeptModal('{{ $departement->idDepartement ?? $departement->id }}', '{{ addslashes($departement->title) }}', '{{ addslashes($departement->description) }}', '{{ $departement->idUser }}')"
                 class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +87,7 @@
                 </span>
                 <div>
                     <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Présence Moy.</p>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ collect($employeesList)->avg('presence') ?? '100' }}%</p>
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $departement->avg_presence ?? 0 }}%</p>
                 </div>
             </div>
 
@@ -103,11 +104,38 @@
 
         {{-- ═══════════ EMPLOYEES LIST ═══════════ --}}
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
-            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
                 <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#b11d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     Membres du Département
                 </h3>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    {{-- Period Filter --}}
+                    <div class="bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex items-center">
+                        <a href="{{ route('departements.show', ['id' => $departement->idDepartement, 'period' => 'today']) }}" 
+                           class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all {{ $period == 'today' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600' }}">
+                            Aujourd'hui
+                        </a>
+                        <a href="{{ route('departements.show', ['id' => $departement->idDepartement, 'period' => 'weekly']) }}" 
+                           class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all {{ $period == 'weekly' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600' }}">
+                            7 Jours
+                        </a>
+                        <a href="{{ route('departements.show', ['id' => $departement->idDepartement, 'period' => 'monthly']) }}" 
+                           class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all {{ $period == 'monthly' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600' }}">
+                            Ce Mois
+                        </a>
+                    </div>
+
+                    {{-- Export Button --}}
+                    <a href="{{ route('departements.export-pdf', ['id' => $departement->idDepartement, 'period' => $period]) }}" 
+                       class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-slate-200 transition-all active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        PDF Rapport
+                    </a>
+                </div>
             </div>
             
             <div class="overflow-x-auto">
@@ -139,15 +167,55 @@
                                         {{ $employee->post ?? 'Employé' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    {{-- Placeholder presence if not dynamic --}}
-                                    <div class="flex items-center justify-center gap-2">
-                                        <span class="text-xs font-extrabold text-emerald-500">{{ $employee->presence ?? '100' }}%</span>
-                                        <div class="w-16 bg-slate-100 rounded-full h-1.5">
-                                            <div class="bg-emerald-400 h-1.5 rounded-full" style="width: {{ $employee->presence ?? '100' }}%"></div>
-                                        </div>
-                                    </div>
-                                </td>
+                                 <td class="px-6 py-4 text-center">
+                                     <div class="flex flex-col items-center gap-1.5">
+                                         <div class="flex items-center gap-3">
+                                             <div class="flex items-center gap-2">
+                                                 <span class="text-xs font-extrabold {{ ($employee->presence_percentage ?? 0) > 80 ? 'text-emerald-500' : (($employee->presence_percentage ?? 0) > 50 ? 'text-amber-500' : 'text-red-500') }}">
+                                                     {{ $employee->presence_percentage ?? 0 }}%
+                                                 </span>
+                                                 <div class="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                     <div class="h-1.5 rounded-full transition-all duration-500 {{ ($employee->presence_percentage ?? 0) > 80 ? 'bg-emerald-400' : (($employee->presence_percentage ?? 0) > 50 ? 'bg-amber-400' : 'bg-red-400') }}" 
+                                                          style="width: {{ $employee->presence_percentage ?? 0 }}%"></div>
+                                                 </div>
+                                             </div>
+                                             
+                                             {{-- Status Badges --}}
+                                             @if($employee->is_here_today)
+                                                 @php
+                                                     $pStatus = strtolower($employee->today_pointage->status ?? 'present');
+                                                     $arrivalTime = $employee->today_pointage->heureEntree ? \Carbon\Carbon::parse($employee->today_pointage->heureEntree)->format('H:i') : '--:--';
+                                                 @endphp
+                                                 
+                                                 @if($pStatus === 'retard')
+                                                     <div class="group relative inline-block">
+                                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-tighter cursor-help">
+                                                             <span class="w-1 h-1 rounded-full bg-amber-500"></span>
+                                                             En retard
+                                                         </span>
+                                                         {{-- Tooltip --}}
+                                                         <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-max">
+                                                             <div class="bg-slate-800 text-white text-[10px] py-1 px-2.5 rounded-lg shadow-xl font-bold">
+                                                                 Arrivé à {{ $arrivalTime }}
+                                                                 <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 @else
+                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-tighter">
+                                                         <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
+                                                         Présent
+                                                     </span>
+                                                 @endif
+                                             @else
+                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-tighter">
+                                                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                                     Absent
+                                                 </span>
+                                             @endif
+                                         </div>
+                                     </div>
+                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @php
                                         $statusStr = strtolower($employee->status ?? 'actif');

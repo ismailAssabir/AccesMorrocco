@@ -139,6 +139,9 @@
         } else if (entityType === 'objectif') {
             title = "Supprimer l'objectif ?";
             description = "Cette action supprimera l'objectif et ses suivis d'avancement.";
+        } else if (entityType === 'lead') {
+            title = "Supprimer le lead ?";
+            description = "Toutes les données de ce prospect seront définitivement supprimées.";
         }
 
         openGlobalDeleteModal(url, title, description);

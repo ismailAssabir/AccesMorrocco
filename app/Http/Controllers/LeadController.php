@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
 use App\Models\Lead;
 use App\Models\User;
 use App\Models\Departement;
 use App\Models\Client;
+use App\Models\Dossier;
+use Illuminate\Support\Str;
+
 use Illuminate\Support\Facades\Gate;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -122,81 +127,91 @@ class LeadController extends Controller
     }
 
     public function updateStatut(Request $request, $id)
-    {
-        Gate::authorize('lead.edit');
+{
+    Gate::authorize('lead.edit');
 
-        $lead = Lead::findOrFail($id);
+    $lead = Lead::findOrFail($id);
 
-        $request->validate([
-            'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
-            'idDepartement' => 'nullable|exists:departements,idDepartement',
-            'idUser'        => 'nullable|exists:users,idUser',
-        ]);
+    $request->validate([
+        'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
+        'idDepartement' => 'nullable|exists:departements,idDepartement',
+        'idUser'        => 'nullable|exists:users,idUser',
+        'password'      => 'nullable|required_if:statut,ok|min:6',
+    ]);
 
-        $statut = $request->statut;
+    $statut = $request->statut;
 
-        if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
-            $lead->statut = '1er_appel';
+    if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
+        $lead->statut = '1er_appel';
 
-        } elseif ($statut === '2eme_appel' && $lead->statut === '1er_appel') {
-            $lead->statut = '2eme_appel';
+    } elseif ($statut === '2eme_appel' && $lead->statut === '1er_appel') {
+        $lead->statut = '2eme_appel';
 
-        } elseif ($statut === 'lost') {
-            $lead->statut = 'lost';
+    } elseif ($statut === 'lost') {
+        $lead->statut = 'lost';
 
-        } elseif ($statut === 'promis') {
-            $lead->statut = 'promis';
+    } elseif ($statut === 'promis') {
+        $lead->statut = 'promis';
 
-        } elseif ($statut === 'ok') {
-            $lead->statut = 'ok';
+    } elseif ($statut === 'ok') {
 
-            if ($request->filled('idDepartement')) {
-                $lead->idDepartement = $request->idDepartement;
-            }
-            if ($request->filled('idUser')) {
-                $lead->idUser = $request->idUser;
-            }
+        $lead->statut = 'ok';
 
-            // Vérifier si un client avec cet email existe déjà
-            $clientExiste = false;
-            if ($lead->email) {
-                $clientExiste = Client::where('email', $lead->email)->exists();
-            }
-
-            if (!$clientExiste) {
-                // Créer le client à partir des données du lead
-                Client::create([
-                    'firstName'     => $lead->firstName,
-                    'lastName'      => $lead->lastName,
-                    'email'         => $lead->email,
-                    'phoneNumber'   => $lead->phoneNumber,
-                    'adresse'       => $lead->adresse,
-                    'CNE'           => $lead->CNE,
-                    'nationalite'   => $lead->nationalite,
-                    'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
-                    'idUser'        => $request->idUser ?? $lead->idUser,
-                    'dateCreation'  => now()->toDateString(),
-                    // Ajoute ici d'autres champs si ta table clients en a
-                ]);
-                $lead->delete();
-            }
-
-        } else {
-            return redirect()->back()->with('error', 'Transition de statut non autorisée.');
+        if ($request->filled('idDepartement')) {
+            $lead->idDepartement = $request->idDepartement;
         }
 
-        $lead->save();
+        if ($request->filled('idUser')) {
+            $lead->idUser = $request->idUser;
+        }
+        $client = Client::where('email', $lead->email)->first();
 
-        $messages = [
-            '1er_appel'  => '1er appel enregistré.',
-            '2eme_appel' => '2ème appel enregistré.',
-            'lost'       => 'Lead marqué comme perdu.',
-            'promis'     => 'Lead marqué comme promis.',
-            'ok'         => 'Lead converti en client avec succès !',
-        ];
+        if (!$client) {
+            $client = Client::create([
+                'firstName'     => $lead->firstName,
+                'lastName'      => $lead->lastName,
+                'email'         => $lead->email,
+                'phoneNumber'   => $lead->phoneNumber,
+                'adresse'       => $lead->adresse,
+                'CNE'           => $lead->CNE,
+                'nationalite'   => $lead->nationalite,
+                'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
+                'idUser'        => $request->idUser ?? $lead->idUser,
+                'dateCreation'  => now()->toDateString(),
+                'password'      => Hash::make($request->password ?? '123456'),
+            ]);
+        }
 
-        return redirect()->route('leads.show', $id)->with('msg', $messages[$statut]);
+        Dossier::create([
+            'idClient'        => $client->idClient,
+            'idDepartement'   => $request->idDepartement ?? $lead->idDepartement,
+            'reference'       => 'DOS-' . strtoupper(Str::random(8)),
+            'dateCreation'    => now(),
+            'nombrePersonnes' => 1,
+            'montant'         => 0,
+            'nombreJours'     => 0,
+            'status'          => 'ouvert',
+            'commentaire'     => 'Dossier créé automatiquement depuis la conversion du lead #' . $lead->idLead . '.',
+        ]);
+
+    } else {
+        return redirect()->back()->with('error', 'Transition de statut non autorisée.');
     }
+
+    $lead->save();
+
+    $messages = [
+        '1er_appel'  => '1er appel enregistré.',
+        '2eme_appel' => '2ème appel enregistré.',
+        'lost'       => 'Lead marqué comme perdu.',
+        'promis'     => 'Lead marqué comme promis.',
+        'ok'         => 'Lead converti en client avec succès !',
+    ];
+
+    return redirect()
+        ->route('leads.show', $id)
+        ->with('msg', $messages[$statut]);
+}
 
     public function destroy($id)
     {

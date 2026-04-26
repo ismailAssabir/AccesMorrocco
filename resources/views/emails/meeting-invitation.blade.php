@@ -135,7 +135,10 @@
     <div class="email-container">
         <div class="header" style="text-align: left;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <img src="https://i.postimg.cc/J06WrJWy/logo.png" alt="Access Morocco" style="max-height: 80px; display: inline-block;">
+                <img src="https://i.ibb.co/Hfm6DJ2Y/access.png" alt="Access Morocco" style="width: 120px; height: auto; border: none; display: block; margin: 0 auto 15px auto;">
+                <span style="color: #b11d40; font-size: 20px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; display: inline-block; font-family: 'Inter', sans-serif;">
+                    ACCESS MOROCCO
+                </span>
             </div>
             <div style="text-align: center; margin-bottom: 30px;">
                 <div class="tag" style="margin-bottom: 0;">Invitation à une réunion</div>
@@ -150,35 +153,41 @@
             @endif
             
             <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">📅 Date & Heure</div>
-                    <div class="info-value">
-                        {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y') }} à {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}
-                        @if($reunion->heureFin)
-                            - {{ \Carbon\Carbon::parse($reunion->heureFin)->format('H:i') }}
-                        @endif
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-label">📍 Lieu</div>
-                    <div class="info-value">
-                        @if($reunion->lieu)
-                            {{ $reunion->lieu }}
-                        @elseif($reunion->type === 'Interne')
-                            Enterprise
-                        @elseif($reunion->type === 'Externe')
-                            Meeting online
-                        @else
-                            Visioconférence
-                        @endif
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">🏷️ Type</div>
-                    <div class="info-value">{{ $reunion->type }}</div>
-                </div>
+                <table role="presentation" width="100%">
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <div class="info-label">📅 Date & Heure</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">
+                                {{ \Carbon\Carbon::parse($reunion->dateHeure)->translatedFormat('l d F Y') }} à {{ \Carbon\Carbon::parse($reunion->dateHeure)->format('H:i') }}
+                                @if($reunion->heureFin)
+                                    - {{ \Carbon\Carbon::parse($reunion->heureFin)->format('H:i') }}
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <div class="info-label">📍 Lieu</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">
+                                @if($reunion->lieu)
+                                    {{ $reunion->lieu }}
+                                @elseif($reunion->type === 'Interne')
+                                    Enterprise
+                                @elseif($reunion->type === 'Externe')
+                                    Meeting online
+                                @else
+                                    Visioconférence
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="info-label">🏷️ Type</div>
+                            <div class="info-value" style="color: #1e293b; font-size: 15px;">{{ $reunion->type }}</div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             @if($reunion->lien)

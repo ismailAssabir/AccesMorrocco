@@ -215,9 +215,14 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Lead associé *</label>
-                            <input name="idLead" required placeholder="ID du lead"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Lead associé (Optionnel)</label>
+                            <select name="idLead" 
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                <option value="">-- Sélectionner un Lead --</option>
+                                @foreach($leads as $lead)
+                                    <option value="{{ $lead->id }}">{{ $lead->firstName }} {{ $lead->lastName }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="md:col-span-2">

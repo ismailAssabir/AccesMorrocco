@@ -49,12 +49,12 @@ class DepartementController extends Controller
             $employeIds = $dept->employes->pluck('idUser')->toArray();
 
             if (empty($employeIds)) {
-                $dept->avg_presence = 0; // Fallback pour les départements vides
+                $dept->avg_presence = 0;
             } else {
                 $presentCount = Pointage::whereIn('idUser', $employeIds)
-                    ->whereIn('status', ['present', 'Present', 'présent', 'Présent']) // Gère les variations de casse
                     ->whereDate('date', now()->toDateString())
-                    ->count();
+                    ->distinct('idUser')
+                    ->count('idUser');
                 
                 $dept->avg_presence = round(($presentCount / count($employeIds)) * 100);
             }
@@ -100,12 +100,104 @@ public function store(Request $request) {
     return redirect()->back()->with('msg' , "Le département a été ajouté avec succès");
 
 }
-public function show($id){
-            Gate::authorize('departement.view');
+    public function show(Request $request, $id)
+    {
+        Gate::authorize('departement.view');
+        $period = $request->get('period', 'weekly');
 
-    $departement = Departement::with(['manager', 'taches', 'taches.users'])->findOrFail($id);
-    return view('showDepartement' , compact('departement'));
-}
+        $departement = Departement::with(['manager', 'employes', 'taches', 'taches.users'])->findOrFail($id);
+        $this->calculatePresence($departement, $period);
+
+        return view('showDepartement', compact('departement', 'period'));
+    }
+
+    private function calculatePresence($departement, $period)
+    {
+        $today = now();
+        $startDate = match ($period) {
+            'today' => now()->startOfDay(),
+            'monthly' => now()->startOfMonth(),
+            default => now()->subDays(6)->startOfDay(), // last 7 days
+        };
+
+        $workingDaysCount = 0;
+        $tempDate = $startDate->copy();
+        while ($tempDate->startOfDay() <= $today->startOfDay()) {
+            if ($tempDate->isWeekday()) {
+                $workingDaysCount++;
+            } elseif ($period === 'today') {
+                // If we're specifically looking at today and it's a weekend, it's a working day if they're here
+                $workingDaysCount = 1;
+            }
+            $tempDate->addDay();
+        }
+
+        // Final fallback: if today is a weekend and we're looking at a range, 
+        // we should still have at least 1 day if we want to show any percentage.
+        if ($workingDaysCount === 0 && $period === 'today') {
+            $workingDaysCount = 1;
+        }
+
+        $employeIds = $departement->employes->pluck('idUser')->toArray();
+        $pointages = Pointage::whereIn('idUser', $employeIds)
+            ->whereDate('date', '>=', $startDate->toDateString())
+            ->get()
+            ->groupBy('idUser');
+
+        $todayPointages = Pointage::whereIn('idUser', $employeIds)
+            ->whereDate('date', now()->toDateString())
+            ->get()
+            ->keyBy('idUser');
+
+        foreach ($departement->employes as $employee) {
+            $daysPresent = isset($pointages[$employee->idUser]) 
+                ? $pointages[$employee->idUser]->unique('date')->count() 
+                : 0;
+            
+            $employee->presence_percentage = $workingDaysCount > 0 
+                ? round(($daysPresent / $workingDaysCount) * 100) 
+                : 0;
+            
+            // Ensure 100% if they are/were here today
+            if ($employee->is_here_today) {
+                if ($period === 'today') {
+                    $employee->presence_percentage = 100;
+                }
+            }
+
+            $todayP = $todayPointages->get($employee->idUser);
+            $employee->is_here_today = (bool)$todayP;
+            $employee->today_pointage = $todayP;
+            
+            // Count total retards for the period
+            $employee->total_retards = isset($pointages[$employee->idUser])
+                ? $pointages[$employee->idUser]->whereIn('status', ['retard', 'Retard'])->count()
+                : 0;
+        }
+
+        $departement->avg_presence = count($employeIds) > 0 
+            ? round($departement->employes->where('presence_percentage', '>', 0)->avg('presence_percentage') ?? 0)
+            : 0;
+            
+        // If it's today, it's easier: just average everyone's today percentage
+        if ($period === 'today' && count($employeIds) > 0) {
+            $departement->avg_presence = round($departement->employes->avg('presence_percentage'));
+        }
+    }
+
+    public function exportPdf(Request $request, $id)
+    {
+        Gate::authorize('departement.view');
+        $period = $request->get('period', 'monthly');
+        $departement = Departement::with(['manager', 'employes'])->findOrFail($id);
+        
+        $this->calculatePresence($departement, $period);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('departements.report-pdf', compact('departement', 'period'));
+        
+        $filename = 'Rapport_' . str_replace(' ', '_', $departement->title) . '_' . now()->format('Y-m-d') . '.pdf';
+        return $pdf->download($filename);
+    }
 public function destroy($id)
 
 {   

@@ -81,32 +81,37 @@ class ReunionController extends Controller
 
         $reunion = Reunion::create($validated);
 
-        // Handle Participants
-        $recipients = collect();
-
         if ($request->invitation_type === 'individual') {
             $reunion->participants()->sync($request->participant_ids);
-            $recipients = \App\Models\User::whereIn('idUser', $request->participant_ids)->get();
-        } elseif ($request->invitation_type === 'department') {
-            $recipients = \App\Models\User::where('idDepartement', $request->idDepartement)->get();
-        } else {
-            // All active users
-            $recipients = \App\Models\User::where('status', 'active')->get();
         }
 
         // Send Emails
+        $this->sendInvitations($reunion, $request->invitation_type, $request->participant_ids ?? []);
+
+        return redirect('/reunions')->with('msg', 'La réunion a été ajoutée avec succès et les invitations ont été envoyées.');
+    }
+
+    private function sendInvitations($reunion, $invitationType, $participantIds = [])
+    {
+        $recipients = collect();
+
+        if ($invitationType === 'individual') {
+            $recipients = \App\Models\User::whereIn('idUser', $participantIds)->get();
+        } elseif ($invitationType === 'department') {
+            $recipients = \App\Models\User::where('idDepartement', $reunion->idDepartement)->get();
+        } else {
+            $recipients = \App\Models\User::where('status', 'active')->get();
+        }
+
         foreach ($recipients as $recipient) {
             if ($recipient->email) {
                 try {
                     \Illuminate\Support\Facades\Mail::to($recipient->email)->send(new \App\Mail\MeetingInvitation($reunion));
                 } catch (\Exception $e) {
-                    // Log error or ignore if SMTP fails
                     \Illuminate\Support\Facades\Log::error("Failed to send meeting email to {$recipient->email}: " . $e->getMessage());
                 }
             }
         }
-
-        return redirect('/reunions')->with('msg', 'La réunion a été ajoutée avec succès et les invitations ont été envoyées.');
     }
 
     public function show($id)
@@ -160,7 +165,10 @@ class ReunionController extends Controller
             $reunion->participants()->detach();
         }
 
-        return redirect('/reunions')->with('msg', 'La réunion a été mise à jour');
+        // Send updated emails
+        $this->sendInvitations($reunion, $request->invitation_type, $request->participant_ids ?? []);
+
+        return redirect('/reunions')->with('msg', 'La réunion a été mise à jour et les invitations ont été renvoyées.');
     }
 
     public function destroy($id)

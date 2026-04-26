@@ -134,7 +134,12 @@ class PointageController extends Controller
 
         $currentTime = now();
         $officialTime = Carbon::createFromTimeString($companyEntryTime);
+<<<<<<< HEAD
         $status = $currentTime->gt($officialTime->addMinutes($MaxDelay)) ? 'retard' : 'present';
+=======
+        $graceMinutes = $settings->maxDelay ?? 15;
+        $status = $currentTime->gt($officialTime->addMinutes($graceMinutes)) ? 'retard' : 'present';
+>>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
 
         Pointage::create([
             'idUser'      => $idUser,
@@ -228,6 +233,10 @@ class PointageController extends Controller
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
@@ -251,10 +260,36 @@ class PointageController extends Controller
             $validatedData['fichier'] = $request->file('fichier')->store('Justifpointages', 'public');
         }
 
+        $validatedData['justification_status'] = 'en_attente';
+
         $pointage->update($validatedData);
         return redirect()->back()->with('msg', 'Justification envoyée.');
     }
 
+<<<<<<< HEAD
+=======
+    public function validateJustification(Request $request, $id)
+    {
+        Gate::authorize('role:admin'); // Only admins can validate
+
+        $request->validate([
+            'action' => 'required|in:accepte,refuse',
+        ]);
+
+        $pointage = Pointage::findOrFail($id);
+        $pointage->justification_status = $request->action;
+
+        if ($request->action === 'accepte') {
+            $pointage->status = 'present'; // Clear the infraction if accepted
+        }
+
+        $pointage->save();
+
+        return redirect()->back()->with('msg', 'Justification ' . ($request->action === 'accepte' ? 'acceptée' : 'refusée') . '.');
+    }
+
+    
+>>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
     public function updateSettings(Request $request)
     {
         Gate::authorize('pointage.create');
@@ -273,9 +308,14 @@ class PointageController extends Controller
             'companyEntryTime' => 'nullable',
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
+<<<<<<< HEAD
             'MaxDeley' => 'integer|nullable' ,
              'AbsenceTime' => 'nullable|date_format:H:i',
 
+=======
+            'maxDelay'         => 'nullable|integer|min:0',
+            'absenceTime'      => 'nullable',
+>>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
         ], [
             'companyGps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);

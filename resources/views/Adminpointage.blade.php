@@ -240,19 +240,46 @@
                         </td>
                         <td class="px-6 py-4 max-w-xs">
                             @if($pointage->justification)
-                                <div class="space-y-1">
-                                    <p class="text-xs text-slate-600 truncate max-w-[200px]" title="{{ $pointage->justification }}">
-                                        {{ $pointage->justification }}
-                                    </p>
-                                    @if($pointage->typejustif)
-                                        <span class="inline-block text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">{{ $pointage->typejustif }}</span>
-                                    @endif
-                                    @if($pointage->fichier)
-                                        <a href="{{ Storage::url($pointage->fichier) }}" target="_blank"
-                                            class="inline-flex items-center gap-1 text-[10px] font-bold text-[#be2346] hover:underline">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                            Voir fichier
-                                        </a>
+                                <div class="space-y-2">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <p class="text-xs text-slate-600 truncate max-w-[150px]" title="{{ $pointage->justification }}">
+                                            {{ $pointage->justification }}
+                                        </p>
+                                        @if($pointage->justification_status === 'en_attente')
+                                            <span class="bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">En attente</span>
+                                        @elseif($pointage->justification_status === 'accepte')
+                                            <span class="bg-emerald-100 text-emerald-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">Acceptée</span>
+                                        @elseif($pointage->justification_status === 'refuse')
+                                            <span class="bg-red-100 text-red-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">Refusée</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        @if($pointage->typejustif)
+                                            <span class="inline-block text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full uppercase">{{ $pointage->typejustif }}</span>
+                                        @endif
+                                        @if($pointage->fichier)
+                                            <a href="{{ Storage::url($pointage->fichier) }}" target="_blank"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-[#be2346] hover:underline">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                Fichier
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    @if($pointage->justification_status === 'en_attente')
+                                        <div class="flex items-center gap-2 pt-1">
+                                            <form action="{{ route('admin.pointages.validate', $pointage->idPointage) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="action" value="accepte">
+                                                <button type="submit" class="text-[10px] bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-2 py-1 rounded transition-colors">Accepter</button>
+                                            </form>
+                                            <form action="{{ route('admin.pointages.validate', $pointage->idPointage) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="action" value="refuse">
+                                                <button type="submit" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded transition-colors">Refuser</button>
+                                            </form>
+                                        </div>
                                     @endif
                                 </div>
                             @else
@@ -297,24 +324,36 @@
                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 font-mono">
                 <p class="text-[10px] text-slate-400 ml-1">Format: latitude,longitude</p>
             </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Entrée</label>
+                    <input type="time" name="companyEntryTime" value="{{ $settings->companyEntryTime ?? '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Sortie</label>
+                    <input type="time" name="companyExitTime" value="{{ $settings->companyExitTime ?? '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Absence</label>
+                    <input type="time" name="absenceTime" value="{{ $settings->absenceTime ?? '' }}"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                </div>
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure d'Entrée</label>
-                    <input type="time" name="companyEntryTime" value="{{ $settings->companyEntryTime ?? '' }}"
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (m)</label>
+                    <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Heure de Sortie</label>
-                    <input type="time" name="companyExitTime" value="{{ $settings->companyExitTime ?? '' }}"
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Délai de grâce (min)</label>
+                    <input type="number" name="maxDelay" placeholder="Ex: 15" min="0" max="120" value="{{ $settings->maxDelay ?? '' }}"
                         class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                 </div>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Distance maximale (mètres)</label>
-                <input type="number" name="distance" placeholder="Ex: 200" min="10" max="5000" value="{{ $settings->distance ?? '' }}"
-                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                <p class="text-[10px] text-slate-400 ml-1">Rayon autorisé autour de l'entreprise pour le pointage GPS.</p>
-            </div>
+            <p class="text-[10px] text-slate-400 ml-1">Rayon autorisé (mètres) et marge de retard autorisée (minutes).</p>
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeSettingsModal()"
                     class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">

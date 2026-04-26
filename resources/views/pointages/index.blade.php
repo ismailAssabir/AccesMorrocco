@@ -25,6 +25,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
         {{-- CHECK-IN CARD --}}
+        @can('pointage.create')
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div class="h-1.5 w-full bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
             <div class="p-7">
@@ -59,8 +60,10 @@
                 </form>
             </div>
         </div>
+        @endcan
 
         {{-- CHECK-OUT CARD --}}
+        @can('pointage.edit')
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
             <div class="p-7">
@@ -95,6 +98,7 @@
                 </form>
             </div>
         </div>
+        @endcan
     </div>
 
     {{-- ═══════════ HISTORIQUE DE POINTAGE ═══════════ --}}

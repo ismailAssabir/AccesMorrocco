@@ -25,17 +25,14 @@
                 </a>
                 @endcan
                 @can('lead.delete')
-                <form method="POST" action="{{ route('leads.destroy', $lead->idLead) }}"
-                      onsubmit="return confirm('Supprimer ce lead ?')">
-                    @csrf @method('DELETE')
-                    <button type="submit"
-                            class="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-500 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        Supprimer
-                    </button>
-                </form>
+                <button type="button" 
+                        onclick="confirmDelete('{{ route('leads.destroy', $lead->idLead) }}', 'lead')"
+                        class="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-500 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Supprimer
+                </button>
                 @endcan
             </div>
         </div>
@@ -197,25 +194,38 @@
 
                             {{-- Département + Employé (visible seulement si OK) --}}
                             <div id="dept-section" class="hidden space-y-3 mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                                <div>
-                                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département *</label>
-                                    <select name="idDepartement" id="select-dept"
-                                            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40]"
-                                            onchange="loadEmployees(this.value)">
-                                        <option value="">— Choisir un département —</option>
-                                        @foreach($departements as $dept)
-                                            <option value="{{ $dept->idDepartement }}">{{ $dept->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Assigner à un employé</label>
-                                    <select name="idUser" id="select-user"
-                                            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40]">
-                                        <option value="">— Choisir un employé —</option>
-                                    </select>
-                                </div>
-                            </div>
+
+    {{-- Département --}}
+    <div>
+        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
+        <select name="idDepartement" id="select-dept"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
+            onchange="loadEmployees(this.value)">
+            <option value="">— Choisir un département —</option>
+            @foreach($departements as $dept)
+                <option value="{{ $dept->idDepartement }}">{{ $dept->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    {{-- User --}}
+    <div>
+        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Employé</label>
+        <select name="idUser" id="select-user"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+            <option value="">— Choisir un employé —</option>
+        </select>
+    </div>
+
+    {{-- 🔥 Password --}}
+    <div>
+        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Mot de passe client</label>
+        <input type="password" name="password" id="password"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
+            placeholder="Entrer un mot de passe">
+    </div>
+
+</div>
 
                             <button type="submit"
                                     class="w-full py-2.5 bg-[#b11d40] text-white font-black rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
