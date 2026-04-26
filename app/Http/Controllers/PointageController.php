@@ -32,7 +32,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         $settings = Company::first();
         return view('Adminpointage', compact('pointages', 'settings'));
     }
-    }
+    
    
     public function userPointage()
     {           Gate::authorize('pointage.view');
@@ -163,7 +163,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', 'Entrée enregistrée avec succès.');
     }
 
-    }
+    
     public function checkOut(Request $request) 
     {
         Gate::authorize('pointage.edit');
@@ -240,7 +240,7 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
-    }
+    
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
@@ -304,4 +304,4 @@ private function calculateDistance($lat1, $lon1, $lat2, $lon2)
         Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');
     }
-}}
+}
