@@ -8,9 +8,6 @@
 <?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-    <?php
-        $departements = \App\Models\Departement::with('manager')->get();
-    ?>
     <style>
         @keyframes modalIn {
             from { opacity: 0; transform: scale(0.95) translateY(-20px); }
@@ -44,18 +41,18 @@
                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     </span>
                 </div>
-                <h3 class="text-3xl font-bold mt-2 text-slate-800"><?php echo e($users->count()); ?></h3>
+                <h3 class="text-3xl font-bold mt-2 text-slate-800"><?php echo e($stats['total']); ?></h3>
             </div>
 
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#be2346]">
                 <p class="text-slate-400 text-[10px] uppercase font-black tracking-widest">En Congé</p>
-                <h3 class="text-3xl font-bold mt-2 text-[#be2346]"><?php echo e($users->where('status', 'conge')->count()); ?></h3>
+                <h3 class="text-3xl font-bold mt-2 text-[#be2346]"><?php echo e($stats['conge']); ?></h3>
             </div>
 
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                 <p class="text-slate-400 text-[10px] uppercase font-black tracking-widest">Consultants</p>
                 <h3 class="text-3xl font-bold mt-2 text-blue-600">
-                    <?php echo e($users->where('typeContrat', 'freelance')->count()); ?></h3>
+                    <?php echo e($stats['freelance']); ?></h3>
             </div>
         </div>
 
@@ -82,77 +79,89 @@
 <?php endif; ?>
         </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-open modal if userId is in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('userId');
-        if (userId) {
-            const users = <?php echo json_encode($users, 15, 512) ?>;
-            const user = users.find(u => (u.idUser || u.id) == userId);
-            if (user) {
-                openViewModal(user);
-            }
-        }
-    });
-</script>
+        
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+            <form id="filterForm" class="flex flex-wrap items-center gap-4">
+                
+                <div class="flex-1 min-w-[280px] relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="search" id="searchInput" placeholder="Rechercher par nom, email, poste..." 
+                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
+                </div>
 
-        <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-100 bg-slate-50/50">
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                Collaborateur</th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Poste
-                            </th>
-                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                Contrat</th>
-                            <th
-                                class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
-                                Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr class="hover:bg-slate-50/80 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-[#be2346]/10 flex items-center justify-center font-bold text-xs text-[#be2346]">
-                                        <?php echo e(strtoupper(substr($user->firstName, 0, 1))); ?><?php echo e(strtoupper(substr($user->lastName, 0, 1))); ?>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative">
+                        <select name="poste" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Poste (Tous)</option>
+                            <?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($post); ?>"><?php echo e($post); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
 
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-bold text-slate-700"><?php echo e($user->firstName); ?> <?php echo e($user->lastName); ?></span>
-                                        <span class="text-[11px] text-slate-400"><?php echo e($user->email); ?></span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-slate-600 font-medium"><?php echo e($user->post ?? 'Non défini'); ?></td>
-                            <td class="px-6 py-4">
-                                <span class="text-[10px] font-black text-slate-400 uppercase"><?php echo e($user->typeContrat == 'CD' ? 'CDI' : $user->typeContrat); ?></span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button onclick='openViewModal(<?php echo json_encode($user, 15, 512) ?>)' class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Voir les détails">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    </button>
-                                    <button onclick='openEditModal(<?php echo json_encode($user, 15, 512) ?>)' class="p-2 rounded-lg text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all" title="Modifier">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                    </button>
-                                    <button onclick="confirmDeleteUser('<?php echo e(route('users.destroy', $user->idUser )); ?>')" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all" title="Supprimer">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-slate-400 text-sm">Aucun collaborateur trouvé.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                    <div class="relative">
+                        <select name="type" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Rôle (Tous)</option>
+                            <option value="employee">Employé</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <select name="typeContrat" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Contrat (Tous)</option>
+                            <option value="CD">CDI</option>
+                            <option value="CI">CI</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <select name="departement" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Département (Tous)</option>
+                            <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+
+                    <button type="button" id="resetFilters" class="p-3 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center" title="Réinitialiser les filtres">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        
+        <div id="tableContainer" class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8 relative">
+            
+            <div id="loadingOverlay" class="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 hidden items-center justify-center transition-all duration-300">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="w-8 h-8 border-4 border-[#be2346]/20 border-t-[#be2346] rounded-full animate-spin"></div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mise à jour...</span>
+                </div>
+            </div>
+
+            <div id="usersTable">
+                <?php echo $__env->make('partials._user_table', ['users' => $users], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
         </div>
 
@@ -267,6 +276,15 @@
                                         <option value="CD">CDI</option>
                                         <option value="CI">CI</option>
                                         <option value="freelance">Freelance</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Statut *</label>
+                                    <select name="status" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                        <option value="active" selected>Actif</option>
+                                        <option value="desactive">Désactivé</option>
+                                        <option value="conge">En Congé</option>
                                     </select>
                                 </div>
 
@@ -794,29 +812,84 @@
             toggleModal('editUserModal');
         }
 
-        function confirmDeleteUser(url) {
-            window.confirmDelete(url, 'employé');
+        // --- High-End SaaS Filter & AJAX Logic ---
+        const filterForm = document.getElementById('filterForm');
+        const usersTable = document.getElementById('usersTable');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        let searchTimeout;
+
+        function fetchUsers() {
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            const url = `<?php echo e(route('users.index')); ?>?${params.toString()}`;
+
+            if (loadingOverlay) { loadingOverlay.classList.remove('hidden'); loadingOverlay.classList.add('flex'); }
+            if (usersTable) usersTable.style.opacity = '0.4';
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.text())
+            .then(html => {
+                if (usersTable) usersTable.innerHTML = html;
+                window.history.pushState({ path: url }, '', url);
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                if (loadingOverlay) { loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex'); }
+                if (usersTable) usersTable.style.opacity = '1';
+            });
         }
 
-        // --- Auto-open and UI initialization ---
-        document.addEventListener('DOMContentLoaded', function() {
-            // Server-side auto-open (When data is received from routes)
-            <?php if(isset($openModal) && isset($selectedUser)): ?>
-                const selectedUser = <?php echo json_encode($selectedUser, 15, 512) ?>;
-                const openModal = "<?php echo e($openModal); ?>";
-                if (openModal === 'view') {
-                    openViewModal(selectedUser, true);
-                } else if (openModal === 'edit') {
-                    openEditModal(selectedUser, true);
-                }
-            <?php endif; ?>
+        if (filterForm) {
+            filterForm.querySelectorAll('select').forEach(select => select.addEventListener('change', fetchUsers));
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(fetchUsers, 300);
+                });
+            }
+            const resetBtn = document.getElementById('resetFilters');
+            if (resetBtn) { resetBtn.addEventListener('click', () => { filterForm.reset(); fetchUsers(); }); }
 
-            // Handle back button
-            window.onpopstate = function() {
-                document.getElementById('viewUserModal').classList.add('hidden');
-                document.getElementById('editUserModal').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            };
+            // Handle Pagination AJAX
+            if (usersTable) {
+                usersTable.addEventListener('click', function(e) {
+                    const link = e.target.closest('.pagination a, [rel="next"], [rel="prev"]');
+                    if (link) {
+                        e.preventDefault();
+                        const url = link.href;
+                        
+                        if (loadingOverlay) { loadingOverlay.classList.remove('hidden'); loadingOverlay.classList.add('flex'); }
+                        usersTable.style.opacity = '0.4';
+
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
+                        .then(html => {
+                            usersTable.innerHTML = html;
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.history.pushState({ path: url }, '', url);
+                        })
+                        .catch(error => console.error('Error:', error))
+                        .finally(() => {
+                            if (loadingOverlay) { loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex'); }
+                            usersTable.style.opacity = '1';
+                        });
+                    }
+                });
+            }
+        }
+
+        function initFiltersFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            params.forEach((value, key) => {
+                const input = filterForm?.querySelector(`[name="${key}"]`);
+                if (input) input.value = value;
+            });
+        }
+
+        window.addEventListener('popstate', () => {
+            initFiltersFromUrl();
+            fetchUsers();
         });
 
         // Add Global-Modal based Validation
@@ -834,10 +907,7 @@
                     
                     if (currentManager && currentManager !== '') {
                         e.preventDefault();
-                        
-                        window.confirmDelete = window.confirmDelete || function(){}; // Safety
-                        
-                        // Use openGlobalDeleteModal for custom text and theme
+                        window.confirmDelete = window.confirmDelete || function(){}; 
                         openGlobalDeleteModal(
                             null, 
                             'Remplacer le Manager ?', 
@@ -846,11 +916,7 @@
                             'info',
                             'switch'
                         );
-                        
-                        // Override the form submission logic for this specific case
                         const confirmBtn = document.querySelector('#globalDeleteForm button[type="submit"]');
-                        const originalOnclick = confirmBtn.onclick;
-                        
                         confirmBtn.onclick = function(event) {
                             event.preventDefault();
                             form.submit();
@@ -860,10 +926,46 @@
             });
         }
 
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
+            initFiltersFromUrl();
+            
+            // Auto-open modal if userId is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userId');
+            if (userId) {
+                const users = <?php echo json_encode($users, 15, 512) ?>;
+                const user = users.find(u => (u.idUser || u.id) == userId);
+                if (user) openViewModal(user);
+            }
+
+            // Server-side auto-open (When data is received from routes)
+            <?php if(isset($openModal) && isset($selectedUser)): ?>
+                const selectedUser = <?php echo json_encode($selectedUser, 15, 512) ?>;
+                const openModal = "<?php echo e($openModal); ?>";
+                if (openModal === 'view') {
+                    openViewModal(selectedUser, true);
+                } else if (openModal === 'edit') {
+                    openEditModal(selectedUser, true);
+                }
+            <?php endif; ?>
+
+            // Handle back button
+            window.onpopstate = function() {
+                const vModal = document.getElementById('viewUserModal');
+                const eModal = document.getElementById('editUserModal');
+                if (vModal) vModal.classList.add('hidden');
+                if (eModal) eModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            };
+
             bindManagerValidation('#addUserModal form', 'select[name="type"]', 'select[name="idDepartement"]');
             bindManagerValidation('#editForm', '#edit_role', '#edit_idDepartement');
         });
+
+        function confirmDeleteUser(url) {
+            window.confirmDelete(url, 'collaborateur');
+        }
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

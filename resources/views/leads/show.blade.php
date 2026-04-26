@@ -198,31 +198,23 @@
     {{-- Département --}}
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
-        <select name="idDepartement" id="select-dept"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
-            onchange="loadEmployees(this.value)">
+        <select name="idDepartement"
+            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700"
+            style="color:#1e293b;">
             <option value="">— Choisir un département —</option>
             @foreach($departements as $dept)
-                <option value="{{ $dept->idDepartement }}">{{ $dept->name }}</option>
+                <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
             @endforeach
         </select>
     </div>
 
-    {{-- User --}}
-    <div>
-        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Employé</label>
-        <select name="idUser" id="select-user"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
-            <option value="">— Choisir un employé —</option>
-        </select>
-    </div>
 
     {{-- 🔥 Password --}}
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Mot de passe client</label>
         <input type="password" name="password" id="password"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
-            placeholder="Entrer un mot de passe">
+        class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
+        placeholder="Entrer un mot de passe">
     </div>
 
 </div>
@@ -359,26 +351,6 @@
         }
 
         // Charger les employés du département via fetch
-        function loadEmployees(deptId) {
-            const select = document.getElementById('select-user');
-            select.innerHTML = '<option value="">Chargement...</option>';
 
-            if (!deptId) {
-                select.innerHTML = '<option value="">— Choisir un employé —</option>';
-                return;
-            }
-
-            fetch(`/departements/${deptId}/users`)
-                .then(r => r.json())
-                .then(users => {
-                    select.innerHTML = '<option value="">— Choisir un employé —</option>';
-                    users.forEach(u => {
-                        select.innerHTML += `<option value="${u.idUser}">${u.firstName} ${u.lastName}</option>`;
-                    });
-                })
-                .catch(() => {
-                    select.innerHTML = '<option value="">Erreur de chargement</option>';
-                });
-        }
     </script>
 </x-app-layout>

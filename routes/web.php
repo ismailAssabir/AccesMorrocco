@@ -34,7 +34,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
 /*
 |--------------------------------------------------------------------------
 | Profile

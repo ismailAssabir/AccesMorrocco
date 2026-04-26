@@ -135,7 +135,6 @@ class LeadController extends Controller
     $request->validate([
         'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
         'idDepartement' => 'nullable|exists:departements,idDepartement',
-        'idUser'        => 'nullable|exists:users,idUser',
         'password'      => 'nullable|required_if:statut,ok|min:6',
     ]);
 
@@ -159,10 +158,6 @@ class LeadController extends Controller
 
         if ($request->filled('idDepartement')) {
             $lead->idDepartement = $request->idDepartement;
-        }
-
-        if ($request->filled('idUser')) {
-            $lead->idUser = $request->idUser;
         }
         $client = Client::where('email', $lead->email)->first();
 

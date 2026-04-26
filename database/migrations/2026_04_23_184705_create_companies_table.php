@@ -17,6 +17,8 @@ return new class extends Migration
             $table->time('companyEntryTime');
             $table->time('companyExitTime');
             $table->decimal('distance', 6, 2)->default(200.00)->nullable();
+            $table->integer('maxDelay')->default(0);
+           $table->time('absenceTime')->nullable();
             $table->timestamps();
         });
     }
