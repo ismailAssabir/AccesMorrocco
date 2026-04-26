@@ -12,35 +12,62 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class DossierController extends Controller
 {
+
+    public function getEmployes($id)
+{
+    $employes = User::where('idDepartement', $id)
+        ->whereHas('roles', function ($q) {
+            $q->where('name', 'employee');
+        })
+        ->select('idUser', 'firstName', 'lastName')
+        ->get();
+
+    return response()->json($employes);
+        }
     public function index(Request $request)
-    {
-        Gate::authorize('dossier.view');
+{
+    Gate::authorize('dossier.view');
 
-        $query = Dossier::with(['client', 'departement']);
+    $user = auth()->user();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('reference', 'like', "%{$search}%")
-                  ->orWhere('distination', 'like', "%{$search}%")
-                  ->orWhere('commentaire', 'like', "%{$search}%");
-            });
-        }
+    $query = Dossier::with(['client', 'departement', 'user']);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('idDepartement')) {
-            $query->where('idDepartement', $request->idDepartement);
-        }
-
-        $dossiers     = $query->latest()->paginate(10)->withQueryString();
-        $departements = Departement::all();
-        $clients      = Client::all();
-
-        return view('dossiers.index', compact('dossiers', 'departements', 'clients'));
+    // 🔥 FILTRAGE PAR ROLE
+    if ($user->hasRole('manager')) {
+        // manager voit seulement dossiers de son département
+        $query->where('idDepartement', $user->idDepartement);
     }
+
+    if ($user->hasRole('employe')) {
+        // employé voit seulement ses dossiers assignés
+        $query->where('idUser', $user->id);
+    }
+
+    // 🔍 filtres existants
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('reference', 'like', "%{$search}%")
+              ->orWhere('distination', 'like', "%{$search}%")
+              ->orWhere('commentaire', 'like', "%{$search}%");
+        });
+    }
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('idDepartement') && !$user->hasRole('manager')) {
+        // manager ne doit pas filtrer par autre département
+        $query->where('idDepartement', $request->idDepartement);
+    }
+
+    $dossiers     = $query->latest()->paginate(10)->withQueryString();
+    $departements = Departement::all();
+    $clients      = Client::all();
+
+    return view('dossiers.index', compact('dossiers', 'departements', 'clients'));
+}
 
     public function store(Request $request)
     {

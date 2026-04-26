@@ -12,6 +12,7 @@ use App\Models\Tache;
 use App\Models\Departement;
 use App\Models\Reclamation;
 use App\Models\Conge;
+use App\Models\Dossier;
 use App\Models\documentDemande;
 class User extends Authenticatable
 {
@@ -98,5 +99,8 @@ class User extends Authenticatable
     public function reunions()
     {
         return $this->belongsToMany(Reunion::class, 'reunion_participants', 'idUser', 'idReunion')->withTimestamps();
+    }
+    public function dossiers(){
+        return $this->hasMany(Dossier::class, 'idUser', 'idUser')->withTimestamps();
     }
 }

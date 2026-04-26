@@ -34,7 +34,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
+//route d'assignation
+Route::patch('/clients/{id}/assign', [ClientController::class, 'assign'])
+    ->name('clients.assign')
+    ->middleware('role:manager,admin');
 /*
 |--------------------------------------------------------------------------
 | Profile
@@ -61,11 +64,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('/users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
     #Client Routes
-    Route::get('/clients',[ClientController::class, 'index'])->name('clients.index');
-Route::post('/clients',[ClientController::class, 'store'])->name('clients.store');
-Route::get('/clients/{id}',[ClientController::class, 'show'])->name('clients.show');
-Route::get('/clients/{id}/edit',[ClientController::class, 'edit'])->name('clients.edit');
-Route::put('/clients/{id}',[ClientController::class, 'update'])->name('clients.update');
 
     #Category Routes
     Route::get('/category', [CategoryController::class, 'index']);
@@ -80,7 +78,16 @@ Route::put('/clients/{id}',[ClientController::class, 'update'])->name('clients.u
     Route::get('/permissions/{id}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
     Route::put('/permissions/{id}', [PermissionController::class, 'update'])->name('permissions.update');
 });
+Route::middleware(['auth'])->group(function () {
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::patch('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
 
+    Route::patch('/clients/{id}/assign', [ClientController::class, 'assign'])->name('clients.assign');
+});
 /*
 |--------------------------------------------------------------------------
 | ADMIN & MANAGER ROUTES

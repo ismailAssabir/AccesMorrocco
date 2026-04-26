@@ -40,4 +40,8 @@ class Dossier extends Model
     function paiements(){
         return $this->hasMany(Paiement::class, 'idDossier', 'idDossier');
     }
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'idUser');
+    }
 }
