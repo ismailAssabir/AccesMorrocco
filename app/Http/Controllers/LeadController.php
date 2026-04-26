@@ -178,7 +178,7 @@ class LeadController extends Controller
                     'dateCreation'  => now()->toDateString(),
                     // Ajoute ici d'autres champs si ta table clients en a
                 ]);
-                
+                $lead->delete();
             }
 
         } else {

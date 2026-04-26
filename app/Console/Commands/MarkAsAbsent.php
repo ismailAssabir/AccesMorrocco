@@ -37,7 +37,7 @@ class MarkAsAbsent extends Command
 
     foreach ($absentUsers as $user) {
         \App\Models\Pointage::create([
-            'idUser' => $user->id,
+            'idUser' => $user->idUser,
             'date'   => $today,
             'status' => 'absent',
             
