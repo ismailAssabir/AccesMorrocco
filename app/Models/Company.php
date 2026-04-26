@@ -10,6 +10,8 @@ class Company extends Model
         'companyGps',
         'companyEntryTime',
         'companyExitTime',
-        'distance'
+        'distance',
+        'maxDelay',
+        'absenceTime'
     ];
 }
