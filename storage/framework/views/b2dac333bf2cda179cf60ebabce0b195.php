@@ -23,6 +23,40 @@
             },
             confirmDelete(id) {
                 window.confirmDelete('/tasks/' + id, 'tâche');
+            },
+            changeStatus(id, newStatus, event) {
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<svg class=\'animate-spin w-4 h-4\' xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg>';
+                btn.disabled = true;
+
+                fetch(`/tasks/${id}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => {
+                    return fetch(window.location.href);
+                })
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newBoard = doc.getElementById('kanban-board');
+                    if(newBoard) {
+                        document.getElementById('kanban-board').innerHTML = newBoard.innerHTML;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
             }
          }">
 
@@ -63,8 +97,10 @@
 <?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
 <?php endif; ?>
 
+
+
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="kanban-board" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             
             <div class="flex flex-col gap-4">
@@ -73,12 +109,10 @@
                         <span class="w-2 h-2 rounded-full bg-slate-300"></span>
                         À FAIRE
                     </h2>
-                    <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($Taches->where('status', 'todo')->count()); ?></span>
+                    <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($todoTasks->count()); ?></span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    <?php $__currentLoopData = $Taches->where('status', 'todo'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tache): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php echo $__env->make('taches.card', ['tache' => $tache], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php echo $__env->renderEach('taches.card', $todoTasks, 'tache'); ?>
                 </div>
             </div>
 
@@ -89,12 +123,10 @@
                         <span class="w-2 h-2 rounded-full bg-blue-400"></span>
                         EN COURS
                     </h2>
-                    <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($Taches->where('status', 'en_cours')->count()); ?></span>
+                    <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($enCoursTasks->count()); ?></span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    <?php $__currentLoopData = $Taches->where('status', 'en_cours'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tache): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php echo $__env->make('taches.card', ['tache' => $tache], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php echo $__env->renderEach('taches.card', $enCoursTasks, 'tache'); ?>
                 </div>
             </div>
 
@@ -105,12 +137,10 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                         TERMINÉ
                     </h2>
-                    <span class="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($Taches->where('status', 'termine')->count()); ?></span>
+                    <span class="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full"><?php echo e($termineTasks->count()); ?></span>
                 </div>
                 <div class="flex flex-col gap-4 min-h-[500px]">
-                    <?php $__currentLoopData = $Taches->where('status', 'termine'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tache): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php echo $__env->make('taches.card', ['tache' => $tache], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php echo $__env->renderEach('taches.card', $termineTasks, 'tache'); ?>
                 </div>
             </div>
 

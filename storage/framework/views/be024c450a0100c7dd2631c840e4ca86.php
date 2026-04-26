@@ -162,6 +162,17 @@
                 </div>
                 <form method="POST" action="<?php echo e(route('clients.store')); ?>">
                     <?php echo csrf_field(); ?>
+
+                    <?php if($errors->any()): ?>
+                        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-xs font-bold">
+                            <ul class="list-disc pl-4 space-y-1">
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         <div>

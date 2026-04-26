@@ -53,6 +53,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
         
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('pointage.create')): ?>
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div class="h-1.5 w-full bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
             <div class="p-7">
@@ -87,8 +88,10 @@
                 </form>
             </div>
         </div>
+        <?php endif; ?>
 
         
+        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('pointage.edit')): ?>
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
             <div class="p-7">
@@ -123,6 +126,7 @@
                 </form>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 
     
@@ -351,35 +355,92 @@
     updateClock();
 
     // ─── GPS + Submit ─────────────────────────────────────────────────────────
-    function getLocationAndSubmit(action) {
+    // ─── GPS + AJAX Submit ──────────────────────────────────────────────────
+    async function getLocationAndSubmit(action) {
         const statusEl = document.getElementById(action === 'checkin' ? 'gps-status-in' : 'gps-status-out');
-        const gpsInput = document.getElementById(action === 'checkin' ? 'gps-checkin' : 'gps-checkout');
-        const form     = document.getElementById(action === 'checkin' ? 'checkin-form' : 'checkout-form');
-
-        statusEl.textContent = '📡 Localisation en cours...';
+        const btn = event.currentTarget;
+        const originalContent = btn.innerHTML;
+        
+        statusEl.innerHTML = '<span class="flex items-center gap-2"><svg class="animate-spin h-3 w-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 📡 Localisation...</span>';
+        btn.disabled = true;
+        btn.innerHTML = 'Traitement...';
 
         if (!navigator.geolocation) {
             statusEl.textContent = '❌ Géolocalisation non supportée.';
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
             return;
         }
 
         navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                 const lat = position.coords.latitude.toFixed(7);
                 const lon = position.coords.longitude.toFixed(7);
-                gpsInput.value = `${lat},${lon}`;
+                const gps = `${lat},${lon}`;
+                
                 statusEl.textContent = `✅ Position: ${lat}, ${lon}`;
-                form.submit();
+
+                try {
+                    const response = await fetch(action === 'checkin' ? '<?php echo e(route("pointage.checkin")); ?>' : '<?php echo e(route("pointage.checkout")); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ gps: gps })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Success Toast or Message
+                        showToast(result.message, 'success');
+                        
+                        // Instant UI Update: Reload the page or update components
+                        // For a "Wow" effect, we'll reload after a short delay to refresh the history table
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast(result.message || 'Une erreur est survenue.', 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }
+                } catch (error) {
+                    showToast('Erreur de connexion au serveur.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
             },
             (error) => {
                 let msg = '❌ Erreur de localisation.';
-                if (error.code === error.PERMISSION_DENIED)    msg = '❌ Permission refusée. Activez la localisation.';
+                if (error.code === error.PERMISSION_DENIED)    msg = '❌ Activez la localisation.';
                 if (error.code === error.POSITION_UNAVAILABLE) msg = '❌ Position indisponible.';
                 if (error.code === error.TIMEOUT)              msg = '❌ Délai expiré.';
                 statusEl.textContent = msg;
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
+    }
+
+    function showToast(message, type) {
+        // Simple alert for now, could be a pretty toast
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-5 right-5 px-6 py-3 rounded-2xl text-white font-bold shadow-2xl z-[200] transition-all transform translate-y-20`;
+        toast.style.backgroundColor = type === 'success' ? '#10b981' : '#be2346';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.style.transform = 'translateY(0)', 100);
+        
+        // Remove after 3s
+        setTimeout(() => {
+            toast.style.transform = 'translateY(20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
     }
 
     // ─── Justification Modal ─────────────────────────────────────────────────

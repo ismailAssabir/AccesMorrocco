@@ -206,15 +206,15 @@ function openAssignModal(dossierId, departementId) {
     modal.classList.remove('hidden');
     form.action = '/dossiers/' + dossierId + '/assign';
 
-   fetch('/departements/' + departementId + '/users')
+    fetch('/departements/' + departementId + '/users')
         .then(res => res.json())
         .then(data => {
             select.innerHTML = '';
 
             data.forEach(user => {
                 select.innerHTML += `
-                    <option value="${user.idUser}">
-                        ${user.firstName} ${user.lastName}
+                    <option value="${user.id}">
+                        ${user.firstName + " "+user.lastName}
                     </option>`;
             });
         });

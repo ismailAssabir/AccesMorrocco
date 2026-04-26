@@ -55,7 +55,7 @@ public function store(Request $request) {
         'commentaire'     => 'Dossier créé automatiquement à l\'inscription du client.',
     ]);
 
-    return redirect()->back()->with('msg', 'Le client a été ajouté avec succès!');
+    return redirect()->route('clients.index')->with('msg', 'Le client a été ajouté avec succès!');
 }
 public function show($id){
             Gate::authorize('client.view');

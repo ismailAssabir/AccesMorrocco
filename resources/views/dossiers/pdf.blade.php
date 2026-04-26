@@ -49,7 +49,7 @@
                 <td><strong>{{ $dossier->reference }}</strong></td>
                 <td>{{ $dossier->client->firstName ?? '—' }} {{ $dossier->client->lastName ?? '' }}</td>
                 <td>{{ $dossier->distination ?? '—' }}</td>
-                <td>{{ $dossier->departement->name ?? '—' }}</td>
+                <td>{{ $dossier->departement->title ?? '—' }}</td>
                 <td>{{ $dossier->nombrePersonnes }}</td>
                 <td>{{ $dossier->nombreJours }}</td>
                 <td><strong>{{ number_format($dossier->montant, 2) }} MAD</strong></td>

@@ -107,7 +107,7 @@
                     <span class="avatar">{{ strtoupper(substr($lead->firstName,0,1)) }}{{ strtoupper(substr($lead->lastName,0,1)) }}</span>
                     <span class="name-block">
                         <div class="name">{{ $lead->firstName }} {{ $lead->lastName }}</div>
-                        <div class="sub">{{ $lead->adresse ?? '—' }}</div>
+                        <div class="sub">{{ $lead->address ?? '—' }}</div>
                     </span>
                 </td>
                 <td>{{ $lead->email ?? '—' }}</td>
@@ -115,7 +115,7 @@
                 <td><span class="pill">{{ $lead->type }}</span></td>
                 <td>{{ $lead->source ?? '—' }}</td>
                 <td>{{ $lead->nationalite ?? '—' }}</td>
-                <td>{{ $lead->departements->name ?? '—' }}</td>
+                <td>{{ $lead->departements->title ?? '—' }}</td>
                 <td>{{ $lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—' }}</td>
             </tr>
             @empty

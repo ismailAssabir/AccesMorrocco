@@ -149,6 +149,17 @@
                 </div>
                 <form method="POST" action="{{ route('clients.store') }}">
                     @csrf
+
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-xs font-bold">
+                            <ul class="list-disc pl-4 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         <div>

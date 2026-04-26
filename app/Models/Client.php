@@ -15,13 +15,15 @@ class Client extends Model
         'lastName',
         'email',
         'password',
-        'adress',
+        'address',
         'CNE', 
         'phoneNumber',
         'nationalite',
         'dateNaissance',
         'status',
         'type',
+        'idLead',
+        'note',
     ];
     function lead(){
         return $this->hasOne(Lead::class, 'idClient');

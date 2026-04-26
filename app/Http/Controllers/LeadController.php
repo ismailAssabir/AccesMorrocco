@@ -45,8 +45,9 @@ class LeadController extends Controller
 
         $leads  = $query->latest()->paginate(10)->withQueryString();
         $types  = Lead::select('type')->distinct()->pluck('type');
+        $departements = Departement::all();
 
-        return view('leads.index', compact('leads', 'types'));
+        return view('leads.index', compact('leads', 'types', 'departements'));
     }
 
     public function store(Request $request)
@@ -57,7 +58,7 @@ class LeadController extends Controller
             'firstName'     => 'required|string|max:25',
             'lastName'      => 'required|string|max:25',
             'email'         => 'nullable|email|unique:leads,email',
-            'adresse'       => 'nullable|string',
+            'address'       => 'nullable|string',
             'CNE'           => 'nullable|string',
             'phoneNumber'   => 'nullable|string',
             'nationalite'   => 'nullable|string',
@@ -109,7 +110,7 @@ class LeadController extends Controller
             'firstName'     => 'required|string|max:25',
             'lastName'      => 'required|string|max:25',
             'email'         => 'nullable|email|unique:leads,email,' . $id . ',idLead',
-            'adresse'       => 'nullable|string',
+            'address'       => 'nullable|string',
             'CNE'           => 'nullable|string',
             'phoneNumber'   => 'nullable|string',
             'nationalite'   => 'nullable|string',
@@ -167,7 +168,7 @@ class LeadController extends Controller
                 'lastName'      => $lead->lastName,
                 'email'         => $lead->email,
                 'phoneNumber'   => $lead->phoneNumber,
-                'adresse'       => $lead->adresse,
+                'address'       => $lead->address,
                 'CNE'           => $lead->CNE,
                 'nationalite'   => $lead->nationalite,
                 'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
