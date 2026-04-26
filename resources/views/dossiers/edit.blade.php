@@ -41,7 +41,7 @@
                                 <option value="">— Aucun —</option>
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}" {{ old('idDepartement', $dossier->idDepartement) == $dept->idDepartement ? 'selected' : '' }}>
-                                        {{ $dept->name }}
+                                        {{ $dept->title }}
                                     </option>
                                 @endforeach
                             </select>

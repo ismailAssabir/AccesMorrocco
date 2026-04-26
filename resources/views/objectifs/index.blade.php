@@ -161,7 +161,7 @@
                             <select name="idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="">-- Global --</option>
                                 @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -246,7 +246,7 @@
                             <select name="idDepartement" id="edit_idDepartement" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 <option value="">-- Global --</option>
                                 @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title ?? $dept->name }}</option>
+                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
                                 @endforeach
                             </select>
                         </div>

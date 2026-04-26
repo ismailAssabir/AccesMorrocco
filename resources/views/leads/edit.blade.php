@@ -84,7 +84,7 @@
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
-                            <input name="adresse" value="{{ old('adresse', $lead->adresse) }}"
+                            <input name="address" value="{{ old('address', $lead->address) }}"
                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
 
@@ -96,7 +96,7 @@
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}"
                                         {{ old('idDepartement', $lead->idDepartement) == $dept->idDepartement ? 'selected' : '' }}>
-                                        {{ $dept->name }}
+                                        {{ $dept->title }}
                                     </option>
                                 @endforeach
                             </select>

@@ -172,7 +172,7 @@
                         <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($lead->source ?? '—'); ?></td>
 
                         
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($lead->departements->name ?? '—'); ?></td>
+                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($lead->departements->title ?? '—'); ?></td>
 
                         
                         <td class="px-4 py-4 text-slate-500 text-xs">
@@ -319,7 +319,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
-                            <input name="adresse" placeholder="Adresse"
+                            <input name="address" placeholder="Adresse"
                                 class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
                         <div>
@@ -331,6 +331,16 @@
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
                             <input name="type" required placeholder="Type de lead"
                                 class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
+                            <select name="idDepartement"
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                <option value="">— Aucun —</option>
+                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Note</label>

@@ -109,7 +109,7 @@ class PointageController extends Controller
         $companyGps = $settings->companyGps ?? "32.9348,-6.0234";
         $companyEntryTime = $settings->companyEntryTime ?? "08:00:00";
         $maxDistance = $settings->distance ?? 200;
-        $MaxDelay = $settings->Maxdelay;
+        $graceMinutes = $settings->maxDelay ?? 15;
         $idUser = auth()->id();
         $today = now()->toDateString();
 
@@ -134,12 +134,8 @@ class PointageController extends Controller
 
         $currentTime = now();
         $officialTime = Carbon::createFromTimeString($companyEntryTime);
-<<<<<<< HEAD
-        $status = $currentTime->gt($officialTime->addMinutes($MaxDelay)) ? 'retard' : 'present';
-=======
         $graceMinutes = $settings->maxDelay ?? 15;
         $status = $currentTime->gt($officialTime->addMinutes($graceMinutes)) ? 'retard' : 'present';
->>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
 
         Pointage::create([
             'idUser'      => $idUser,
@@ -233,10 +229,6 @@ class PointageController extends Controller
         return redirect()->route('pointages.index')->with('success', $msg);
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
     private function parseGps($gpsString)
     {
         if (empty($gpsString)) return [0, 0];
@@ -266,8 +258,6 @@ class PointageController extends Controller
         return redirect()->back()->with('msg', 'Justification envoyée.');
     }
 
-<<<<<<< HEAD
-=======
     public function validateJustification(Request $request, $id)
     {
         Gate::authorize('role:admin'); // Only admins can validate
@@ -287,9 +277,6 @@ class PointageController extends Controller
 
         return redirect()->back()->with('msg', 'Justification ' . ($request->action === 'accepte' ? 'acceptée' : 'refusée') . '.');
     }
-
-    
->>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
     public function updateSettings(Request $request)
     {
         Gate::authorize('pointage.create');
@@ -308,14 +295,8 @@ class PointageController extends Controller
             'companyEntryTime' => 'nullable',
             'companyExitTime'  => 'nullable',
             'distance'         => 'nullable|integer',
-<<<<<<< HEAD
-            'MaxDeley' => 'integer|nullable' ,
-             'AbsenceTime' => 'nullable|date_format:H:i',
-
-=======
             'maxDelay'         => 'nullable|integer|min:0',
             'absenceTime'      => 'nullable',
->>>>>>> f10b64178ac6f78159067980a18f1a5355bfabdb
         ], [
             'companyGps.regex' => 'Le format GPS doit être: latitude,longitude'
         ]);

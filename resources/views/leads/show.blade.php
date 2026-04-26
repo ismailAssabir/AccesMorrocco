@@ -123,7 +123,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-400 font-bold uppercase">Adresse</p>
-                                    <p class="text-sm text-slate-700 font-semibold">{{ $lead->adresse ?? '—' }}</p>
+                                    <p class="text-sm text-slate-700 font-semibold">{{ $lead->address ?? '—' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -203,7 +203,7 @@
             onchange="loadEmployees(this.value)">
             <option value="">— Choisir un département —</option>
             @foreach($departements as $dept)
-                <option value="{{ $dept->idDepartement }}">{{ $dept->name }}</option>
+                <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
             @endforeach
         </select>
     </div>
@@ -262,7 +262,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Département</p>
-                                <p class="text-sm font-semibold text-slate-700">{{ $lead->departements->name ?? '—' }}</p>
+                                <p class="text-sm font-semibold text-slate-700">{{ $lead->departements->title ?? '—' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Responsable</p>

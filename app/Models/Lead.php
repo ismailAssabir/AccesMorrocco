@@ -15,7 +15,7 @@ class Lead extends Model
         'lastName',
         'email',
         'password',
-        'adress',
+        'address',
         'CNE', 
         'phoneNumber',
         'nationalite',
@@ -29,7 +29,7 @@ class Lead extends Model
         'statut'
     ];
     function client(){
-        return $this->belongsTo(User::class, 'idUser', 'idClient');
+        return $this->belongsTo(Client::class, 'idClient', 'idClient');
     }
      function user()
     {
