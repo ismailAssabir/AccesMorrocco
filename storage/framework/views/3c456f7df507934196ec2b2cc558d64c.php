@@ -83,8 +83,8 @@
     <div class="header">
         <h1>Rapport des Leads</h1>
         <p>Liste complète des prospects commerciaux</p>
-        <div class="meta">Généré le {{ now()->format('d/m/Y à H:i') }}</div>
-        <div class="badge-count">{{ $leads->count() }} lead(s)</div>
+        <div class="meta">Généré le <?php echo e(now()->format('d/m/Y à H:i')); ?></div>
+        <div class="badge-count"><?php echo e($leads->count()); ?> lead(s)</div>
     </div>
 
     <table>
@@ -101,33 +101,34 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($leads as $lead)
+            <?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
                 <td>
-                    <span class="avatar">{{ strtoupper(substr($lead->firstName,0,1)) }}{{ strtoupper(substr($lead->lastName,0,1)) }}</span>
+                    <span class="avatar"><?php echo e(strtoupper(substr($lead->firstName,0,1))); ?><?php echo e(strtoupper(substr($lead->lastName,0,1))); ?></span>
                     <span class="name-block">
-                        <div class="name">{{ $lead->firstName }} {{ $lead->lastName }}</div>
-                        <div class="sub">{{ $lead->address ?? '—' }}</div>
+                        <div class="name"><?php echo e($lead->firstName); ?> <?php echo e($lead->lastName); ?></div>
+                        <div class="sub"><?php echo e($lead->adresse ?? '—'); ?></div>
                     </span>
                 </td>
-                <td>{{ $lead->email ?? '—' }}</td>
-                <td>{{ $lead->phoneNumber ?? '—' }}</td>
-                <td><span class="pill">{{ $lead->type }}</span></td>
-                <td>{{ $lead->source ?? '—' }}</td>
-                <td>{{ $lead->nationalite ?? '—' }}</td>
-                <td>{{ $lead->departements->title ?? '—' }}</td>
-                <td>{{ $lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—' }}</td>
+                <td><?php echo e($lead->email ?? '—'); ?></td>
+                <td><?php echo e($lead->phoneNumber ?? '—'); ?></td>
+                <td><span class="pill"><?php echo e($lead->type); ?></span></td>
+                <td><?php echo e($lead->source ?? '—'); ?></td>
+                <td><?php echo e($lead->nationalite ?? '—'); ?></td>
+                <td><?php echo e($lead->departements->name ?? '—'); ?></td>
+                <td><?php echo e($lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—'); ?></td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="8" style="text-align:center; padding: 30px; color: #94a3b8;">Aucun lead trouvé</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
     <div class="footer">
-        Rapport confidentiel — {{ config('app.name') }} © {{ now()->year }}
+        Rapport confidentiel — <?php echo e(config('app.name')); ?> © <?php echo e(now()->year); ?>
+
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\Users\ABA SOLUTIONS\Desktop\PROJET STAGE Travel Agency\AccesMorrocco\resources\views/leads/pdf.blade.php ENDPATH**/ ?>

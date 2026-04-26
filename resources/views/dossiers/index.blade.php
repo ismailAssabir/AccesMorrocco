@@ -60,7 +60,7 @@
                 <option value="">Tous les départements</option>
                 @foreach($departements as $dept)
                     <option value="{{ $dept->idDepartement }}" {{ request('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>
-                        {{ $dept->name }}
+                        {{ $dept->title }}
                     </option>
                 @endforeach
             </select>
@@ -133,7 +133,7 @@
 
                         <td class="px-4 py-4 text-slate-600 text-xs truncate">{{ $dossier->distination ?? '—' }}</td>
 
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate">{{ $dossier->departement->name ?? '—' }}</td>
+                        <td class="px-4 py-4 text-slate-600 text-xs truncate">{{ $dossier->departement->title ?? '—' }}</td>
 
                         <td class="px-4 py-4 text-slate-600 text-xs">{{ $dossier->nombrePersonnes }}</td>
 

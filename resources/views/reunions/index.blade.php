@@ -7,16 +7,8 @@
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Planification des Réunions</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Gérez vos rendez-vous internes et externes.</p>
             </div>
-<<<<<<< HEAD
-
-            
             @if(auth()->user()->type !== 'employee')
             <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
-
-=======
-            @if(auth()->user()->type !== 'employee')
-            <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
->>>>>>> 7c796e9f5a864443e53e933abdac9c3335d98aea
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -614,7 +606,6 @@
             }
         });
     </script>
-<<<<<<< HEAD
 
     @verbatim
     <style>

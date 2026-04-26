@@ -70,7 +70,7 @@
                 <option value="">Tous les départements</option>
                 <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <option value="<?php echo e($dept->idDepartement); ?>" <?php echo e(request('idDepartement') == $dept->idDepartement ? 'selected' : ''); ?>>
-                        <?php echo e($dept->name); ?>
+                        <?php echo e($dept->title); ?>
 
                     </option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -146,7 +146,7 @@
 
                         <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($dossier->distination ?? '—'); ?></td>
 
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($dossier->departement->name ?? '—'); ?></td>
+                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($dossier->departement->title ?? '—'); ?></td>
 
                         <td class="px-4 py-4 text-slate-600 text-xs"><?php echo e($dossier->nombrePersonnes); ?></td>
 

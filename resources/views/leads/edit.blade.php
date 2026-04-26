@@ -3,12 +3,12 @@
 
         {{-- Header --}}
         <div class="mb-8">
-            <a href="{{ route('leads.show', $lead->idLead) }}"
+            <a href="{{ route('leads.index') }}"
                class="inline-flex items-center gap-2 text-slate-400 hover:text-[#b11d40] text-sm font-bold mb-3 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Retour au lead
+                Retour aux leads
             </a>
             <h1 class="text-2xl font-extrabold text-slate-800">Modifier le Lead</h1>
             <p class="text-slate-500 text-sm">{{ $lead->firstName }} {{ $lead->lastName }}</p>
@@ -84,7 +84,7 @@
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
-                            <input name="adresse" value="{{ old('adresse', $lead->adresse) }}"
+                            <input name="address" value="{{ old('address', $lead->address) }}"
                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
 
@@ -96,7 +96,7 @@
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}"
                                         {{ old('idDepartement', $lead->idDepartement) == $dept->idDepartement ? 'selected' : '' }}>
-                                        {{ $dept->name }}
+                                        {{ $dept->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -128,7 +128,7 @@
 
             {{-- Boutons --}}
             <div class="flex items-center justify-between">
-                <a href="{{ route('leads.show', $lead->idLead) }}"
+                <a href="{{ route('leads.index') }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>

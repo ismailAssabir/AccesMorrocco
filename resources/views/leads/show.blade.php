@@ -123,7 +123,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-400 font-bold uppercase">Adresse</p>
-                                    <p class="text-sm text-slate-700 font-semibold">{{ $lead->adresse ?? '—' }}</p>
+                                    <p class="text-sm text-slate-700 font-semibold">{{ $lead->address ?? '—' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -195,15 +195,14 @@
                             {{-- Département + Employé (visible seulement si OK) --}}
                             <div id="dept-section" class="hidden space-y-3 mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
 
-    {{-- Département --}}
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
         <select name="idDepartement" id="select-dept"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
             onchange="loadEmployees(this.value)">
             <option value="">— Choisir un département —</option>
             @foreach($departements as $dept)
-                <option value="{{ $dept->idDepartement }}">{{ $dept->name }}</option>
+                <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
             @endforeach
         </select>
     </div>
@@ -212,7 +211,7 @@
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Employé</label>
         <select name="idUser" id="select-user"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700">
             <option value="">— Choisir un employé —</option>
         </select>
     </div>
@@ -221,7 +220,7 @@
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Mot de passe client</label>
         <input type="password" name="password" id="password"
-            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
             placeholder="Entrer un mot de passe">
     </div>
 
@@ -262,7 +261,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Département</p>
-                                <p class="text-sm font-semibold text-slate-700">{{ $lead->departements->name ?? '—' }}</p>
+                                <p class="text-sm font-semibold text-slate-700">{{ $lead->departements->title ?? '—' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Responsable</p>

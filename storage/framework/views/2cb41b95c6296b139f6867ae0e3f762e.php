@@ -91,7 +91,7 @@
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Département</span>
-                                <span class="text-sm font-bold text-slate-700"><?php echo e($dossier->departement->name ?? '—'); ?></span>
+                                <span class="text-sm font-bold text-slate-700"><?php echo e($dossier->departement->title ?? '—'); ?></span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Destination</span>

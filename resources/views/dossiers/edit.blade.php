@@ -2,12 +2,12 @@
     <div class="p-8 bg-[#F8FAFC] min-h-screen">
 
         <div class="mb-8">
-            <a href="{{ route('dossiers.show', $dossier->idDossier) }}"
+            <a href="{{ route('dossiers.index') }}"
                class="inline-flex items-center gap-2 text-slate-400 hover:text-[#b11d40] text-sm font-bold mb-3 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Retour au dossier
+                Retour aux dossiers
             </a>
             <h1 class="text-2xl font-extrabold text-slate-800">Modifier le Dossier</h1>
             <p class="text-slate-500 text-sm">{{ $dossier->reference }}</p>
@@ -41,7 +41,7 @@
                                 <option value="">— Aucun —</option>
                                 @foreach($departements as $dept)
                                     <option value="{{ $dept->idDepartement }}" {{ old('idDepartement', $dossier->idDepartement) == $dept->idDepartement ? 'selected' : '' }}>
-                                        {{ $dept->name }}
+                                        {{ $dept->title }}
                                     </option>
                                 @endforeach
                             </select>
@@ -113,7 +113,7 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <a href="{{ route('dossiers.show', $dossier->idDossier) }}"
+                <a href="{{ route('dossiers.index') }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
