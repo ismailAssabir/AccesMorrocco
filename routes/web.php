@@ -189,6 +189,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->name('reunions.update');
         Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->name('reunions.destroy');
     });
+
+    # Primes & Bonus Routes
+    Route::resource('primes', \App\Http\Controllers\PrimeController::class);
 });
 
 
@@ -204,6 +207,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin')->group(function() {
         Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
         Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+        Route::post('/admin/pointages/{id}/validate', [PointageController::class, 'validateJustification'])->name('admin.pointages.validate');
     });
 });
 #Paiment Routes

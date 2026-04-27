@@ -31,7 +31,8 @@
                                 <input type="checkbox" name="permissions[]" value="{{ $perm->name }}" 
                                        class="perm-{{ $module }} accent-[#b11d40]"
                                        {{ $role->hasPermissionTo($perm->name) ? 'checked' : '' }}>
-                                <span class="text-xs font-bold text-slate-700">{{ explode('.', $perm->name)[1] }}</span>
+                                @php $parts = explode('.', $perm->name); @endphp
+                                <span class="text-xs font-bold text-slate-700">{{ count($parts) > 1 ? $parts[1] : $perm->name }}</span>
                             </label>
                             @endforeach
                         </div>

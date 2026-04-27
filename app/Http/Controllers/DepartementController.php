@@ -30,6 +30,15 @@ class DepartementController extends Controller
     }
     public function index(){
         Gate::authorize('departement.view');
+
+        // ── AUTO-MARK ABSENCES (Lazy Cron) ──────────────────────────────
+        $settings = \App\Models\Company::first();
+        if ($settings && $settings->absenceTime) {
+            if (now()->format('H:i') >= \Carbon\Carbon::parse($settings->absenceTime)->format('H:i')) {
+                \Illuminate\Support\Facades\Artisan::call('pointage:mark-absents');
+            }
+        }
+
         $depts = Departement::with(['manager', 'employes'])
             ->withCount([
                 'employes as users_count', 
@@ -51,12 +60,21 @@ class DepartementController extends Controller
             if (empty($employeIds)) {
                 $dept->avg_presence = 0;
             } else {
-                $presentCount = Pointage::whereIn('idUser', $employeIds)
+                $pointagesToday = Pointage::whereIn('idUser', $employeIds)
                     ->whereDate('date', now()->toDateString())
-                    ->distinct('idUser')
-                    ->count('idUser');
+                    ->get()
+                    ->keyBy('idUser');
                 
-                $dept->avg_presence = round(($presentCount / count($employeIds)) * 100);
+                $totalScore = 0;
+                foreach ($employeIds as $id) {
+                    $p = $pointagesToday->get($id);
+                    if ($p) {
+                        if ($p->status === 'present') $totalScore += 100;
+                        elseif ($p->status === 'retard') $totalScore += 50;
+                    }
+                }
+                
+                $dept->avg_presence = round($totalScore / count($employeIds));
             }
         }
         
@@ -103,6 +121,15 @@ public function store(Request $request) {
     public function show(Request $request, $id)
     {
         Gate::authorize('departement.view');
+
+        // ── AUTO-MARK ABSENCES (Lazy Cron) ──────────────────────────────
+        $settings = \App\Models\Company::first();
+        if ($settings && $settings->absenceTime) {
+            if (now()->format('H:i') >= \Carbon\Carbon::parse($settings->absenceTime)->format('H:i')) {
+                \Illuminate\Support\Facades\Artisan::call('pointage:mark-absents');
+            }
+        }
+
         $period = $request->get('period', 'weekly');
 
         $departement = Departement::with(['manager', 'employes', 'taches', 'taches.users'])->findOrFail($id);
@@ -150,29 +177,30 @@ public function store(Request $request) {
             ->keyBy('idUser');
 
         foreach ($departement->employes as $employee) {
-            $daysPresent = isset($pointages[$employee->idUser]) 
-                ? $pointages[$employee->idUser]->unique('date')->count() 
-                : 0;
+            $userPointages = $pointages->get($employee->idUser) ?? collect();
+            
+            // Calculate weighted sum for the period
+            $dailyScores = $userPointages->groupBy(fn($p) => \Carbon\Carbon::parse($p->date)->toDateString())
+                ->map(function($group) {
+                    $p = $group->first();
+                    $status = strtolower($p->status);
+                    if ($status === 'present') return 100;
+                    if ($status === 'retard') return 50;
+                    return 0; // absent = 0
+                });
+            
+            $totalScore = $dailyScores->sum();
             
             $employee->presence_percentage = $workingDaysCount > 0 
-                ? round(($daysPresent / $workingDaysCount) * 100) 
+                ? round($totalScore / $workingDaysCount) 
                 : 0;
-            
-            // Ensure 100% if they are/were here today
-            if ($employee->is_here_today) {
-                if ($period === 'today') {
-                    $employee->presence_percentage = 100;
-                }
-            }
 
             $todayP = $todayPointages->get($employee->idUser);
-            $employee->is_here_today = (bool)$todayP;
             $employee->today_pointage = $todayP;
+            $employee->is_here_today = $todayP && strtolower($todayP->status) !== 'absent';
             
             // Count total retards for the period
-            $employee->total_retards = isset($pointages[$employee->idUser])
-                ? $pointages[$employee->idUser]->whereIn('status', ['retard', 'Retard'])->count()
-                : 0;
+            $employee->total_retards = $userPointages->whereIn('status', ['retard', 'Retard'])->count();
         }
 
         $departement->avg_presence = count($employeIds) > 0 

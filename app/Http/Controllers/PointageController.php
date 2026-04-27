@@ -39,26 +39,103 @@ class PointageController extends Controller
     {
         Gate::authorize('pointage.view');
 
+        $user   = auth()->user();
         $idUser = auth()->id();
         $today  = now()->toDateString();
+        $settings = Company::first();
+        $isAdmin  = $user->can('view_all_attendance');
 
+        // ── Today's personal pointage (for clock-in status) ──────────────────
         $todayPointage = Pointage::where('idUser', $idUser)
             ->where('date', $today)
             ->first();
 
-        $query = Pointage::query();
-        if (auth()->user()->type === 'employee') {
-            $query->where('idUser', $idUser);
-        }
-        
-        $recentPointages = $query->with('user')
-            ->orderBy('date', 'desc')
-            ->orderBy('heureEntree', 'desc')
-            ->take(15)
-            ->get();
+        // ── Departments and unique Posts for filter dropdowns ────────────────
+        $departements = \App\Models\Departement::orderBy('title')->get();
+        $uniquePosts  = \App\Models\User::whereNotNull('post')->distinct()->pluck('post');
 
-        $settings = Company::first();
-        return view('pointages.index', compact('todayPointage', 'recentPointages', 'settings'));
+        $isRealAdmin = ($user->type === 'admin');
+
+        // ── AUTO-MARK ABSENCES (Lazy Cron) ──────────────────────────────
+        if ($settings && $settings->absenceTime) {
+            $now = now()->format('H:i');
+            $deadline = \Carbon\Carbon::parse($settings->absenceTime)->format('H:i');
+            
+            if ($now >= $deadline) {
+                \Illuminate\Support\Facades\Artisan::call('pointage:mark-absents');
+            }
+        }
+
+        if ($isRealAdmin) {
+            // ── ADMIN GLOBAL VIEW ─────────────────────────────────────────────
+            $query = Pointage::with(['user.departement'])
+                ->where('date', $today)
+                ->orderBy('heureEntree', 'desc');
+
+            // Filter: search by name
+            if ($search = request('search')) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('firstName', 'like', "%{$search}%")
+                      ->orWhere('lastName',  'like', "%{$search}%");
+                });
+            }
+
+            // Filter: department
+            if ($dept = request('departement')) {
+                $query->whereHas('user', fn($q) => $q->where('idDepartement', $dept));
+            }
+
+            // Filter: post (Job Title)
+            if ($post = request('post')) {
+                $query->whereHas('user', fn($q) => $q->where('post', $post));
+            }
+
+            // Filter: role/type
+            if ($role = request('role')) {
+                $query->whereHas('user', fn($q) => $q->where('type', $role));
+            }
+
+            // Filter: attendance status
+            if ($status = request('status')) {
+                $query->where('status', $status);
+            }
+
+            $recentPointages = $query->paginate(10)->withQueryString();
+
+            // Stats for today (Global)
+            $statsQuery = Pointage::where('date', $today);
+            $totalToday    = $statsQuery->count();
+            $presentsToday = (clone $statsQuery)->where('status', 'present')->count();
+            $retardsToday  = (clone $statsQuery)->where('status', 'retard')->count();
+            $absentsToday  = (clone $statsQuery)->where('status', 'absent')->count();
+        } else {
+            // ── MANAGER / EMPLOYEE PERSONAL VIEW ──────────────────────────────
+            $recentPointages = Pointage::where('idUser', $idUser)
+                ->with('user')
+                ->orderBy('date', 'desc')
+                ->orderBy('heureEntree', 'desc')
+                ->paginate(10);
+
+            $totalToday    = Pointage::where('idUser', $idUser)->where('date', $today)->count();
+            $presentsToday = Pointage::where('idUser', $idUser)->where('date', $today)->where('status', 'present')->count();
+            $retardsToday  = Pointage::where('idUser', $idUser)->where('date', $today)->where('status', 'retard')->count();
+            $absentsToday  = Pointage::where('idUser', $idUser)->where('date', $today)->where('status', 'absent')->count();
+        }
+
+        $isAdmin = $isRealAdmin; // Pass to blade
+
+        return view('pointages.index', compact(
+            'todayPointage',
+            'recentPointages',
+            'settings',
+            'isAdmin',
+            'departements',
+            'uniquePosts',
+            'totalToday',
+            'presentsToday',
+            'retardsToday',
+            'absentsToday'
+        ));
     }
 
     public function status()
@@ -260,22 +337,29 @@ class PointageController extends Controller
 
     public function validateJustification(Request $request, $id)
     {
-        Gate::authorize('role:admin'); // Only admins can validate
+        Gate::authorize('view_all_attendance');
 
         $request->validate([
-            'action' => 'required|in:accepte,refuse',
+            'action'      => 'required|in:accepte,refuse',
+            'motif_refus' => 'nullable|string|max:500',
         ]);
 
         $pointage = Pointage::findOrFail($id);
         $pointage->justification_status = $request->action;
 
         if ($request->action === 'accepte') {
-            $pointage->status = 'present'; // Clear the infraction if accepted
+            $pointage->status      = 'present';
+            $pointage->motif_refus = null;
+        }
+
+        if ($request->action === 'refuse' && $request->filled('motif_refus')) {
+            $pointage->motif_refus = $request->motif_refus;
         }
 
         $pointage->save();
 
-        return redirect()->back()->with('msg', 'Justification ' . ($request->action === 'accepte' ? 'acceptée' : 'refusée') . '.');
+        $label = $request->action === 'accepte' ? 'acceptée' : 'refusée';
+        return redirect()->back()->with('msg', "Justification {$label}.");
     }
     public function updateSettings(Request $request)
     {

@@ -21,7 +21,8 @@ class Pointage extends Model
         'justification',
         'fichier',
         'typejustif',
-        'justification_status'
+        'justification_status',
+        'motif_refus'
     ];
     public function user() {
         return $this->belongsTo(\App\Models\User::class, 'idUser', 'idUser');

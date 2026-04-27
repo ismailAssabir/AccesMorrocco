@@ -108,27 +108,62 @@
     </div>
 
     
-    <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3 items-center">
-        <input type="text" id="search-input" oninput="filterTable()" placeholder="🔍 Rechercher un employé, une date..."
-            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all">
-        <select id="status-filter" onchange="filterTable()"
-            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all appearance-none min-w-[160px]">
-            <option value="">Tous les statuts</option>
-            <option value="present">Présent</option>
-            <option value="retard">Retard</option>
-            <option value="absent">Absent</option>
-        </select>
-        <select id="role-filter" onchange="filterTable()"
-            class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#be2346] focus:ring-2 focus:ring-[#be2346]/10 transition-all appearance-none min-w-[160px]">
-            <option value="">Tous les rôles</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="employee">Employé</option>
-        </select>
-        <button onclick="document.getElementById('search-input').value='';document.getElementById('status-filter').value='';document.getElementById('role-filter').value='';filterTable()"
-            class="text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">
-            Réinitialiser
-        </button>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+        <form id="filterForm" class="flex flex-wrap items-center gap-4" onsubmit="event.preventDefault()">
+            
+            <div class="flex-1 min-w-[280px] relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" id="search-input" oninput="filterTable()" placeholder="Rechercher un employé, une date..." 
+                    class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
+            </div>
+
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="relative">
+                    <select id="status-filter" onchange="filterTable()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <option value="">Tous les statuts</option>
+                        <option value="present">Présent</option>
+                        <option value="retard">Retard</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <select id="role-filter" onchange="filterTable()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <option value="">Tous les rôles</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="employee">Employé</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <select id="dept-filter" onchange="filterTable()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <option value="">Tous les départements</option>
+                        <?php $__currentLoopData = \App\Models\Departement::orderBy('title')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e(strtolower($dept->title)); ?>"><?php echo e($dept->title); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                <button type="button" onclick="document.getElementById('search-input').value='';document.getElementById('status-filter').value='';document.getElementById('role-filter').value='';document.getElementById('dept-filter').value='';filterTable()" class="p-3 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center" title="Réinitialiser les filtres">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                </button>
+            </div>
+        </form>
     </div>
 
     
@@ -202,7 +237,8 @@
                         data-name="<?php echo e(strtolower($empName)); ?>"
                         data-role="<?php echo e(strtolower($user->type ?? 'employee')); ?>"
                         data-date="<?php echo e($pointage->date); ?>"
-                        data-status="<?php echo e($pointage->status); ?>">
+                        data-status="<?php echo e($pointage->status); ?>"
+                        data-dept="<?php echo e(strtolower($user->departement->title ?? '')); ?>">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c1233] to-[#be2346] flex items-center justify-center text-white font-black text-xs shrink-0">
@@ -308,11 +344,13 @@
                                                 <input type="hidden" name="action" value="accepte">
                                                 <button type="submit" class="text-[10px] bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-2 py-1 rounded transition-colors">Accepter</button>
                                             </form>
-                                            <form action="<?php echo e(route('admin.pointages.validate', $pointage->idPointage)); ?>" method="POST">
-                                                <?php echo csrf_field(); ?>
-                                                <input type="hidden" name="action" value="refuse">
-                                                <button type="submit" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded transition-colors">Refuser</button>
-                                            </form>
+                                            <button type="button" onclick="openAdminRefuseModal(<?php echo e($pointage->idPointage); ?>)" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded transition-colors">Refuser</button>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if($pointage->justification_status === 'refuse' && $pointage->motif_refus): ?>
+                                        <div class="mt-1 p-1.5 bg-red-50 border border-red-100 rounded text-[9px] text-red-700">
+                                            <strong class="font-bold">Motif refus:</strong> <?php echo e($pointage->motif_refus); ?>
+
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -402,6 +440,45 @@
     </div>
 </div>
 
+
+<div id="adminRefuseModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAdminRefuseModal()"></div>
+    <div class="relative bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
+        <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+            <div>
+                <h2 class="text-lg font-black text-slate-800">Refuser la justification</h2>
+            </div>
+            <button type="button" onclick="closeAdminRefuseModal()"
+                class="w-8 h-8 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#be2346]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form id="adminRefuseForm" method="POST" class="p-7 space-y-5">
+            <?php echo csrf_field(); ?>
+            <input type="hidden" name="action" value="refuse">
+
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Motif du refus <span class="text-[#be2346]">*</span></label>
+                <textarea name="motif_refus" rows="3" required
+                    placeholder="Ex: Document illisible, motif non valable..."
+                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 max-length-500"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeAdminRefuseModal()"
+                    class="flex-1 py-3 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50">
+                    Annuler
+                </button>
+                <button type="submit"
+                    class="flex-1 py-3 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white">
+                    Confirmer le Refus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
     @keyframes modalIn {
         from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -422,20 +499,43 @@
         modal.classList.remove('flex');
         document.body.style.overflow = 'auto';
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettingsModal(); });
+    document.addEventListener('keydown', e => { 
+        if (e.key === 'Escape') {
+            closeSettingsModal();
+            if(typeof closeAdminRefuseModal === 'function') closeAdminRefuseModal();
+        }
+    });
+
+    function openAdminRefuseModal(idPointage) {
+        const form = document.getElementById('adminRefuseForm');
+        form.action = `/admin/pointages/${idPointage}/validate`;
+        const modal = document.getElementById('adminRefuseModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAdminRefuseModal() {
+        const modal = document.getElementById('adminRefuseModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
 
     function filterTable() {
         const search = document.getElementById('search-input').value.toLowerCase();
         const status = document.getElementById('status-filter').value.toLowerCase();
         const role   = document.getElementById('role-filter').value.toLowerCase();
+        const dept   = document.getElementById('dept-filter').value.toLowerCase();
         const rows   = document.querySelectorAll('.pointage-row');
 
         rows.forEach(row => {
             const nameMatch   = row.getAttribute('data-name').includes(search);
             const statusMatch = status === '' || row.getAttribute('data-status') === status;
             const roleMatch   = role === '' || row.getAttribute('data-role') === role;
+            const deptMatch   = dept === '' || row.getAttribute('data-dept') === dept;
             
-            if (nameMatch && statusMatch && roleMatch) {
+            if (nameMatch && statusMatch && roleMatch && deptMatch) {
                 row.classList.remove('hidden');
             } else {
                 row.classList.add('hidden');
