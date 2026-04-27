@@ -176,6 +176,7 @@ class LeadController extends Controller
                 'dateCreation'  => now()->toDateString(),
                 'password'      => Hash::make($request->password ?? '123456'),
             ]);
+            $lead->idClient = $client->idClient;
         }
 
         Dossier::create([

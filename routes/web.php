@@ -35,9 +35,9 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 //route d'assignation
-Route::patch('/clients/{id}/assign', [ClientController::class, 'assign'])
-    ->name('clients.assign')
-    ->middleware('role:manager,admin');
+Route::put('/dossiers/{id}/assign', [DossierController::class, 'assign'])
+    ->name('dossiers.assign')
+    ->middleware(['auth', 'role:manager,admin']);
 /*
 |--------------------------------------------------------------------------
 | Profile
@@ -86,7 +86,6 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
 
-    Route::patch('/clients/{id}/assign', [ClientController::class, 'assign'])->name('clients.assign');
 });
 /*
 |--------------------------------------------------------------------------

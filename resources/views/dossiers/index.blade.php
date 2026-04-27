@@ -96,11 +96,11 @@
                     <td class="px-4 py-4">{{ $dossier->distination }}</td>
 
                     <td class="px-4 py-4">
-                        {{ $dossier->departement->name ?? '-' }}
+                        {{ $dossier->departement->title ?? '-' }}
                     </td>
 
                     <td class="px-4 py-4 text-green-600 font-bold">
-                        {{ $dossier->user->name ?? 'Non assigné' }}
+                        {{$dossier->idUser? $dossier->user->firstName." ".$dossier->user->lastName : 'Non assigné' }}
                     </td>
 
                     <td class="px-4 py-4">
@@ -180,26 +180,36 @@
 {{-- JS --}}
 <script>
 function openAssignModal(dossierId, departementId) {
-
     const modal = document.getElementById('modal-assign');
     const select = document.getElementById('assign-user');
     const form = document.getElementById('assignForm');
 
     modal.classList.remove('hidden');
+    // On s'assure que l'URL générée est correcte
     form.action = '/dossiers/' + dossierId + '/assign';
 
     fetch('/departements/' + departementId + '/users')
         .then(res => res.json())
         .then(data => {
-            select.innerHTML = '';
+            select.innerHTML = '<option value="">Choisir un employé...</option>';
 
             data.forEach(user => {
+                // ATTENTION : on utilise user.idUser car c'est ce que votre route JSON renvoie
                 select.innerHTML += `
-                    <option value="${user.id}">
-                        ${user.firstName + " "+user.lastName}
+                    <option value="${user.idUser}">
+                        ${user.firstName} ${user.lastName}
                     </option>`;
             });
-        });
+        })
+        .catch(err => console.error('Erreur lors de la récupération des utilisateurs:', err));
+}
+
+// Optionnel : Fermer le modal en cliquant à côté
+window.onclick = function(event) {
+    const modal = document.getElementById('modal-assign');
+    if (event.target == modal) {
+        modal.classList.add('hidden');
+    }
 }
 </script>
 
