@@ -103,4 +103,7 @@ class User extends Authenticatable
     public function dossiers(){
         return $this->hasMany(Dossier::class, 'idUser', 'idUser')->withTimestamps();
     }
+    public function primes(){
+        return $this->hasMany(Prime::class, 'idUser', 'idUser');
+    }
 }

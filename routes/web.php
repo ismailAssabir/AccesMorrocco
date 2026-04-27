@@ -188,6 +188,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/reunions/edit/{id}', [ReunionController::class, 'update'])->name('reunions.update');
         Route::delete('/reunions/delete/{id}', [ReunionController::class, 'destroy'])->name('reunions.destroy');
     });
+
+    # Primes & Bonus Routes
+    Route::resource('primes', \App\Http\Controllers\PrimeController::class);
 });
 
 
