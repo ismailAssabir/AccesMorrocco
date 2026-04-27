@@ -95,6 +95,45 @@
                 </a>
             <?php endif; ?>
 
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('reunion.view')): ?>
+                <a href="<?php echo e(Route::has('meetings.index') ? route('meetings.index') : '#'); ?>" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   <?php echo e(request()->routeIs('meetings.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                    <div class="transition-transform duration-300 <?php echo e(request()->routeIs('meetings.index') ? '' : 'group-hover:rotate-12'); ?>">
+                        <svg class="w-5 h-5 <?php echo e(request()->routeIs('meetings.index') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Réunions</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('objectif.view')): ?>
+                <a href="<?php echo e(Route::has('goals.index') ? route('goals.index') : '#'); ?>" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   <?php echo e(request()->routeIs('goals.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                    <div class="transition-transform duration-300 <?php echo e(request()->routeIs('goals.index') ? '' : 'group-hover:rotate-12'); ?>">
+                        <svg class="w-5 h-5 <?php echo e(request()->routeIs('goals.index') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Objectifs</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('conge.view')): ?>
+                <a href="<?php echo e(Route::has('conge.index') ? route('conge.index') : '#'); ?>" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   <?php echo e(request()->routeIs('conge.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                    <div class="transition-transform duration-300 <?php echo e(request()->routeIs('conge.index') ? '' : 'group-hover:rotate-12'); ?>">
+                        <svg class="w-5 h-5 <?php echo e(request()->routeIs('conge.index') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Congés</span>
+                </a>
+            <?php endif; ?>
+
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('reclamation.view')): ?>
 
                 <a href="/reclamations" 
