@@ -137,7 +137,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-400 font-bold uppercase">Adresse</p>
-                                    <p class="text-sm text-slate-700 font-semibold"><?php echo e($lead->adresse ?? '—'); ?></p>
+                                    <p class="text-sm text-slate-700 font-semibold"><?php echo e($lead->address ?? '—'); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -209,12 +209,13 @@
                             
                             <div id="dept-section" class="hidden space-y-3 mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
 
-    
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
-        <select name="idDepartement"
-            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700"
-            style="color:#1e293b;">
+
+        <select name="idDepartement" id="select-dept"
+            class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
+            onchange="loadEmployees(this.value)">
+
             <option value="">— Choisir un département —</option>
             <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
@@ -222,13 +223,14 @@
         </select>
     </div>
 
-
     
     <div>
         <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Mot de passe client</label>
         <input type="password" name="password" id="password"
+
         class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700"
         placeholder="Entrer un mot de passe">
+
     </div>
 
 </div>
@@ -268,7 +270,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Département</p>
-                                <p class="text-sm font-semibold text-slate-700"><?php echo e($lead->departements->name ?? '—'); ?></p>
+                                <p class="text-sm font-semibold text-slate-700"><?php echo e($lead->departements->title ?? '—'); ?></p>
                             </div>
                             <div>
                                 <p class="text-xs font-black text-slate-400 uppercase mb-1">Responsable</p>
@@ -362,15 +364,18 @@
     </div>
 
     <script>
-        // Afficher/masquer la section département selon le statut choisi
-        function toggleDept(radio) {
-            const section = document.getElementById('dept-section');
-            section.classList.toggle('hidden', radio.value !== 'ok');
+    document.addEventListener("DOMContentLoaded", function () {
+        const selected = document.querySelector('input[name="statut"]:checked');
+        if (selected && selected.value === 'ok') {
+            document.getElementById('dept-section').classList.remove('hidden');
         }
+    });
 
-        // Charger les employés du département via fetch
-
-    </script>
+    function toggleDept(radio) {
+        const section = document.getElementById('dept-section');
+        section.classList.toggle('hidden', radio.value !== 'ok');
+    }
+</script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>

@@ -170,28 +170,7 @@ unset($__errorArgs, $__bag); ?>
                                 <option value="inactif" <?php echo e(old('status', $client->status) === 'inactif' ? 'selected' : ''); ?>>Inactif</option>
                             </select>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Lead associé *</label>
-                            <input name="idLead" required value="<?php echo e(old('idLead', $client->idLead)); ?>"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] <?php $__errorArgs = ['idLead'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> border-red-400 <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>">
-                            <?php $__errorArgs = ['idLead'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-
+                        
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
                             <input name="address" value="<?php echo e(old('address', $client->address)); ?>"

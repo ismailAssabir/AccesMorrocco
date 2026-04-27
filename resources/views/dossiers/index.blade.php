@@ -37,7 +37,7 @@
             @foreach($departements as $dept)
                 <option value="{{ $dept->idDepartement }}"
                     {{ request('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>
-                    {{ $dept->name }}
+                    {{ $dept->title }}
                 </option>
             @endforeach
         </select>
@@ -96,11 +96,18 @@
                     <td class="px-4 py-4">{{ $dossier->distination }}</td>
 
                     <td class="px-4 py-4">
-                        {{ $dossier->departement->name ?? '-' }}
+                        @if(!$dossier->idDepartement && auth()->user()->hasRole('admin'))
+                            <button onclick="openDeptModal({{ $dossier->idDossier }})"
+                                class="px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+                                ⚠ Non assigné
+                            </button>
+                        @else
+                            {{ $dossier->departement->title ?? '-' }}
+                        @endif
                     </td>
 
                     <td class="px-4 py-4 text-green-600 font-bold">
-                        {{ $dossier->user->name ?? 'Non assigné' }}
+                        {{$dossier->idUser? $dossier->user->firstName." ".$dossier->user->lastName : 'Non assigné' }}
                     </td>
 
                     <td class="px-4 py-4">
@@ -176,30 +183,83 @@
         </form>
     </div>
 </div>
+{{-- ================= MODAL ASSIGN DEPARTEMENT ================= --}}
+<div id="modal-dept" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+        <h2 class="font-bold mb-1 text-slate-800">Assigner un Département</h2>
+        <p class="text-xs text-slate-400 mb-4">Ce dossier n'est assigné à aucun département.</p>
 
+        <form method="POST" id="deptForm">
+            @csrf
+            @method('PUT')
+
+            <select name="idDepartement" id="dept-select"
+                class="w-full px-3 py-2 border border-slate-200 rounded-xl mb-4 text-sm">
+                <option value="">Choisir un département...</option>
+                @foreach($departements as $dept)
+                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                @endforeach
+            </select>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="flex-1 bg-[#b11d40] text-white py-2 rounded-xl font-bold text-sm hover:bg-[#7c1233] transition">
+                    Assigner
+                </button>
+                <button type="button" onclick="document.getElementById('modal-dept').classList.add('hidden')"
+                    class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {{-- JS --}}
 <script>
-function openAssignModal(dossierId, departementId) {
+    function openDeptModal(dossierId) {
+    const modal = document.getElementById('modal-dept');
+    const form = document.getElementById('deptForm');
+    form.action = '/dossiers/' + dossierId + '/assign-departement';
+    modal.classList.remove('hidden');
+}
 
+window.addEventListener('click', function(event) {
+    const deptModal = document.getElementById('modal-dept');
+    if (event.target == deptModal) {
+        deptModal.classList.add('hidden');
+    }
+});
+function openAssignModal(dossierId, departementId) {
     const modal = document.getElementById('modal-assign');
     const select = document.getElementById('assign-user');
     const form = document.getElementById('assignForm');
 
     modal.classList.remove('hidden');
+    // On s'assure que l'URL générée est correcte
     form.action = '/dossiers/' + dossierId + '/assign';
 
     fetch('/departements/' + departementId + '/users')
         .then(res => res.json())
         .then(data => {
-            select.innerHTML = '';
+            select.innerHTML = '<option value="">Choisir un employé...</option>';
 
             data.forEach(user => {
+                // ATTENTION : on utilise user.idUser car c'est ce que votre route JSON renvoie
                 select.innerHTML += `
-                    <option value="${user.id}">
-                        ${user.firstName + " "+user.lastName}
+                    <option value="${user.idUser}">
+                        ${user.firstName} ${user.lastName}
                     </option>`;
             });
-        });
+        })
+        .catch(err => console.error('Erreur lors de la récupération des utilisateurs:', err));
+}
+
+// Optionnel : Fermer le modal en cliquant à côté
+window.onclick = function(event) {
+    const modal = document.getElementById('modal-assign');
+    if (event.target == modal) {
+        modal.classList.add('hidden');
+    }
 }
 </script>
 
