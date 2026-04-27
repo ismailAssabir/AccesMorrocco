@@ -12,6 +12,7 @@ class Prime extends Model
     use HasFactory;
     protected $primaryKey = 'idPrime';
     protected $fillable = [
+        'idUser',
         'idTache',
         'idPointage',
         'idObjectif',
@@ -20,6 +21,12 @@ class Prime extends Model
         'dateAttribution',
         'status'
     ];
+    public function user(){
+        return $this->belongsTo(User::class, 'idUser', 'idUser');
+    }
+    public function objectif(){
+        return $this->belongsTo(Objectif::class, 'idObjectif', 'idObjectif');
+    }
     function pointage(){
         return $this->belongsTo(Pointage::class, 'idPointage', 'idPointage');
     }
