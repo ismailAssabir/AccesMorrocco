@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('primes', function (Blueprint $table) {
             $table->id('idPrime');
+            $table->unsignedBigInteger('idUser')->nullable();
+            $table->foreign('idUser')->references('idUser')->on('users')->cascadeOnDelete();
             $table->unsignedBigInteger('idTache')->nullable();
             $table->unsignedBigInteger('idPointage')->nullable();
             $table->unsignedBigInteger('idObjectif')->nullable();

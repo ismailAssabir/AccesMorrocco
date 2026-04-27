@@ -110,8 +110,15 @@
                     <td class="px-4 py-4"><?php echo e($dossier->distination); ?></td>
 
                     <td class="px-4 py-4">
-                        <?php echo e($dossier->departement->title ?? '-'); ?>
+                        <?php if(!$dossier->idDepartement && auth()->user()->hasRole('admin')): ?>
+                            <button onclick="openDeptModal(<?php echo e($dossier->idDossier); ?>)"
+                                class="px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+                                ⚠ Non assigné
+                            </button>
+                        <?php else: ?>
+                            <?php echo e($dossier->departement->title ?? '-'); ?>
 
+                        <?php endif; ?>
                     </td>
 
                     <td class="px-4 py-4 text-green-600 font-bold">
@@ -195,8 +202,51 @@
     </div>
 </div>
 
+<div id="modal-dept" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+        <h2 class="font-bold mb-1 text-slate-800">Assigner un Département</h2>
+        <p class="text-xs text-slate-400 mb-4">Ce dossier n'est assigné à aucun département.</p>
+
+        <form method="POST" id="deptForm">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
+
+            <select name="idDepartement" id="dept-select"
+                class="w-full px-3 py-2 border border-slate-200 rounded-xl mb-4 text-sm">
+                <option value="">Choisir un département...</option>
+                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="flex-1 bg-[#b11d40] text-white py-2 rounded-xl font-bold text-sm hover:bg-[#7c1233] transition">
+                    Assigner
+                </button>
+                <button type="button" onclick="document.getElementById('modal-dept').classList.add('hidden')"
+                    class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
+    function openDeptModal(dossierId) {
+    const modal = document.getElementById('modal-dept');
+    const form = document.getElementById('deptForm');
+    form.action = '/dossiers/' + dossierId + '/assign-departement';
+    modal.classList.remove('hidden');
+}
+
+window.addEventListener('click', function(event) {
+    const deptModal = document.getElementById('modal-dept');
+    if (event.target == deptModal) {
+        deptModal.classList.add('hidden');
+    }
+});
 function openAssignModal(dossierId, departementId) {
     const modal = document.getElementById('modal-assign');
     const select = document.getElementById('assign-user');

@@ -26,7 +26,24 @@ class DossierController extends Controller
         return redirect()->back()->with('msg', 'Dossier assigné avec succès !');
     }
 
+    public function assignDepartement(Request $request, $id)
+    {
+        // Seulement l'admin peut faire ça
+        Gate::authorize('dossier.edit');
 
+        $request->validate([
+            'idDepartement' => 'required|exists:departements,idDepartement',
+        ]);
+
+        $dossier = Dossier::findOrFail($id);
+
+        // Sécurité : on n'écrase pas un département déjà assigné via cette route
+        abort_if($dossier->idDepartement !== null, 403, 'Ce dossier a déjà un département.');
+
+        $dossier->update(['idDepartement' => $request->idDepartement]);
+
+        return redirect()->back()->with('msg', 'Département assigné avec succès !');
+    }
     public function getEmployes($id)
 {
     $employes = User::where('idDepartement', $id)
