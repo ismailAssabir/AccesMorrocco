@@ -170,15 +170,7 @@ unset($__errorArgs, $__bag); ?>
                                 <option value="inactif" <?php echo e(old('status', $client->status) === 'inactif' ? 'selected' : ''); ?>>Inactif</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">département assigner</label>
-                            <select value="<?php echo e(optional($client->departement)->title ?? '-'); ?>" name="idDepartemnent" 
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
+                        
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
                             <input name="address" value="<?php echo e(old('address', $client->address)); ?>"

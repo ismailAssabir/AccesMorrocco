@@ -47,7 +47,7 @@
             <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <option value="<?php echo e($dept->idDepartement); ?>"
                     <?php echo e(request('idDepartement') == $dept->idDepartement ? 'selected' : ''); ?>>
-                    <?php echo e($dept->name); ?>
+                    <?php echo e($dept->title); ?>
 
                 </option>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

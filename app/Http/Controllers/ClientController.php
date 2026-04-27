@@ -15,7 +15,7 @@ class ClientController extends Controller
 {
     public function index(){
         Gate::authorize('client.view');
-        $clients = Client::all();
+        $clients = Client::orderBy('idClient', 'desc')->get();
         $departements = Departement::all();
         return view('AllClients' , compact("clients", 'departements'));
     }
@@ -67,7 +67,7 @@ public function show($id){
 
 public function edit($id){
      Gate::authorize('client.edit');
-    $client = Client::with('departement')->findOrFail($id);
+    $client = Client::findOrFail($id);
     $departements = Departement::all();
     return view('editClient' , compact('client', 'departements'));
 }

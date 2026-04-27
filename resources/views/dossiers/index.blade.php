@@ -37,7 +37,7 @@
             @foreach($departements as $dept)
                 <option value="{{ $dept->idDepartement }}"
                     {{ request('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>
-                    {{ $dept->name }}
+                    {{ $dept->title }}
                 </option>
             @endforeach
         </select>

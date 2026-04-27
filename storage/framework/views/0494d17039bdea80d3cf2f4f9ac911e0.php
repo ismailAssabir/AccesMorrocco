@@ -364,15 +364,18 @@
     </div>
 
     <script>
-        // Afficher/masquer la section département selon le statut choisi
-        function toggleDept(radio) {
-            const section = document.getElementById('dept-section');
-            section.classList.toggle('hidden', radio.value !== 'ok');
+    document.addEventListener("DOMContentLoaded", function () {
+        const selected = document.querySelector('input[name="statut"]:checked');
+        if (selected && selected.value === 'ok') {
+            document.getElementById('dept-section').classList.remove('hidden');
         }
+    });
 
-        // Charger les employés du département via fetch
-
-    </script>
+    function toggleDept(radio) {
+        const section = document.getElementById('dept-section');
+        section.classList.toggle('hidden', radio.value !== 'ok');
+    }
+</script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>

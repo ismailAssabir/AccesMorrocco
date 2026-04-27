@@ -91,15 +91,7 @@
                                 <option value="inactif" {{ old('status', $client->status) === 'inactif' ? 'selected' : '' }}>Inactif</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">département assigner</label>
-                            <select value="{{ optional($client->departement)->title ?? '-' }}" name="idDepartemnent" 
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
                             <input name="address" value="{{ old('address', $client->address) }}"

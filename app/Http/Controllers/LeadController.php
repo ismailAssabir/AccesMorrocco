@@ -21,7 +21,7 @@ class LeadController extends Controller
     {
         Gate::authorize('lead.view');
 
-        $query = Lead::with(['user', 'client', 'departements']);
+        $query = Lead::with('client');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -136,7 +136,7 @@ class LeadController extends Controller
     $request->validate([
         'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
         'idDepartement' => 'nullable|exists:departements,idDepartement',
-        'password'      => 'nullable|required_if:statut,ok|min:6',
+        'password'      => 'required_if:statut,ok|min:8',
     ]);
 
     $statut = $request->statut;
@@ -171,25 +171,26 @@ class LeadController extends Controller
                 'address'       => $lead->address,
                 'CNE'           => $lead->CNE,
                 'nationalite'   => $lead->nationalite,
-                'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
-                'idUser'        => $request->idUser ?? $lead->idUser,
                 'dateCreation'  => now()->toDateString(),
-                'password'      => Hash::make($request->password ?? '123456'),
+                'password' => Hash::make($request->password ?? '12345678'),
             ]);
             $lead->idClient = $client->idClient;
         }
 
-        Dossier::create([
-            'idClient'        => $client->idClient,
-            'idDepartement'   => $request->idDepartement ?? $lead->idDepartement,
-            'reference'       => 'DOS-' . strtoupper(Str::random(8)),
-            'dateCreation'    => now(),
-            'nombrePersonnes' => 1,
-            'montant'         => 0,
-            'nombreJours'     => 0,
-            'status'          => 'ouvert',
-            'commentaire'     => 'Dossier créé automatiquement depuis la conversion du lead #' . $lead->idLead . '.',
-        ]);
+        $dossierExiste = Dossier::where('idClient', $client->idClient)->exists();
+
+        if (!$dossierExiste) {
+            Dossier::create([
+                'idClient'        => $client->idClient,
+                'idDepartement'   => $request->idDepartement ?? $lead->idDepartement,
+                'reference'       => 'DOS-' . strtoupper(Str::random(8)),
+                'dateCreation'    => now(),
+                'nombrePersonnes' => 1,
+                'montant'         => 0,
+                'nombreJours'     => 0,
+                'status'          => 'ouvert',
+                'commentaire'     => 'Dossier créé automatiquement depuis la conversion du lead #' . $lead->idLead . '.',
+            ]);}
 
     } else {
         return redirect()->back()->with('error', 'Transition de statut non autorisée.');
