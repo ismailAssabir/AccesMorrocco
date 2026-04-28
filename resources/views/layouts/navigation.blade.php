@@ -95,6 +95,56 @@
         } catch (\Exception $e) {}
         return $items;
     });
+
+    $recentNotifications = \Illuminate\Support\Facades\Cache::remember('recent_notifications_' . $userType . '_' . auth()->id(), 60, function() use ($userType) {
+        $notifications = collect();
+        try {
+            if (Gate::allows('tache.view')) {
+                $tasks = \App\Models\Tache::latest()->limit(2)->get()->map(function($item) {
+                    return [
+                        'title' => 'Nouvelle Tâche',
+                        'desc' => $item->titre,
+                        'time' => $item->created_at,
+                        'url' => '/tasks'
+                    ];
+                });
+                $notifications = $notifications->concat($tasks);
+            }
+            if (Gate::allows('reunion.view')) {
+                $reunions = \App\Models\Reunion::latest()->limit(2)->get()->map(function($item) {
+                    return [
+                        'title' => 'Nouvelle Réunion',
+                        'desc' => $item->titre,
+                        'time' => $item->created_at,
+                        'url' => '/meetings'
+                    ];
+                });
+                $notifications = $notifications->concat($reunions);
+            }
+            if (Gate::allows('reclamation.view')) {
+                $recs = \App\Models\Reclamation::latest()->limit(2);
+                if ($userType === 'employee') {
+                    $recs->where('idUser', auth()->id());
+                }
+                $recs = $recs->get()->map(function($item) {
+                    return [
+                        'title' => 'Nouvelle Réclamation',
+                        'desc' => $item->titre,
+                        'time' => $item->created_at,
+                        'url' => '/reclamations'
+                    ];
+                });
+                $notifications = $notifications->concat($recs);
+            }
+            
+            return $notifications->sortByDesc('time')->take(5)->values();
+        } catch (\Exception $e) {
+            return collect();
+        }
+    });
+    
+    $newestNotificationTime = $recentNotifications->max('time');
+    $newestTimestamp = $newestNotificationTime ? $newestNotificationTime->timestamp * 1000 : 0;
 @endphp
 
 
@@ -170,26 +220,55 @@
 
             <div class="h-6 w-[1px] bg-gray-200"></div>
 
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" 
+            <div x-data="{ 
+                open: false,
+                lastChecked: parseInt(localStorage.getItem('notifications_last_checked_{{ auth()->id() }}') || '0'),
+                displayLastChecked: parseInt(localStorage.getItem('notifications_last_checked_{{ auth()->id() }}') || '0'),
+                notifications: {{ json_encode($recentNotifications->map(function($n) {
+                    $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
+                    $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
+                    return $n;
+                })) }},
+                get unreadNotifications() {
+                    return this.notifications.filter(n => n.timestamp > this.displayLastChecked);
+                },
+                get hasNew() {
+                    return this.notifications.some(n => n.timestamp > this.lastChecked);
+                },
+                toggle() {
+                    if (!this.open) {
+                        this.open = true;
+                        this.lastChecked = Date.now();
+                        localStorage.setItem('notifications_last_checked_{{ auth()->id() }}', this.lastChecked);
+                    } else {
+                        this.close();
+                    }
+                },
+                close() {
+                    this.open = false;
+                    setTimeout(() => { this.displayLastChecked = this.lastChecked; }, 300);
+                }
+            }" @click.away="close()" class="relative">
+                <button @click="toggle()" 
                     class="relative p-2 rounded-xl hover:bg-[#be2346]/5 transition-all duration-300 group">
                     
-                    <span class="absolute top-2 right-2 flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
-                    </span>
+                    <template x-if="hasNew">
+                        <span class="absolute top-2 right-2 flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
+                        </span>
+                    </template>
                     
                     <svg class="w-6 h-6 text-gray-500 group-hover:text-[#be2346] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                 </button>
 
-                <div x-show="open" 
+                    <div x-show="open" 
                     x-cloak
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                    @click.away="open = false" 
                     class="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50">
                     
                     <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
@@ -197,7 +276,17 @@
                     </div>
 
                     <div class="max-h-64 overflow-y-auto">
-                        <div class="p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
+                        <template x-for="notif in unreadNotifications" :key="notif.url + notif.timestamp">
+                            <a :href="notif.url" class="block p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
+                                <div class="flex justify-between items-start mb-1">
+                                    <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]" x-text="notif.title"></p>
+                                    <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2" x-text="notif.time_human"></span>
+                                </div>
+                                <p class="text-xs text-gray-500 line-clamp-2 mt-1" x-text="notif.desc"></p>
+                            </a>
+                        </template>
+
+                        <div x-show="unreadNotifications.length === 0" class="p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
                             <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]">Mise à jour système</p>
                             <p class="text-xs text-gray-500 mt-1">Nouveaux objectifs ajoutés pour le projet Access Morocco.</p>
                         </div>

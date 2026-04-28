@@ -18,7 +18,6 @@
             </div>
             <?php if(auth()->user()->type !== 'employee'): ?>
             <button onclick="toggleModal('addReunionModal', 'open')" class="flex items-center gap-2 bg-[#b11d40] hover:bg-[#911633] active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-[#b11d40]/20 text-sm whitespace-nowrap">
-
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -405,8 +404,10 @@
     
     <div id="viewReunionModal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeReunionModal()"></div>
-        <div class="relative bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden flex flex-col z-10 animate-modal-in border border-white/20">
-            <div class="p-8 md:p-10">
+        <div class="relative bg-white w-11/12 md:max-w-lg rounded-[40px] shadow-2xl overflow-hidden flex flex-col z-10 animate-modal-in border border-white/20 max-h-[90vh]">
+            
+            
+            <div class="overflow-y-auto p-8 md:p-10 scrollbar-hide">
                 <div class="flex justify-between items-start mb-8">
                     <div id="modal_reunion_type_badge" class="px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm"></div>
                     <button onclick="closeReunionModal()" class="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all active:scale-90">
@@ -460,7 +461,7 @@
                     </div>
                 </div>
 
-                <div class="flex gap-4">
+                <div class="flex gap-4 pb-4">
                     <button onclick="closeReunionModal()" class="flex-1 py-5 bg-gray-100 hover:bg-gray-200 rounded-[24px] text-xs font-black text-gray-500 transition-all active:scale-95 uppercase tracking-widest">Fermer</button>
                     <a id="modal_view_full" href="#" class="flex-1 py-5 bg-[#be2346] hover:bg-[#a01d3a] rounded-[24px] text-xs font-black text-white text-center transition-all shadow-xl shadow-[#be2346]/20 active:scale-95 uppercase tracking-widest">Voir plus</a>
                 </div>
@@ -655,4 +656,5 @@
 <?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
 <?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
 <?php endif; ?>
+
 <?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/reunions/index.blade.php ENDPATH**/ ?>

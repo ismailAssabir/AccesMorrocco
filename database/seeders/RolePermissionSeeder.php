@@ -85,6 +85,8 @@ class RolePermissionSeeder extends Seeder
             'pointage.create',
             'pointage.edit',
             'pointage.delete',
+            'can_point',             // clock in/out permission
+            'view_all_attendance',   // see all employees' records
 
             // --- Congés ---
             'conge.view',
@@ -131,12 +133,33 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+        // --- Assign can_point to employee and manager (not admin by default) ---
+        $canPoint = Permission::firstOrCreate(['name' => 'can_point']);
+        $viewAll  = Permission::firstOrCreate(['name' => 'view_all_attendance']);
 
+        // Give employees the ability to clock in/out
+        if (!$employeeRole->hasPermissionTo('can_point')) {
+            $employeeRole->givePermissionTo($canPoint);
+        }
+        // Give managers can_point AND view_all_attendance
+        if (!$managerRole->hasPermissionTo('can_point')) {
+            $managerRole->givePermissionTo($canPoint);
+        }
+        if (!$managerRole->hasPermissionTo('view_all_attendance')) {
+            $managerRole->givePermissionTo($viewAll);
+        }
+        // Give admins view_all_attendance (but NOT can_point by default)
+        if (!$adminRole->hasPermissionTo('view_all_attendance')) {
+            $adminRole->givePermissionTo($viewAll);
+        }
+        // Keep existing admin permission.edit / permission.view
+        if (!$adminRole->hasPermissionTo('permission.edit')) {
+            $adminRole->givePermissionTo('permission.edit');
+        }
+        if (!$adminRole->hasPermissionTo('permission.view')) {
+            $adminRole->givePermissionTo('permission.view');
+        }
 
-        $adminRole->syncPermissions([ 'permission.edit',
-            'permission.view',]);
-
-
-        // Assign permissions to manager
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

@@ -81,13 +81,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/permissions/{id}', [PermissionController::class, 'update'])->name('permissions.update');
 });
 Route::middleware(['auth'])->group(function () {
+    Route::get('clients/export-pdf', [ClientController::class, 'exportPdf'])->name('clients.export-pdf');
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
     Route::get('/clients/{id}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clients/{id}', [ClientController::class, 'update'])->name('clients.update');
-    Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
-
+    Route::delete('/clients/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');   
 });
 /*
 |--------------------------------------------------------------------------
@@ -207,7 +207,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::middleware('role:admin')->group(function() {
         Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+        Route::get('/admin/pointages/export', [PointageController::class, 'exportPdf'])->name('admin.pointages.export');
         Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+        Route::post('/admin/pointages/{id}/validate', [PointageController::class, 'validateJustification'])->name('admin.pointages.validate');
+        Route::delete('/admin/pointages/clear', [PointageController::class, 'destroyAll'])->name('admin.pointages.clear');
     });
 });
 #Paiment Routes

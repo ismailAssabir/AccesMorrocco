@@ -184,11 +184,11 @@
                                      <div class="flex flex-col items-center gap-1.5">
                                          <div class="flex items-center gap-3">
                                              <div class="flex items-center gap-2">
-                                                 <span class="text-xs font-extrabold <?php echo e(($employee->presence_percentage ?? 0) > 80 ? 'text-emerald-500' : (($employee->presence_percentage ?? 0) > 50 ? 'text-amber-500' : 'text-red-500')); ?>">
+                                                 <span class="text-xs font-extrabold <?php echo e(($employee->presence_percentage ?? 0) >= 80 ? 'text-emerald-500' : (($employee->presence_percentage ?? 0) >= 40 ? 'text-amber-500' : 'text-red-500')); ?>">
                                                      <?php echo e($employee->presence_percentage ?? 0); ?>%
                                                  </span>
                                                  <div class="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                                     <div class="h-1.5 rounded-full transition-all duration-500 <?php echo e(($employee->presence_percentage ?? 0) > 80 ? 'bg-emerald-400' : (($employee->presence_percentage ?? 0) > 50 ? 'bg-amber-400' : 'bg-red-400')); ?>" 
+                                                     <div class="h-1.5 rounded-full transition-all duration-500 <?php echo e(($employee->presence_percentage ?? 0) >= 80 ? 'bg-emerald-400' : (($employee->presence_percentage ?? 0) >= 40 ? 'bg-amber-400' : 'bg-red-400')); ?>" 
                                                           style="width: <?php echo e($employee->presence_percentage ?? 0); ?>%"></div>
                                                  </div>
                                              </div>
@@ -222,10 +222,17 @@
                                                      </span>
                                                  <?php endif; ?>
                                              <?php else: ?>
-                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-tighter">
-                                                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                                                     Absent
-                                                 </span>
+                                                 <?php if($employee->today_pointage && strtolower($employee->today_pointage->status) === 'absent'): ?>
+                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-[#be2346] text-[9px] font-black uppercase tracking-tighter border border-red-100/50">
+                                                         <span class="w-1 h-1 rounded-full bg-[#be2346]"></span>
+                                                         Absent
+                                                     </span>
+                                                 <?php else: ?>
+                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-tighter">
+                                                         <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                                         Absent
+                                                     </span>
+                                                 <?php endif; ?>
                                              <?php endif; ?>
                                          </div>
                                      </div>

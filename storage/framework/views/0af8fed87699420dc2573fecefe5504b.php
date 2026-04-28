@@ -40,7 +40,8 @@
                                 <input type="checkbox" name="permissions[]" value="<?php echo e($perm->name); ?>" 
                                        class="perm-<?php echo e($module); ?> accent-[#b11d40]"
                                        <?php echo e($role->hasPermissionTo($perm->name) ? 'checked' : ''); ?>>
-                                <span class="text-xs font-bold text-slate-700"><?php echo e(explode('.', $perm->name)[1]); ?></span>
+                                <?php $parts = explode('.', $perm->name); ?>
+                                <span class="text-xs font-bold text-slate-700"><?php echo e(count($parts) > 1 ? $parts[1] : $perm->name); ?></span>
                             </label>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>

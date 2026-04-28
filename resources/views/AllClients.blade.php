@@ -7,15 +7,27 @@
                 <h1 class="text-2xl font-extrabold text-slate-800">Gestion des Clients</h1>
                 <p class="text-slate-500 text-sm">Liste de tous vos clients actifs.</p>
             </div>
-            @can('client.create')
-            <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-                    class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Nouveau Client
-            </button>
-            @endcan
+            <div class="flex gap-3">
+                @can('client.view')
+                <a href="{{ route('clients.export-pdf') }}"
+                    class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Exporter PDF
+                </a>
+                @endcan
+
+                @can('client.create')
+                <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+                        class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Nouveau Client
+                </button>
+                @endcan
+            </div>
         </div>
 
         {{-- Flash --}}

@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Schedule;
 
 
 
-$absenceTime = Company::value('absenceTime') ?? '12:00';
-Schedule::command('app:mark-as-absent')
+Schedule::command('pointage:mark-absents')
     ->dailyAt(Company::value('absenceTime') ?? '12:00');
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

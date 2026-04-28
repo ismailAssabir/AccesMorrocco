@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Gate;
 
 class ClientController extends Controller
 {
+    public function exportPdf()
+    {
+        Gate::authorize('client.view');
+
+        $clients = Client::orderBy('idClient', 'desc')->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('clients.pdf', compact('clients'))
+                    ->setPaper('a4', 'landscape');
+
+        return $pdf->download('clients-' . now()->format('Y-m-d') . '.pdf');
+    }
     public function index(){
         Gate::authorize('client.view');
         $clients = Client::orderBy('idClient', 'desc')->get();

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Rapport des Leads</title>
+    <title>Rapport des Clients</title>
     <style>
         body { font-family: 'Helvetica', 'Arial', sans-serif; color: #374151; line-height: 1.5; margin: 0; padding: 0; font-size: 11px; }
         @page { margin: 30px; }
@@ -24,8 +24,8 @@
         
         /* Couleurs Thématiques */
         .bg-main { background-color: #f0f7ff; color: #1e293b; border-color: #3b82f6; }
-        .bg-leads { background-color: #faf5ff; color: #6b21a5; border-color: #a855f7; }
-        .bg-converted { background-color: #f0fdf4; color: #15803d; border-color: #22c55e; }
+        .bg-active { background-color: #f0fdf4; color: #15803d; border-color: #22c55e; }
+        .bg-inactive { background-color: #fef2f2; color: #b91c1c; border-color: #ef4444; }
         
         /* Table */
         .data-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 30px; border: 1px solid #e5e7eb; table-layout: fixed; }
@@ -33,15 +33,17 @@
         .data-table td { padding: 10px; border-bottom: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; vertical-align: middle; }
         .data-table tr:nth-child(even) { background-color: #f9fafb; }
         
-        /* Badges */
+        /* Badges Statut */
         .badge { display: inline-block; padding: 5px 8px; border-radius: 6px; font-size: 8px; font-weight: 800; text-transform: uppercase; text-align: center; color: #ffffff; min-width: 60px; }
-        .badge-particulier { background-color: #3b82f6; border: 1px solid #2563eb; }
-        .badge-professionnel { background-color: #8b5cf6; border: 1px solid #7c3aed; }
-        .badge-agence { background-color: #f59e0b; border: 1px solid #d97706; }
+        .badge-actif { background-color: #22c55e; border: 1px solid #16a34a; }
+        .badge-inactif { background-color: #ef4444; border: 1px solid #dc2626; }
+        
+        /* Badge Type Client */
+        .type-badge { display: inline-block; padding: 3px 6px; border-radius: 4px; font-size: 8px; font-weight: 700; text-transform: uppercase; text-align: center; background-color: #fce7f3; color: #be185d; }
         
         /* Utils */
-        .lead-name { font-weight: bold; font-size: 10px; color: #1f2937; }
-        .lead-address { font-size: 9px; color: #6b7280; font-style: italic; }
+        .client-name { font-weight: bold; font-size: 10px; color: #1f2937; }
+        .client-info { font-size: 9px; color: #6b7280; }
         
         .footer { position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 10px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 10px; font-weight: bold; }
         .pagenum:before { content: counter(page); }
@@ -61,11 +63,11 @@
                     </div>
                 </td>
                 <td width="34%" style="text-align: center; vertical-align: middle;">
-                    <div style="font-size: 20px; font-weight: 800; color: #1e293b; text-transform: uppercase;">Rapport des Leads</div>
-                    <div style="font-size: 9px; color: #94a3b8; margin-top: 4px;">Liste complète des prospects commerciaux</div>
+                    <div style="font-size: 20px; font-weight: 800; color: #1e293b; text-transform: uppercase;">Rapport des Clients</div>
+                    <div style="font-size: 9px; color: #94a3b8; margin-top: 4px;">Liste complète des clients enregistrés</div>
                 </td>
                 <td width="33%" style="text-align: right; vertical-align: middle;">
-                    <div style="color: #1e293b; font-size: 15px; font-weight: 800; text-transform: uppercase;">CRM PROSPECTS</div>
+                    <div style="color: #1e293b; font-size: 15px; font-weight: 800; text-transform: uppercase;">CRM CLIENTS</div>
                 </td>
             </tr>
         </table>
@@ -89,16 +91,16 @@
     <table class="stats-table">
         <tr>
             <td class="stat-card bg-main" width="33%">
-                <div class="stat-card-title">Total Leads</div>
-                <div class="stat-card-value"><?php echo e($leads->count()); ?></div>
+                <div class="stat-card-title">Total Clients</div>
+                <div class="stat-card-value"><?php echo e($clients->count()); ?></div>
             </td>
-            <td class="stat-card bg-leads" width="33%">
-                <div class="stat-card-title">Leads actifs</div>
-                <div class="stat-card-value"><?php echo e($leads->where('status', 'actif')->count()); ?></div>
+            <td class="stat-card bg-active" width="33%">
+                <div class="stat-card-title">Clients Actifs</div>
+                <div class="stat-card-value"><?php echo e($clients->where('status', 'actif')->count()); ?></div>
             </td>
-            <td class="stat-card bg-converted" width="33%">
-                <div class="stat-card-title">Taux conversion</div>
-                <div class="stat-card-value"><?php echo e($leads->where('status', 'converti')->count()); ?></div>
+            <td class="stat-card bg-inactive" width="33%">
+                <div class="stat-card-title">Clients Inactifs</div>
+                <div class="stat-card-value"><?php echo e($clients->where('status', 'inactif')->count()); ?></div>
             </td>
         </tr>
     </table>
@@ -106,49 +108,50 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th width="15%">Lead</th>
+                <th width="5%">ID</th>
+                <th width="15%">Client</th>
                 <th width="15%">Email</th>
                 <th width="10%">Téléphone</th>
-                <th width="8%" style="text-align: center;">Type</th>
-                <th width="10%">Source</th>
-                <th width="10%">Nationalité</th>
-                <th width="12%">Département</th>
-                <th width="10%" style="text-align: center;">Date création</th>
-                <th width="10%" style="text-align: center;">Statut</th>
+                <th width="8%">CNE</th>
+                <th width="10%">Type</th>
+                <th width="8%">Nationalité</th>
+                <th width="10%">Date Naissance</th>
+                <th width="9%" style="text-align: center;">Statut</th>
             </tr>
         </thead>
         <tbody>
-            <?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <tr>
-                    <td>
-                        <div class="lead-name"><?php echo e($lead->firstName ?? '—'); ?> <?php echo e($lead->lastName ?? ''); ?></div>
-                        <div class="lead-address"><?php echo e($lead->address ?? 'Adresse non spécifiée'); ?></div>
-                    </td>
-                    <td style="color: #2563eb;"><?php echo e($lead->email ?? '—'); ?></td>
-                    <td><?php echo e($lead->phoneNumber ?? '—'); ?></td>
-                    <td style="text-align: center;">
-                        <div class="badge badge-<?php echo e(strtolower($lead->type)); ?>">
-                            <?php echo e($lead->type ?? '—'); ?>
+            <?php $__empty_1 = true; $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <tr>
+                <td style="font-weight: bold; color: #1e293b;"><?php echo e($client->idClient); ?></td>
+                <td>
+                    <div class="client-name"><?php echo e($client->firstName ?? '—'); ?> <?php echo e($client->lastName ?? ''); ?></div>
+                    <div class="client-info"><?php echo e($client->address ?? 'Adresse non spécifiée'); ?></div>
+                </td>
+                <td style="color: #2563eb;"><?php echo e($client->email ?? '—'); ?></td>
+                <td><?php echo e($client->phoneNumber ?? '—'); ?></td>
+                <td><?php echo e($client->CNE ?? '—'); ?></td>
+                <td>
+                    <?php if($client->type): ?>
+                        <span class="type-badge"><?php echo e($client->type); ?></span>
+                    <?php else: ?>
+                        <span style="color: #cbd5e1;">—</span>
+                    <?php endif; ?>
+                </td>
+                <td><?php echo e($client->nationalite ?? '—'); ?></td>
+                <td style="text-align: center;">
+                    <?php echo e($client->dateNaissance ? \Carbon\Carbon::parse($client->dateNaissance)->format('d/m/Y') : '—'); ?>
 
-                        </div>
-                    </td>
-                    <td><?php echo e($lead->source ?? '—'); ?></td>
-                    <td><?php echo e($lead->nationalite ?? '—'); ?></td>
-                    <td><?php echo e($lead->departements->title ?? '—'); ?></td>
-                    <td style="text-align: center;">
-                        <?php echo e($lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—'); ?>
+                </td>
+                <td style="text-align: center;">
+                    <div class="badge badge-<?php echo e(strtolower($client->status ?? 'inactif')); ?>">
+                        <?php echo e($client->status ?? 'Inactif'); ?>
 
-                    </td>
-                    <td style="text-align: center;">
-                        <div class="badge badge-<?php echo e(strtolower($lead->status ?? 'nouveau')); ?>">
-                            <?php echo e($lead->status ?? 'Nouveau'); ?>
-
-                        </div>
-                    </td>
-                </tr>
+                    </div>
+                </td>
+            </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 30px; color: #6b7280;">Aucun lead trouvé.</td>
+                    <td colspan="9" style="text-align: center; padding: 30px; color: #6b7280;">Aucun client trouvé.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -158,4 +161,4 @@
         Access Morocco | Rapport Confidentiel - Page <span class="pagenum"></span>
     </div>
 </body>
-</html><?php /**PATH C:\Users\4B\Desktop\ExercicesLaravel\voyage\resources\views/leads/pdf.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\Users\4B\Desktop\ExercicesLaravel\voyage\resources\views/clients/pdf.blade.php ENDPATH**/ ?>

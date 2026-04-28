@@ -22,7 +22,10 @@ class PermissionController extends Controller
         $role = Role::findOrFail($id);
         
         // Groupement des permissions par module (ex: 'user.create' -> 'user')
-        $permissions = Permission::all()->groupBy(fn($p) => explode('.', $p->name)[0]);
+        $permissions = Permission::all()->groupBy(function($p) {
+            $parts = explode('.', $p->name);
+            return count($parts) > 1 ? $parts[0] : 'Autres';
+        });
 
         return view('permissions.edit', compact('role', 'permissions'));
     }
