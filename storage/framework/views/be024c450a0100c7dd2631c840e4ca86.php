@@ -29,10 +29,10 @@
 
         
         <?php if(session('msg')): ?>
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
-            <?php echo e(session('msg')); ?>
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
+                <?php echo e(session('msg')); ?>
 
-        </div>
+            </div>
         <?php endif; ?>
 
         
@@ -237,34 +237,24 @@
                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type</label>
-                            <input name="type" placeholder="Type de client"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Statut</label>
-                            <select name="status"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="actif">Actif</option>
-                                <option value="inactif">Inactif</option>
+                       <div>
+                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
+                            <select name="type_select" required
+                                onchange="document.getElementById('other-type-wrapper').classList.toggle('hidden', this.value !== 'autre')"
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                <option value="" disabled selected>Sélectionner un type</option>
+                                <option value="particulier">Particulier</option>
+                                <option value="famille">Famille</option>
+                                <option value="entreprise">Entreprise</option>
+                                <option value="groupe">Groupe</option>
+                                <option value="autre">Autre</option>
                             </select>
-                        </div>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
-                            <input name="address" placeholder="Adresse complète"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            <div id="other-type-wrapper" class="hidden mt-2">
+                                <input name="type" placeholder="Précisez le type..."
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            </div>
                         </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Note</label>
-                            <textarea name="note" rows="2" placeholder="Notes complémentaires..."
-                                      class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
-                        </div>
-
-                    </div>
                     <div class="flex gap-3 justify-end mt-6">
                         <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
                                 class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">

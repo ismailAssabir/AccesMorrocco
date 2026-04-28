@@ -114,10 +114,10 @@
     <div class="header">
         <div class="header-content">
             <h1>Rapport d'Activité</h1>
-            <p class="meta-info">Document généré le {{ now()->format('d/m/Y à H:i') }}</p>
+            <p class="meta-info">Document généré le <?php echo e(now()->format('d/m/Y à H:i')); ?></p>
         </div>
         <div class="stats-badge">
-            <span class="count">{{ $dossiers->count() }}</span>
+            <span class="count"><?php echo e($dossiers->count()); ?></span>
             <span class="label">Dossiers Total</span>
         </div>
     </div>
@@ -137,28 +137,29 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($dossiers as $dossier)
+                <?php $__empty_1 = true; $__currentLoopData = $dossiers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dossier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td class="ref-text">{{ $dossier->reference }}</td>
-                    <td>{{ $dossier->client->firstName ?? '—' }} {{ $dossier->client->lastName ?? '' }}</td>
-                    <td>{{ $dossier->distination ?? '—' }}</td>
-                    <td><small>{{ $dossier->departement->title ?? '—' }}</small></td>
-                    <td style="text-align: center;">{{ $dossier->nombrePersonnes }}</td>
-                    <td class="amount">{{ number_format($dossier->montant, 2, ',', ' ') }} MAD</td>
-                    <td>{{ $dossier->dateVoyage ? \Carbon\Carbon::parse($dossier->dateVoyage)->format('d/m/Y') : '—' }}</td>
+                    <td class="ref-text"><?php echo e($dossier->reference); ?></td>
+                    <td><?php echo e($dossier->client->firstName ?? '—'); ?> <?php echo e($dossier->client->lastName ?? ''); ?></td>
+                    <td><?php echo e($dossier->distination ?? '—'); ?></td>
+                    <td><small><?php echo e($dossier->departement->title ?? '—'); ?></small></td>
+                    <td style="text-align: center;"><?php echo e($dossier->nombrePersonnes); ?></td>
+                    <td class="amount"><?php echo e(number_format($dossier->montant, 2, ',', ' ')); ?> MAD</td>
+                    <td><?php echo e($dossier->dateVoyage ? \Carbon\Carbon::parse($dossier->dateVoyage)->format('d/m/Y') : '—'); ?></td>
                     <td>
-                        <span class="pill {{ strtolower($dossier->status) }}">
-                            {{ $dossier->status }}
+                        <span class="pill <?php echo e(strtolower($dossier->status)); ?>">
+                            <?php echo e($dossier->status); ?>
+
                         </span>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="8" style="text-align:center; padding: 40px; color: #94a3b8;">
                         Aucune donnée disponible pour cette période.
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -166,10 +167,10 @@
     <div class="footer">
         <table style="width: 100%; border: none;">
             <tr>
-                <td style="border: none; padding: 0;">{{ config('app.name') }} &copy; {{ now()->year }} — Confidentiel</td>
+                <td style="border: none; padding: 0;"><?php echo e(config('app.name')); ?> &copy; <?php echo e(now()->year); ?> — Confidentiel</td>
                 <td style="border: none; padding: 0; text-align: right;" class="page-number"></td>
             </tr>
         </table>
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\Users\4B\Desktop\ExercicesLaravel\voyage\resources\views/dossiers/pdf.blade.php ENDPATH**/ ?>

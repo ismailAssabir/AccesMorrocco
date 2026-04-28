@@ -12,12 +12,12 @@
 
         
         <div class="mb-8">
-            <a href="<?php echo e(route('leads.show', $lead->idLead)); ?>"
+            <a href="<?php echo e(route('leads.index')); ?>"
                class="inline-flex items-center gap-2 text-slate-400 hover:text-[#b11d40] text-sm font-bold mb-3 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Retour au lead
+                Retour aux leads
             </a>
             <h1 class="text-2xl font-extrabold text-slate-800">Modifier le Lead</h1>
             <p class="text-slate-500 text-sm"><?php echo e($lead->firstName); ?> <?php echo e($lead->lastName); ?></p>
@@ -84,8 +84,21 @@ unset($__errorArgs, $__bag); ?>
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
-                            <input name="type" required value="<?php echo e(old('type', $lead->type)); ?>"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] <?php $__errorArgs = ['type'];
+
+                            <?php
+                                $knownTypes = ['particulier', 'famille', 'entreprise', 'groupe'];
+                                $currentType = old('type', $lead->type);
+                                $isOther = $currentType && !in_array($currentType, $knownTypes);
+                            ?>
+
+                            <select name="type_select" id="type_select" 
+                                onchange="
+                                        var isOther = this.value === 'autre';
+                                        document.getElementById('other-type-wrapper').classList.toggle('hidden', !isOther);
+                                        document.getElementById('type-other-input').disabled = !isOther;
+                                        document.getElementById('type-select').disabled = isOther;
+                                    "
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] <?php $__errorArgs = ['type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -93,6 +106,21 @@ $message = $__bag->first($__errorArgs[0]); ?> border-red-400 <?php unset($messag
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
+                                <option value="" disabled <?php echo e(!$currentType ? 'selected' : ''); ?>>Sélectionner un type</option>
+                                <option value="particulier" <?php echo e($currentType === 'particulier' ? 'selected' : ''); ?>>Particulier</option>
+                                <option value="famille"     <?php echo e($currentType === 'famille'     ? 'selected' : ''); ?>>Famille</option>
+                                <option value="entreprise"  <?php echo e($currentType === 'entreprise'  ? 'selected' : ''); ?>>Entreprise</option>
+                                <option value="groupe"      <?php echo e($currentType === 'groupe'      ? 'selected' : ''); ?>>Groupe</option>
+                                <option value="autre"       <?php echo e($isOther                       ? 'selected' : ''); ?>>Autre</option>
+                            </select>
+
+                            <div id="other-type-wrapper" class="<?php echo e($isOther ? '' : 'hidden'); ?> mt-2">
+                                <input name="type" id="type-other-input"
+                                    value="<?php echo e($isOther ? $currentType : ''); ?>"
+                                    placeholder="Précisez le type..."
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            </div>
+
                             <?php $__errorArgs = ['type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -150,38 +178,8 @@ unset($__errorArgs, $__bag); ?>
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
-                            <input name="adresse" value="<?php echo e(old('adresse', $lead->adresse)); ?>"
+                            <input name="address" value="<?php echo e(old('address', $lead->address)); ?>"
                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
-                            <select name="idDepartement"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Aucun —</option>
-                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($dept->idDepartement); ?>"
-                                        <?php echo e(old('idDepartement', $lead->idDepartement) == $dept->idDepartement ? 'selected' : ''); ?>>
-                                        <?php echo e($dept->name); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Responsable</label>
-                            <select name="idUser"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Aucun —</option>
-                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($user->idUser); ?>"
-                                        <?php echo e(old('idUser', $lead->idUser) == $user->idUser ? 'selected' : ''); ?>>
-                                        <?php echo e($user->firstName); ?> <?php echo e($user->lastName); ?>
-
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
                         </div>
 
                         <div class="md:col-span-2 lg:col-span-3">
@@ -196,7 +194,7 @@ unset($__errorArgs, $__bag); ?>
 
             
             <div class="flex items-center justify-between">
-                <a href="<?php echo e(route('leads.show', $lead->idLead)); ?>"
+                <a href="<?php echo e(route('leads.index')); ?>"
                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>

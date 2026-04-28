@@ -34,11 +34,12 @@ public function store(Request $request) {
         'phoneNumber'   => 'nullable|min:10|max:15',
         'idLead'        => 'nullable|exists:leads,idLead',
         'status'        => 'in:actif,inactif',
-        'type'          => 'nullable',
+        'type_select' => 'nullable|string',
+        'type'        => 'nullable|string|max:50',
         'nationalite'   => 'max:40|string|nullable',
-        'note'          => 'string|nullable'
+        'note'          => 'string|nullable',
     ]);
-
+    $newClient['type'] = $request->type_select === 'autre' ? $request->type : $request->type_select;
     $newClient['password'] = Hash::make($request->password);
 
     $client = Client::create($newClient);
@@ -83,20 +84,28 @@ public function update(Request $request ,$id){
         'CNE'           => 'required|string|unique:clients,CNE,'.$id.',idClient',
         'dateNaissance' => "required|date",
         'address'       => 'nullable|string|max:100',
-        'phoneNumber'   => 'required|min:10|max:15|unique:clients,phoneNumber,'.$id.',idClient',
-        'idLead'        => 'required|exists:leads,idLead',
-        'type'          => 'nullable|string',
+        'phoneNumber'   => 'required|min:10|max:15',
+        'idLead'        => 'nullable|exists:leads,idLead',
         'status'        => 'in:actif,inactif',
         'nationalite'   => 'nullable|string',
-        'note'          => 'string|nullable'
-
+        'note'          => 'string|nullable',
+        'type_select' => 'required|string',
+        'type'        => 'nullable|string|max:50',
     ]);
+    if ($request->type_select === 'autre') {
+    if (empty($request->type)) {
+        return back()->withErrors(['type' => 'Veuillez préciser le type']);
+    }
+        $clientUpdate['type'] = $request->type;
+    } else {
+        $clientUpdate['type'] = $request->type_select;
+    }
     if ($request->filled('password')) {
         $clientUpdate['password'] = Hash::make($request->password);
     } else {
         unset($clientUpdate['password']);
     }
     $client->update($clientUpdate);
-    return redirect()->back()->with('msg' , 'Les informations utilisateur ont été mises à jour avec succès');
-}
+return redirect()->route('clients.index')
+    ->with('msg', 'Client modifié avec succès');}
 }

@@ -342,8 +342,21 @@
                         </div>
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
-                            <input name="type" required placeholder="Type de lead"
+                            <select name="type_select" required
+                                onchange="document.getElementById('other-type-wrapper').classList.toggle('hidden', this.value !== 'autre')"
                                 class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                                <option value="" disabled selected>Sélectionner un type</option>
+                                <option value="particulier">Particulier</option>
+                                <option value="famille">Famille</option>
+                                <option value="entreprise">Entreprise</option>
+                                <option value="groupe">Groupe</option>
+                                <option value="autre">Autre</option>
+                            </select>
+
+                            <div id="other-type-wrapper" class="hidden mt-2">
+                                <input name="type" placeholder="Précisez le type..."
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            </div>
                         </div>
                         
                         <div class="md:col-span-2">

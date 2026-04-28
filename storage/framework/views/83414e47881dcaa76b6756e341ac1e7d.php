@@ -22,9 +22,18 @@
             <h1 class="text-2xl font-extrabold text-slate-800">Modifier le Client</h1>
             <p class="text-slate-500 text-sm"><?php echo e($client->firstName); ?> <?php echo e($client->lastName); ?></p>
         </div>
-
+        <?php if($errors->any()): ?>
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-xs font-bold">
+                <ul class="list-disc pl-4 space-y-1">
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </ul>
+            </div>
+        <?php endif; ?>
         <form method="POST" action="<?php echo e(route('clients.update', $client->idClient)); ?>">
-            <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?> 
 
             <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-6">
                 <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
@@ -157,9 +166,52 @@ unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type</label>
-                            <input name="type" value="<?php echo e(old('type', $client->type)); ?>"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
+
+                            <?php
+                                $knownTypes = ['particulier', 'famille', 'entreprise', 'groupe'];
+                                $currentType = old('type', $client->type);
+                                $isOther = $currentType && !in_array($currentType, $knownTypes);
+                            ?>
+
+                            <select name="type_select" id="type-select" required
+                                onchange="
+                                        var isOther = this.value === 'autre';
+                                        document.getElementById('other-type-wrapper').classList.toggle('hidden', !isOther);
+                                        document.getElementById('type-other-input').disabled = !isOther;
+                                        document.getElementById('type-select').disabled = isOther;
+                                    "
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] <?php $__errorArgs = ['type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-400 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                                <option value="" disabled <?php echo e(!$currentType ? 'selected' : ''); ?>>Sélectionner un type</option>
+                                <option value="particulier" <?php echo e($currentType === 'particulier' ? 'selected' : ''); ?>>Particulier</option>
+                                <option value="famille"     <?php echo e($currentType === 'famille'     ? 'selected' : ''); ?>>Famille</option>
+                                <option value="entreprise"  <?php echo e($currentType === 'entreprise'  ? 'selected' : ''); ?>>Entreprise</option>
+                                <option value="groupe"      <?php echo e($currentType === 'groupe'      ? 'selected' : ''); ?>>Groupe</option>
+                                <option value="autre"       <?php echo e($isOther                       ? 'selected' : ''); ?>>Autre</option>
+                            </select>
+
+                            <div id="other-type-wrapper" class="<?php echo e($isOther ? '' : 'hidden'); ?> mt-2">
+                                <input name="type" id="type-other-input"
+                                    value="<?php echo e($isOther ? $currentType : ''); ?>"
+                                    placeholder="Précisez le type..."
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            </div>
+
+                            <?php $__errorArgs = ['type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <div>

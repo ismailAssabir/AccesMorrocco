@@ -46,8 +46,36 @@
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Type *</label>
-                            <input name="type" required value="{{ old('type', $lead->type) }}"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('type') border-red-400 @enderror">
+
+                            @php
+                                $knownTypes = ['particulier', 'famille', 'entreprise', 'groupe'];
+                                $currentType = old('type', $lead->type);
+                                $isOther = $currentType && !in_array($currentType, $knownTypes);
+                            @endphp
+
+                            <select name="type_select" id="type_select" 
+                                onchange="
+                                        var isOther = this.value === 'autre';
+                                        document.getElementById('other-type-wrapper').classList.toggle('hidden', !isOther);
+                                        document.getElementById('type-other-input').disabled = !isOther;
+                                        document.getElementById('type-select').disabled = isOther;
+                                    "
+                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('type') border-red-400 @enderror">
+                                <option value="" disabled {{ !$currentType ? 'selected' : '' }}>Sélectionner un type</option>
+                                <option value="particulier" {{ $currentType === 'particulier' ? 'selected' : '' }}>Particulier</option>
+                                <option value="famille"     {{ $currentType === 'famille'     ? 'selected' : '' }}>Famille</option>
+                                <option value="entreprise"  {{ $currentType === 'entreprise'  ? 'selected' : '' }}>Entreprise</option>
+                                <option value="groupe"      {{ $currentType === 'groupe'      ? 'selected' : '' }}>Groupe</option>
+                                <option value="autre"       {{ $isOther                       ? 'selected' : '' }}>Autre</option>
+                            </select>
+
+                            <div id="other-type-wrapper" class="{{ $isOther ? '' : 'hidden' }} mt-2">
+                                <input name="type" id="type-other-input"
+                                    value="{{ $isOther ? $currentType : '' }}"
+                                    placeholder="Précisez le type..."
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                            </div>
+
                             @error('type')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
@@ -86,34 +114,6 @@
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Adresse</label>
                             <input name="address" value="{{ old('address', $lead->address) }}"
                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
-                            <select name="idDepartement"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Aucun —</option>
-                                @foreach($departements as $dept)
-                                    <option value="{{ $dept->idDepartement }}"
-                                        {{ old('idDepartement', $lead->idDepartement) == $dept->idDepartement ? 'selected' : '' }}>
-                                        {{ $dept->title }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Responsable</label>
-                            <select name="idUser"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Aucun —</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->idUser }}"
-                                        {{ old('idUser', $lead->idUser) == $user->idUser ? 'selected' : '' }}>
-                                        {{ $user->firstName }} {{ $user->lastName }}
-                                    </option>
-                                @endforeach
-                            </select>
                         </div>
 
                         <div class="md:col-span-2 lg:col-span-3">

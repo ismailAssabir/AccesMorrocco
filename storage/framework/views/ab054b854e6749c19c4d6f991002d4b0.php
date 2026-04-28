@@ -17,12 +17,24 @@
             <p class="text-slate-500 text-sm">Suivez et gérez tous vos dossiers.</p>
         </div>
 
-        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
-        <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-            class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-            ➕ Nouveau Dossier
-        </button>
-        <?php endif; ?>
+        <div class="flex gap-3">
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
+    <a href="<?php echo e(route('dossiers.export-pdf', request()->query())); ?>"
+        class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Exporter PDF
+    </a>
+    <?php endif; ?>
+
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
+    <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+        class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
+        ➕ Nouveau Dossier
+    </button>
+    <?php endif; ?>
+</div>
     </div>
 
     
@@ -232,6 +244,103 @@
         </form>
     </div>
 </div>
+
+<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
+<div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+
+        
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233] rounded-t-3xl shrink-0"></div>
+        <div class="p-6 flex justify-between items-center border-b border-slate-100 shrink-0">
+            <h2 class="text-lg font-extrabold text-slate-800">Nouveau Dossier</h2>
+            <button onclick="document.getElementById('modal-create').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+
+        <form method="POST" action="<?php echo e(route('dossiers.store')); ?>" class="flex flex-col flex-1 overflow-hidden">
+            <?php echo csrf_field(); ?>
+
+            
+            <div class="px-6 py-4 space-y-4 overflow-y-auto flex-1">
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Client *</label>
+                    <select name="idClient" required
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                        <option value="">— Choisir un client —</option>
+                        <?php $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($client->idClient); ?>"><?php echo e($client->firstName); ?> <?php echo e($client->lastName); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département </label>
+                    <select name="idDepartement" 
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                        <option value="">— Choisir un département —</option>
+                        <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Destination</label>
+                    <input name="distination" placeholder="Ex: Paris, Dubai..."
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de personnes *</label>
+                        <input name="nombrePersonnes" type="number" min="1" value="1" required
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de jours *</label>
+                        <input name="nombreJours" type="number" min="0" value="0" required
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Montant *</label>
+                    <input name="montant" type="number" min="0" step="0.01" value="0" required
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Date de voyage</label>
+                    <input name="dateVoyage" type="date"
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Commentaire</label>
+                    <textarea name="commentaire" rows="3"
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
+                </div>
+
+            </div>
+
+            
+            <div class="px-6 py-4 flex gap-3 justify-end border-t border-slate-100 bg-slate-50 shrink-0">
+                <button type="button"
+                    onclick="document.getElementById('modal-create').classList.add('hidden')"
+                    class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm">
+                    Annuler
+                </button>
+                <button type="submit"
+                    class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm shadow">
+                    Créer le Dossier
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
     function openDeptModal(dossierId) {

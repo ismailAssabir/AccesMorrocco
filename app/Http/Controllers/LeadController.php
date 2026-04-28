@@ -64,7 +64,8 @@ class LeadController extends Controller
             'nationalite'   => 'nullable|string',
             'source'        => 'nullable|string',
             'note'          => 'nullable|string',
-            'type'          => 'required|string|max:20',
+            'type_select'   => 'required|string', 
+            'type'          => 'nullable|string|max:50',
             'idUser'        => 'nullable|exists:users,idUser',
             'idClient'      => 'nullable|exists:clients,idClient',
             'idDepartement' => 'nullable|exists:departements,idDepartement',
@@ -72,7 +73,7 @@ class LeadController extends Controller
 
         $validatedData['dateCreation'] = now()->toDateString();
         $validatedData['statut']       = 'nouveau';
-
+        $validatedData['type'] = $request->type_select === 'autre' ? $request->type : $request->type_select;
         Lead::create($validatedData);
 
         return redirect()->back()->with('msg', 'Lead ajouté avec succès !');
@@ -116,15 +117,13 @@ class LeadController extends Controller
             'nationalite'   => 'nullable|string',
             'source'        => 'nullable|string',
             'note'          => 'nullable|string',
-            'type'          => 'required|string|max:20',
-            'idUser'        => 'nullable|exists:users,idUser',
             'idClient'      => 'nullable|exists:clients,idClient',
-            'idDepartement' => 'nullable|exists:departements,idDepartement',
+            'type_select'   => 'required|string',
+            'type'          => 'nullable|string|max:50',
         ]);
-
+        $validatedData['type'] = $request->type_select === 'autre' ? $request->type : $request->type_select;
         $lead->update($validatedData);
-
-        return redirect()->route('leads.show', $id)->with('msg', 'Lead mis à jour avec succès !');
+        return redirect()->route('leads.index', $id)->with('msg', 'Lead mis à jour avec succès !');
     }
 
     public function updateStatut(Request $request, $id)
