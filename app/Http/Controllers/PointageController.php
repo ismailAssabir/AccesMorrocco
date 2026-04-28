@@ -21,23 +21,13 @@ class PointageController extends Controller
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
-    private function buildPointageQuery(Request $request)
+    private function getMergedPointageList(Request $request)
     {
-        $query = Pointage::with(['user', 'user.departement']);
-
-        // Filter: search by name
-        if ($search = $request->get('search')) {
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('firstName', 'like', "%{$search}%")
-                  ->orWhere('lastName',  'like', "%{$search}%");
-            });
-        }
-
-        // Period Filtering
         $period = $request->get('period');
         $start = null;
         $end = null;
 
+        // Date Period Filtering
         if ($period === 'today') {
             $start = now()->startOfDay();
             $end = now()->endOfDay();
@@ -52,6 +42,10 @@ class PointageController extends Controller
             $end = $request->filled('end_date') ? Carbon::parse($request->end_date)->endOfDay() : null;
         }
 
+        // Base Query starting from Pointage (Strictly real records only)
+        $query = Pointage::with(['user', 'user.departement']);
+
+        // 1. Date Filtering
         if ($start && $end) {
             $query->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
         } elseif ($start) {
@@ -60,56 +54,91 @@ class PointageController extends Controller
             $query->where('date', '<=', $end->toDateString());
         }
 
-        // Filter: status
+        // 2. User Relationship Filters (Search, Role, Department)
+        if ($request->filled('search') || $request->filled('role') || $request->filled('departement') || $request->filled('user_id')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                if ($search = $request->get('search')) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('firstName', 'like', "%{$search}%")
+                           ->orWhere('lastName', 'like', "%{$search}%");
+                    });
+                }
+                if ($role = $request->get('role')) {
+                    $q->where('type', $role);
+                }
+                if ($dept = $request->get('departement')) {
+                    $q->whereHas('departement', fn($sq) => $sq->where('title', 'like', "%{$dept}%"));
+                }
+                if ($idUser = $request->get('user_id')) {
+                    $q->where('idUser', $idUser);
+                }
+            });
+        }
+
+        // 3. Status Filter (Applied directly to Pointage)
         if ($status = $request->get('status')) {
             $query->where('status', $status);
         }
 
-        // Filter: role
-        if ($role = $request->get('role')) {
-            $query->whereHas('user', fn($q) => $q->where('type', $role));
-        }
-
-        // Filter: departement
-        if ($dept = $request->get('departement')) {
-            $query->whereHas('user.departement', fn($q) => $q->where('title', 'like', "%{$dept}%"));
-        }
-
-        // Filter: user_id
-        if ($idUser = $request->get('user_id')) {
-            $query->where('idUser', $idUser);
-        }
-
-        // Filter: justification
-        if ($request->has('has_justification') && $request->get('has_justification') !== '') {
-            if ($request->get('has_justification') === '1' || $request->get('has_justification') === 'yes') {
-                $query->whereNotNull('justification');
+        // 4. Justification Filter (Applied directly to Pointage)
+        if ($request->filled('has_justification')) {
+            $justifFilter = $request->get('has_justification');
+            $wantsJustif = in_array($justifFilter, ['1', 'yes']);
+            if ($wantsJustif) {
+                $query->whereNotNull('justification')->where('justification', '!=', '');
             } else {
-                $query->whereNull('justification');
+                $query->where(function($q) {
+                    $q->whereNull('justification')->orWhere('justification', '');
+                });
             }
         }
 
-        return $query;
+        // 5. Ordering (Chronological order)
+        return $query->orderBy('date', 'asc')
+                     ->orderBy('heureEntree', 'asc')
+                     ->get();
+    }
+
+    public function destroyAll()
+    {
+        Gate::authorize('pointage.view');
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            \App\Models\Pointage::truncate();
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            
+            return redirect()->back()->with('success', 'Historique de pointage vidé avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+        }
     }
 
     public function index(Request $request)
     {
         Gate::authorize('pointage.view');
 
-        $query = $this->buildPointageQuery($request);
+        $merged = $this->getMergedPointageList($request);
 
-        $pointages = $query->orderBy('date', 'desc')
-            ->orderBy('heureEntree', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $perPage = 10;
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $pointages = new \Illuminate\Pagination\LengthAwarePaginator(
+            $merged->forPage($page, $perPage),
+            $merged->count(),
+            $perPage,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
             
-        $statsQuery = clone $query;
         $stats = [
-            'total' => $statsQuery->count(),
-            'presents' => (clone $statsQuery)->where('status', 'present')->count(),
-            'retards' => (clone $statsQuery)->where('status', 'retard')->count(),
-            'absents' => (clone $statsQuery)->where('status', 'absent')->count(),
-            'withJustif' => (clone $statsQuery)->whereNotNull('justification')->count(),
+            'total' => $merged->count(),
+            'presents' => $merged->where('status', 'present')->count(),
+            'retards' => $merged->where('status', 'retard')->count(),
+            'absents' => $merged->where('status', 'absent')->count(),
+            'withJustif' => $merged->where('justification', '!=', null)->count(),
         ];
             
         $settings = Company::first();
@@ -479,11 +508,7 @@ class PointageController extends Controller
     {
         Gate::authorize('view_all_attendance');
 
-        $query = $this->buildPointageQuery($request);
-
-        $pointages = $query->orderBy('date', 'desc')
-            ->orderBy('heureEntree', 'desc')
-            ->get();
+        $pointages = $this->getMergedPointageList($request);
 
         $stats = [
             'total' => $pointages->count(),
@@ -494,16 +519,47 @@ class PointageController extends Controller
 
         $company = Company::first();
         
+        $minDate = $pointages->min('date');
+        $maxDate = $pointages->max('date');
+
+        $periodTrans = [
+            'today' => "Aujourd'hui",
+            'yesterday' => 'Hier',
+            'week' => 'Cette semaine',
+            'last_week' => 'Semaine dernière',
+            'last_7_days' => '7 derniers jours',
+            'last_30_days' => '30 derniers jours',
+            'month' => 'Ce mois-ci',
+            'last_month' => 'Mois dernier',
+            'custom' => 'Personnalisé'
+        ];
+        $periodValue = strtolower($request->get('period', ''));
+        
+        // Reverse mapping to handle case where label might be passed instead of value
+        $reverseTrans = array_flip($periodTrans);
+        $normalizedPeriod = $reverseTrans[$request->get('period')] ?? $periodValue;
+
+        if (!$normalizedPeriod && ($request->filled('start_date') || $request->filled('end_date'))) {
+            $displayPeriod = 'Personnalisé';
+        } else {
+            $displayPeriod = $periodTrans[$normalizedPeriod] ?? ($request->filled('period') ? $request->get('period') : 'Toutes les dates');
+        }
+
         $data = [
             'pointages' => $pointages,
             'stats' => $stats,
             'company' => $company,
             'filters' => [
-                'period' => $request->get('period', 'Toutes les dates'),
-                'start' => $request->get('start_date') ? Carbon::parse($request->get('start_date'))->format('d/m/Y') : null,
-                'end' => $request->get('end_date') ? Carbon::parse($request->get('end_date'))->format('d/m/Y') : null,
-                'role' => $request->get('role', 'Tous'),
-                'status' => $request->get('status', 'Tous'),
+                'period' => $displayPeriod,
+                'start' => $request->get('start_date') 
+                    ? \Carbon\Carbon::parse($request->get('start_date'))->format('d/m/Y') 
+                    : ($minDate ? \Carbon\Carbon::parse($minDate)->format('d/m/Y') : null),
+                'end' => $request->get('end_date') 
+                    ? \Carbon\Carbon::parse($request->get('end_date'))->format('d/m/Y') 
+                    : ($maxDate ? \Carbon\Carbon::parse($maxDate)->format('d/m/Y') : null),
+                'role' => $request->filled('role') ? $request->get('role') : 'Tous',
+                'status' => $request->filled('status') ? $request->get('status') : 'Tous',
+                'employee' => $request->filled('user_id') ? (\App\Models\User::find($request->user_id)?->firstName . ' ' . \App\Models\User::find($request->user_id)?->lastName) : 'Tous',
                 'justified' => $request->has('has_justification') && $request->get('has_justification') !== '' ? ($request->get('has_justification') === 'yes' || $request->get('has_justification') === '1' ? 'Oui' : 'Non') : 'Tous',
             ],
             'logo' => public_path('images/logo.png'),

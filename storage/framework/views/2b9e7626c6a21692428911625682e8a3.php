@@ -4,108 +4,154 @@
     <meta charset="utf-8">
     <title>Rapport de Pointage</title>
     <style>
-        body { font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif; color: #222; line-height: 1.4; margin: 0; padding: 0; font-size: 11px; }
-        @page { margin: 40px; }
-        table { width: 100%; border-collapse: collapse; }
-        .header { width: 100%; border-bottom: 2px solid #b11d40; padding-bottom: 15px; margin-bottom: 25px; }
-        .header td { border: none; padding: 0; }
-        .logo { max-height: 45px; }
-        .company-name { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 3px; }
-        .company-subtitle { font-size: 11px; color: #777; }
-        .report-title { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; color: #111; }
-        .meta-box { border: 1px solid #ddd; padding: 12px; margin-bottom: 25px; background-color: #fafafa; }
-        .meta-table { width: 100%; }
-        .meta-table td { font-size: 10px; padding: 4px 8px; border: none; vertical-align: top; }
-        .meta-table strong { color: #555; display: block; margin-bottom: 3px; text-transform: uppercase; font-size: 9px; }
-        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .data-table th, .data-table td { border: 1px solid #ccc; padding: 8px 6px; text-align: left; vertical-align: middle; }
-        .data-table th { background-color: #f4f4f4; font-weight: bold; font-size: 10px; text-transform: uppercase; color: #333; }
-        .data-table tr:nth-child(even) { background-color: #fcfcfc; }
-        .footer { position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 9px; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #374151; line-height: 1.5; margin: 0; padding: 0; font-size: 11px; }
+        @page { margin: 30px; }
+        
+        /* Header */
+        .header { width: 100%; padding-top: 10px; padding-bottom: 20px; margin-bottom: 15px; }
+        .header table { width: 100%; border-collapse: collapse; }
+        
+        .metadata-box { background-color: #f8fafc; border-radius: 6px; padding: 8px 12px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+        .metadata-table { width: 100%; font-size: 9px; color: #64748b; }
+        .metadata-table td { padding: 4px; border: none; vertical-align: middle; }
+        .metadata-label { font-weight: bold; color: #334155; }
+        
+        /* KPI Cards */
+        .stats-table { width: 100%; margin-bottom: 20px; border-collapse: separate; border-spacing: 12px 0; margin-left: -12px; }
+        .stat-card { border-radius: 8px; padding: 12px; text-align: center; vertical-align: middle; border-width: 2px; border-style: solid; }
+        .stat-card-title { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; color: #64748b; }
+        .stat-card-value { font-size: 22px; font-weight: 800; }
+        
+        .bg-blue { background-color: #f0f7ff; color: #1d4ed8; border-color: #3b82f6; }
+        .bg-green { background-color: #f0fdf4; color: #15803d; border-color: #22c55e; }
+        .bg-orange { background-color: #fffaf0; color: #c2410c; border-color: #f97316; }
+        .bg-red { background-color: #fef2f2; color: #b91c1c; border-color: #ef4444; }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 30px; border: 1px solid #e5e7eb; table-layout: fixed; }
+        .data-table th { background-color: #130000ff; color: #ffffff; font-weight: bold; text-transform: uppercase; padding: 12px 10px; text-align: left; }
+        .data-table td { padding: 10px; border-bottom: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; vertical-align: middle; }
+        .data-table tr:nth-child(even) { background-color: #f9fafb; }
+        
+        /* Badges */
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; text-align: center; color: #ffffff; min-width: 70px; }
+        .badge-present { background-color: #10b981; border: 1px solid #059669; }
+        .badge-retard { background-color: #f59e0b; border: 1px solid #d97706; }
+        .badge-absent { background-color: #ef4444; border: 1px solid #dc2626; }
+        
+        /* Utils */
+        .justification-text { font-size: 9px; color: #4b5563; word-wrap: break-word; max-width: 200px; }
+        .emp-name { font-weight: bold; font-size: 11px; color: #1f2937; }
+        .emp-email { font-size: 8px; color: #6b7280; }
+        .footer { position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 10px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 10px; font-weight: bold; }
         .pagenum:before { content: counter(page); }
-        .status { font-weight: bold; }
-        .status-present { color: #2e7d32; }
-        .status-retard { color: #ed6c02; }
-        .status-absent { color: #d32f2f; }
-        .text-center { text-align: center; }
-        .emp-email { font-size: 9px; color: #666; margin-top: 2px; display: block; }
-        .justif-text { font-size: 9px; color: #444; }
     </style>
 </head>
 <body>
-    <table class="header">
-        <tr>
-            <td width="50%" style="vertical-align: middle;">
-                <?php if(file_exists(public_path('images/logo.png'))): ?>
-                    <img src="<?php echo e(str_replace('\\', '/', public_path('images/logo.png'))); ?>" class="logo">
-                <?php else: ?>
-                    <span style="font-size: 22px; font-weight: bold; color: #b11d40;">ACCESS MOROCCO</span>
-                <?php endif; ?>
-            </td>
-            <td width="50%" style="text-align: right; vertical-align: middle;">
-                <div class="company-name">Access Morocco</div>
-                <div class="company-subtitle">Système de Gestion des Présences</div>
-                <div class="company-subtitle">Généré le: <?php echo e($date); ?></div>
-            </td>
-        </tr>
-    </table>
 
-    <div class="report-title">Rapport de Pointage</div>
-
-    <div class="meta-box">
-        <table class="meta-table">
+    <div class="header">
+        <table style="width: 100%;">
             <tr>
-                <td width="30%">
-                    <strong>Période du Rapport</strong>
-                    <?php echo e(ucfirst($filters['period'])); ?> 
-                    <?php if($filters['start']): ?> 
-                        <br><span style="color: #666; font-size: 9px;">(<?php echo e($filters['start']); ?> — <?php echo e($filters['end']); ?>)</span>
-                    <?php endif; ?>
+                <td width="33%" style="text-align: left; vertical-align: top;">
+                    <div style="display: inline-block; text-align: center; white-space: nowrap;">
+                        <?php
+                            $logoPath = public_path('images/logo.png');
+                            $logoSrc = null;
+                            if (file_exists($logoPath)) {
+                                try {
+                                    $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                                    $data = file_get_contents($logoPath);
+                                    $logoSrc = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                                } catch (\Exception $e) { $logoSrc = null; }
+                            }
+                        ?>
+                        <?php if($logoSrc): ?>
+                            <img src="<?php echo e($logoSrc); ?>" style="width: 100px; display: block; margin: 0 auto;">
+                        <?php else: ?>
+                            <div style="width: 100px; height: 40px; background: #f3f4f6; border: 1px dashed #ccc; vertical-align: middle; text-align: center; font-size: 8px; color: #999; display: block; margin: 0 auto;">LOGO</div>
+                        <?php endif; ?>
+                        <div style="color: #dc2626; font-size: 11px; font-weight: 900; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">ACCESS MOROCCO</div>
+                    </div>
                 </td>
-                <td width="30%">
-                    <strong>Filtres Actifs</strong>
-                    Rôle : <?php echo e(ucfirst($filters['role'] ?: 'Tous')); ?><br>
-                    Statut : <?php echo e(ucfirst($filters['status'] ?: 'Tous')); ?><br>
-                    Justificatif : <?php echo e($filters['justified'] === 'yes' ? 'Avec' : ($filters['justified'] === 'no' ? 'Sans' : 'Tous')); ?>
-
+                <td width="34%" style="text-align: center; vertical-align: middle;">
+                    <div style="font-size: 22px; font-weight: 800; color: #1e293b; text-transform: uppercase;">Rapport de Pointage</div>
+                    <div style="font-size: 9px; color: #94a3b8; margin-top: 4px;">Généré le : <?php echo e($date); ?></div>
                 </td>
-                <td width="40%">
-                    <strong>Résumé des Statistiques</strong>
-                    <table style="width: 100%; border:none; padding:0; margin:0;">
-                        <tr>
-                            <td style="padding:0; border:none; width:50%;">Total Enregistrements : <b><?php echo e($stats['total']); ?></b></td>
-                            <td style="padding:0; border:none; width:50%;">Retards : <b class="status-retard"><?php echo e($stats['retards']); ?></b></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:0; border:none;">Présents : <b class="status-present"><?php echo e($stats['presents']); ?></b></td>
-                            <td style="padding:0; border:none;">Absents : <b class="status-absent"><?php echo e($stats['absents']); ?></b></td>
-                        </tr>
-                    </table>
+                <td width="33%" style="text-align: right; vertical-align: middle;">
+                    <div style="color: #1e293b; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">SYSTÈME RH</div>
                 </td>
             </tr>
         </table>
     </div>
 
+    <div class="metadata-box">
+        <table class="metadata-table">
+            <tr>
+                <td width="33%">
+                    <span class="metadata-label">Période:</span> <?php echo e(ucfirst($filters['period'])); ?> 
+                    <?php if($filters['start'] && ($filters['period'] !== 'Toutes les dates' || $filters['start'] !== $filters['end'])): ?>
+                        (<?php echo e($filters['start']); ?> - <?php echo e($filters['end']); ?>)
+                    <?php endif; ?>
+                </td>
+                <td width="33%" style="text-align: center;">
+                    <span class="metadata-label">Rôle:</span> <?php echo e($filters['role']); ?>
+
+                </td>
+                <td width="34%" style="text-align: right;">
+                    <span class="metadata-label">Statut:</span> <?php echo e($filters['status']); ?>
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: center; padding-top: 5px;">
+                    <span class="metadata-label">Employé:</span> <?php echo e($filters['employee']); ?>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="stats-table">
+        <tr>
+            <td class="stat-card bg-blue" width="25%">
+                <div class="stat-card-title">Total</div>
+                <div class="stat-card-value"><?php echo e($stats['total']); ?></div>
+            </td>
+            <td class="stat-card bg-green" width="25%">
+                <div class="stat-card-title">Présents</div>
+                <div class="stat-card-value"><?php echo e($stats['presents']); ?></div>
+            </td>
+            <td class="stat-card bg-orange" width="25%">
+                <div class="stat-card-title">Retards</div>
+                <div class="stat-card-value"><?php echo e($stats['retards']); ?></div>
+            </td>
+            <td class="stat-card bg-red" width="25%">
+                <div class="stat-card-title">Absents</div>
+                <div class="stat-card-value"><?php echo e($stats['absents']); ?></div>
+            </td>
+        </tr>
+    </table>
+
     <table class="data-table">
         <thead>
             <tr>
                 <th width="10%">Date</th>
-                <th width="20%">Employé</th>
+                <th width="22%">Employé</th>
                 <th width="10%">Rôle</th>
-                <th width="9%" class="text-center">Check-in</th>
-                <th width="9%" class="text-center">Check-out</th>
-                <th width="10%" class="text-center">Durée</th>
-                <th width="10%">Statut</th>
+                <th width="8%" style="text-align: center;">Check-in</th>
+                <th width="8%" style="text-align: center;">Check-out</th>
+                <th width="10%" style="text-align: center;">Durée</th>
+                <th width="10%" style="text-align: center;">Statut</th>
                 <th width="22%">Justification</th>
             </tr>
         </thead>
         <tbody>
-            <?php $__currentLoopData = $pointages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $__empty_1 = true; $__currentLoopData = $pointages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <?php
                     $user = $p->user;
-                    $empName = $user ? $user->firstName . ' ' . $user->lastName : 'Inconnu';
+                    $empName = $user ? $user->firstName . ' ' . $user->lastName : 'Utilisateur inconnu';
                     
-                    $duree = '--';
+                    $duree = '00h 00m';
                     if ($p->heureEntree && $p->heureSortie) {
                         $entry = \Carbon\Carbon::parse($p->heureEntree);
                         $exit = \Carbon\Carbon::parse($p->heureSortie);
@@ -114,44 +160,48 @@
                     }
                 ?>
                 <tr>
-                    <td><?php echo e(\Carbon\Carbon::parse($p->date)->format('d/m/Y')); ?></td>
+                    <td style="font-weight: bold; color: #1f2937;"><?php echo e(\Carbon\Carbon::parse($p->date)->format('d/m/Y')); ?></td>
                     <td>
-                        <strong><?php echo e($empName); ?></strong>
-                        <span class="emp-email"><?php echo e($user->email ?? ''); ?></span>
+                        <div class="emp-name"><?php echo e($empName); ?></div>
+                        <div class="emp-email"><?php echo e($user->email ?? 'Email non renseigné'); ?></div>
                     </td>
-                    <td><?php echo e(ucfirst($user->type ?? '--')); ?></td>
-                    <td class="text-center"><?php echo e($p->heureEntree ? \Carbon\Carbon::parse($p->heureEntree)->format('H:i') : '--:--'); ?></td>
-                    <td class="text-center"><?php echo e($p->heureSortie ? \Carbon\Carbon::parse($p->heureSortie)->format('H:i') : '--:--'); ?></td>
-                    <td class="text-center"><?php echo e($duree); ?></td>
-                    <td>
-                        <span class="status status-<?php echo e(strtolower($p->status)); ?>">
-                            <?php echo e(ucfirst($p->status)); ?>
+                    <td style="text-transform: capitalize; color: #4b5563;"><?php echo e($user->type ?? 'Non défini'); ?></td>
+                    <td style="text-align: center; font-weight: bold; color: #374151;"><?php echo e($p->heureEntree ? \Carbon\Carbon::parse($p->heureEntree)->format('H:i') : 'Non marqué'); ?></td>
+                    <td style="text-align: center; font-weight: bold; color: #374151;"><?php echo e($p->heureSortie ? \Carbon\Carbon::parse($p->heureSortie)->format('H:i') : 'Non marqué'); ?></td>
+                    <td style="text-align: center; font-weight: bold; color: #1f2937;"><?php echo e($duree); ?></td>
+                    <td style="text-align: center;">
+                        <div class="badge badge-<?php echo e(strtolower($p->status)); ?>">
+                            <?php
+                                $statusTrans = [
+                                    'present' => 'Présent',
+                                    'absent' => 'Absent',
+                                    'retard' => 'Retard'
+                                ];
+                            ?>
+                            <?php echo e($statusTrans[strtolower($p->status)] ?? ucfirst($p->status)); ?>
 
-                        </span>
+                        </div>
                     </td>
-                    <td class="justif-text">
+                    <td class="justification-text">
                         <?php if($p->justification): ?>
-                            <strong><?php echo e($p->typejustif); ?></strong><br>
+                            <strong style="color:#1f2937; font-size:9px;"><?php echo e($p->typejustif); ?></strong><br>
                             <?php echo e(Str::limit($p->justification, 60)); ?>
 
                         <?php else: ?>
-                            <span style="color: #aaa;">--</span>
+                            Aucune
                         <?php endif; ?>
                     </td>
                 </tr>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            <?php if($pointages->isEmpty()): ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="8" class="text-center" style="padding: 20px; color: #777;">
-                        Aucun pointage trouvé pour ces filtres.
-                    </td>
+                    <td colspan="8" style="text-align: center; padding: 20px; color: #6b7280;">Aucun pointage trouvé pour ces critères.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
 
     <div class="footer">
-        Rapport de Pointage — Page <span class="pagenum"></span> — Généré automatiquement
+        Access Morocco | Rapport Confidentiel - Page <span class="pagenum"></span>
     </div>
 </body>
 </html>

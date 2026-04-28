@@ -135,24 +135,48 @@
         </div>
 
         
+        
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
             <form id="filterForm" action="<?php echo e(route('admin.pointages.index') ?? url()->current()); ?>" method="GET"
                 class="flex flex-wrap items-center gap-4" onsubmit="event.preventDefault()">
                 
-                <div class="flex-1 min-w-[280px] relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                
+                <div class="flex flex-wrap items-center gap-4 w-full">
+                    
+                    <div class="flex-1 min-w-[280px] relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" name="search" id="searchInput" value="<?php echo e(request('search')); ?>"
+                            placeholder="Rechercher un employé..."
+                            class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
                     </div>
-                    <input type="text" name="search" id="searchInput" value="<?php echo e(request('search')); ?>"
-                        placeholder="Rechercher un employé..."
-                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
+
+                    
+                    <div class="flex gap-2">
+                        <button type="button" onclick="exportToPdf()"
+                            class="px-5 py-3 rounded-2xl bg-[#be2346] text-white hover:bg-[#a01d3a] active:scale-95 transition-all flex items-center gap-2 font-bold text-sm shadow-md shadow-[#be2346]/20 shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export PDF
+                        </button>
+
+                        <button type="button" onclick="confirmClearHistory()"
+                            class="px-5 py-3 rounded-2xl bg-slate-800 text-white hover:bg-red-600 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm shadow-md shadow-slate-200 shrink-0 group">
+                            <svg class="w-5 h-5 text-red-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Vider l'Historique
+                        </button>
+                    </div>
                 </div>
 
                 
-                <div class="flex flex-wrap items-center gap-3 w-full">
+                <div class="flex flex-wrap items-center justify-center gap-3 w-full mt-4 pt-4 border-t border-slate-100">
+                    
                     <div class="relative">
                         <select name="period" id="periodSelect" onchange="toggleCustomDates()"
                             class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
@@ -169,49 +193,19 @@
                         </div>
                     </div>
 
+                    
                     <div id="customDatesContainer" class="flex items-center gap-2 <?php echo e(request('period') == 'custom' ? '' : 'hidden'); ?>">
-                        <input type="date" name="start_date" id="startDate" value="<?php echo e(request('start_date')); ?>"
-                            class="filter-select bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all">
-                        <span class="text-xs text-slate-400 font-bold">au</span>
-                        <input type="date" name="end_date" id="endDate" value="<?php echo e(request('end_date')); ?>"
-                            class="filter-select bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all">
+                        <input type="date" name="start_date" value="<?php echo e(request('start_date')); ?>" onchange="fetchTableData()"
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346]">
+                        <span class="text-slate-400 text-xs">à</span>
+                        <input type="date" name="end_date" value="<?php echo e(request('end_date')); ?>" onchange="fetchTableData()"
+                            class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346]">
                     </div>
 
-                    <div class="relative">
-                        <select name="user_id"
-                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
-                            <option value="">Tous les employés</option>
-                            <?php if(isset($users)): ?>
-                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($u->idUser); ?>" <?php echo e(request('user_id') == $u->idUser ? 'selected' : ''); ?>><?php echo e($u->firstName); ?> <?php echo e($u->lastName); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            <?php endif; ?>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <select name="status"
-                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
-                            <option value="">Tous les statuts</option>
-                            <option value="present" <?php echo e(request('status') == 'present' ? 'selected' : ''); ?>>Présent</option>
-                            <option value="retard" <?php echo e(request('status') == 'retard' ? 'selected' : ''); ?>>Retard</option>
-                            <option value="absent" <?php echo e(request('status') == 'absent' ? 'selected' : ''); ?>>Absent</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <select name="role"
-                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                    
+                    <div class="relative min-w-[150px]">
+                        <select name="role" id="roleSelect" onchange="fetchTableData()"
+                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer w-full">
                             <option value="">Tous les rôles</option>
                             <option value="admin" <?php echo e(request('role') == 'admin' ? 'selected' : ''); ?>>Admin</option>
                             <option value="manager" <?php echo e(request('role') == 'manager' ? 'selected' : ''); ?>>Manager</option>
@@ -222,6 +216,35 @@
                                 <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </div>
+                    </div>
+
+                    
+                    <div class="relative min-w-[150px]">
+                        <select name="status" id="statusSelect" onchange="fetchTableData()"
+                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer w-full">
+                            <option value="">Tous les statuts</option>
+                            <option value="present" <?php echo e(request('status') == 'present' ? 'selected' : ''); ?>>Présent</option>
+                            <option value="absent" <?php echo e(request('status') == 'absent' ? 'selected' : ''); ?>>Absent</option>
+                            <option value="retard" <?php echo e(request('status') == 'retard' ? 'selected' : ''); ?>>En retard</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    
+                    <div class="relative min-w-[200px]">
+                        <select name="user_id" id="userSelect">
+                            <option value="">Tous les employés</option>
+                            <?php $__currentLoopData = $usersForFilter ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($u->idUser); ?>" <?php echo e(request('user_id') == $u->idUser ? 'selected' : ''); ?>>
+                                    <?php echo e($u->firstName); ?> <?php echo e($u->lastName); ?>
+
+                                </option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
                     </div>
 
                     <div class="relative">
@@ -244,19 +267,14 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                    </button>
-
-                    <button type="button" onclick="exportToPdf()"
-                        class="px-4 py-2.5 rounded-xl bg-[#be2346] text-white hover:bg-[#a01d3a] active:scale-95 transition-all flex items-center gap-2 font-bold text-xs shadow-md shadow-[#be2346]/10 ml-auto">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export PDF
-                    </button>
                 </div>
             </form>
         </div>
+
+        <form id="clearHistoryForm" action="<?php echo e(route('admin.pointages.clear')); ?>" method="POST" class="hidden">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('DELETE'); ?>
+        </form>
 
         
         <div id="tableContainer"
@@ -903,6 +921,32 @@
             const params = new URLSearchParams(new FormData(form)).toString();
             window.open("<?php echo e(route('admin.pointages.export')); ?>?" + params, '_blank');
         }
+
+        function confirmClearHistory() {
+            window.confirmDelete("<?php echo e(route('admin.pointages.clear')); ?>", 'historique');
+        }
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        .ts-control { border-radius: 0.75rem; border: 1px solid #e2e8f0; background-color: #f8fafc; padding: 0.625rem 1rem; font-size: 0.75rem; font-weight: 700; color: #475569; min-height: 38px; }
+        .ts-control.focus { border-color: #be2346; box-shadow: 0 0 0 4px rgba(190, 35, 70, 0.05); }
+        .ts-wrapper.single .ts-control:after { right: 1rem; border-color: #94a3b8 transparent transparent transparent; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            new TomSelect("#userSelect", {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                onChange: function(value) {
+                    fetchTableData();
+                }
+            });
+        });
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
