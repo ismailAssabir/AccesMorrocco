@@ -28,8 +28,10 @@ class DepartementController extends Controller
 
         return $jours;
     }
-    public function index(){
+    public function index(Request $request){
         Gate::authorize('departement.view');
+
+        $period = $request->get('period', 'monthly');
 
         // ── AUTO-MARK ABSENCES (Lazy Cron) ──────────────────────────────
         $settings = \App\Models\Company::first();
@@ -39,14 +41,41 @@ class DepartementController extends Controller
             }
         }
 
+        $startDate = match ($period) {
+            'today' => now()->startOfDay(),
+            'monthly' => now()->startOfMonth(),
+            default => now()->startOfMonth(),
+        };
+
+        // Determine working days count for presence calculation
+        $workingDaysCount = 0;
+        $tempDate = $startDate->copy();
+        $today = now();
+        while ($tempDate->startOfDay() <= $today->startOfDay()) {
+            if ($tempDate->isWeekday()) {
+                $workingDaysCount++;
+            } elseif ($period === 'today') {
+                $workingDaysCount = 1;
+            }
+            $tempDate->addDay();
+        }
+        if ($workingDaysCount === 0 && $period === 'today') $workingDaysCount = 1;
+
         $depts = Departement::with(['manager', 'employes'])
             ->withCount([
                 'employes as users_count', 
-                'taches as tasks_count', 
-                'taches as completed_tasks_count' => function ($query) {
-                    $query->where('status', 'termine'); // Status exact dans la BDD
+                'taches as tasks_count' => function ($query) use ($startDate) {
+                    $query->whereDate('created_at', '>=', $startDate->toDateString());
+                }, 
+                'taches as completed_tasks_count' => function ($query) use ($startDate) {
+                    $query->where('status', 'termine')
+                          ->whereDate('created_at', '>=', $startDate->toDateString());
                 }
             ])->get();
+
+        $pointages = Pointage::whereDate('date', '>=', $startDate->toDateString())
+            ->get()
+            ->groupBy('idUser');
 
         foreach($depts as $dept){
             // 1. Tâches Moyenne
@@ -54,27 +83,28 @@ class DepartementController extends Controller
                 ? round(($dept->completed_tasks_count / $dept->tasks_count) * 100) 
                 : 0;
 
-            // 2. Présence Moyenne (pour aujourd'hui)
+            // 2. Présence Moyenne
             $employeIds = $dept->employes->pluck('idUser')->toArray();
 
-            if (empty($employeIds)) {
+            if (empty($employeIds) || $workingDaysCount == 0) {
                 $dept->avg_presence = 0;
             } else {
-                $pointagesToday = Pointage::whereIn('idUser', $employeIds)
-                    ->whereDate('date', now()->toDateString())
-                    ->get()
-                    ->keyBy('idUser');
-                
                 $totalScore = 0;
                 foreach ($employeIds as $id) {
-                    $p = $pointagesToday->get($id);
-                    if ($p) {
-                        if ($p->status === 'present') $totalScore += 100;
-                        elseif ($p->status === 'retard') $totalScore += 50;
-                    }
+                    $userPointages = $pointages->get($id) ?? collect();
+                    $dailyScores = $userPointages->groupBy(fn($p) => \Carbon\Carbon::parse($p->date)->toDateString())
+                        ->map(function($group) {
+                            $p = $group->first();
+                            $status = strtolower($p->status);
+                            if ($status === 'present') return 100;
+                            if ($status === 'retard') return 50;
+                            return 0; // absent = 0
+                        });
+                    $totalScore += $dailyScores->sum();
                 }
                 
-                $dept->avg_presence = round($totalScore / count($employeIds));
+                $maxPossibleScore = count($employeIds) * $workingDaysCount * 100;
+                $dept->avg_presence = $maxPossibleScore > 0 ? round(($totalScore / $maxPossibleScore) * 100) : 0;
             }
         }
         
@@ -85,7 +115,22 @@ class DepartementController extends Controller
             'tachesMoyenne'     => $depts->count() > 0 ? round($depts->avg('tasks_completion')) : 0,
        ];
 
-        return view('departements.index' , ['departements'=>$depts, 'state'=> $state] );
+       if ($request->ajax()) {
+            $mappedDepts = $depts->map(function($dept) {
+                return [
+                    'id' => $dept->idDepartement ?? $dept->id,
+                    'presence' => $dept->avg_presence,
+                    'tasks' => $dept->tasks_completion
+                ];
+            });
+
+            return response()->json([
+                'state' => $state,
+                'departements' => $mappedDepts
+            ]);
+        }
+
+        return view('departements.index' , ['departements'=>$depts, 'state'=> $state, 'period' => $period] );
     }
 
 public function store(Request $request) {
