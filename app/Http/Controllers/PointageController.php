@@ -25,14 +25,46 @@ class PointageController extends Controller
     {
         Gate::authorize('pointage.view');
 
+        $query = Pointage::with(['user', 'user.departement']);
 
-        $pointages = Pointage::with('user')
-            ->orderBy('date', 'desc')
+        // Filter: search by name
+        if ($search = request('search')) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('firstName', 'like', "%{$search}%")
+                  ->orWhere('lastName',  'like', "%{$search}%");
+            });
+        }
+
+        // Filter: status
+        if ($status = request('status')) {
+            $query->where('status', $status);
+        }
+
+        // Filter: role
+        if ($role = request('role')) {
+            $query->whereHas('user', fn($q) => $q->where('type', $role));
+        }
+
+        // Filter: departement
+        if ($dept = request('departement')) {
+            $query->whereHas('user.departement', fn($q) => $q->where('title', 'like', "%{$dept}%"));
+        }
+
+        $pointages = $query->orderBy('date', 'desc')
             ->orderBy('heureEntree', 'desc')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
+            
+        $stats = [
+            'total' => Pointage::count(),
+            'presents' => Pointage::where('status', 'present')->count(),
+            'retards' => Pointage::where('status', 'retard')->count(),
+            'absents' => Pointage::where('status', 'absent')->count(),
+            'withJustif' => Pointage::whereNotNull('justification')->count(),
+        ];
             
         $settings = Company::first();
-        return view('Adminpointage', compact('pointages', 'settings'));
+        return view('Adminpointage', compact('pointages', 'settings', 'stats'));
     }
 
     public function userPointage()
