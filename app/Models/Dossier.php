@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Departement;
 use App\Models\Presentation;
 use App\Models\Paiement;
+use App\Models\User;
 class Dossier extends Model
 {
     use HasFactory;
@@ -43,6 +44,6 @@ class Dossier extends Model
     }
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'idUser', 'idUser');
+        return $this->belongsTo(User::class, 'idUser', 'idUser');
     }
 }

@@ -36,6 +36,15 @@
             $avgTasks   = $state['tachesMoyenne'] ?? 0;
 
         ?>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-extrabold text-slate-800">Aperçu Global</h2>
+            
+            <div class="bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex items-center inline-flex">
+                <button type="button" data-period="monthly" class="period-toggle px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all <?php echo e($period == 'monthly' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'); ?>">Mensuel</button>
+                <button type="button" data-period="today" class="period-toggle px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all <?php echo e($period == 'today' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'); ?>">Aujourd'hui</button>
+            </div>
+        </div>
+        
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[] flex items-center gap-4">
                 <span class="p-2.5 rounded-xl bg-[#b11d40]/10 text-[#b11d40]">
@@ -61,7 +70,7 @@
                 </span>
                 <div>
                     <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Présence Moy.</p>
-                    <p class="text-2xl font-extrabold text-slate-800"><?php echo e($avgPres); ?>%</p>
+                    <p class="text-2xl font-extrabold text-slate-800"><span id="global-presence"><?php echo e($avgPres); ?></span>%</p>
                 </div>
             </div>
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#b11d40] flex items-center gap-4">
@@ -70,7 +79,7 @@
                 </span>
                 <div>
                     <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Tâches Moy.</p>
-                    <p class="text-2xl font-extrabold text-[#b11d40]"><?php echo e($avgTasks); ?>%</p>
+                    <p class="text-2xl font-extrabold text-[#b11d40]"><span id="global-tasks"><?php echo e($avgTasks); ?></span>%</p>
                 </div>
             </div>
         </div>
@@ -113,7 +122,7 @@
                         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500'];
                     ?>
 
-                    <div class="bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
+                    <div class="dept-card bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group" data-dept-id="<?php echo e($dept->idDepartement ?? $dept->id); ?>">
 
                         
                         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
@@ -173,26 +182,26 @@
                                 <div>
                                     <div class="flex justify-between items-center mb-1.5">
                                         <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-                                            <span class="w-1.5 h-1.5 rounded-full <?php echo e($presence >= 80 ? 'bg-emerald-400' : ($presence >= 60 ? 'bg-amber-400' : 'bg-red-400')); ?> inline-block"></span>
+                                            <span class="presence-dot w-1.5 h-1.5 rounded-full <?php echo e($presence >= 80 ? 'bg-emerald-400' : ($presence >= 40 ? 'bg-amber-400' : 'bg-red-400')); ?> inline-block"></span>
                                             Présence
                                         </span>
-                                        <span class="text-xs font-extrabold <?php echo e($presence >= 80 ? 'text-emerald-500' : ($presence >= 60 ? 'text-amber-500' : 'text-red-500')); ?>"><?php echo e($presence); ?>%</span>
+                                        <span class="presence-text text-xs font-extrabold <?php echo e($presence >= 80 ? 'text-emerald-500' : ($presence >= 40 ? 'text-amber-500' : 'text-red-500')); ?>"><?php echo e($presence); ?>%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                        <div class="h-2 rounded-full transition-all duration-700 <?php echo e($presence >= 80 ? 'bg-emerald-400' : ($presence >= 60 ? 'bg-amber-400' : 'bg-red-400')); ?>" style="width: <?php echo e($presence); ?>%"></div>
+                                        <div class="presence-bar h-2 rounded-full transition-all duration-700 <?php echo e($presence >= 80 ? 'bg-emerald-400' : ($presence >= 40 ? 'bg-amber-400' : 'bg-red-400')); ?>" style="width: <?php echo e($presence); ?>%"></div>
                                     </div>
                                 </div>
                                 
                                 <div>
                                     <div class="flex justify-between items-center mb-1.5">
                                         <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-                                            <span class="w-1.5 h-1.5 rounded-full <?php echo e($tasks >= 80 ? 'bg-emerald-400' : ($tasks >= 50 ? 'bg-blue-400' : 'bg-amber-400')); ?> inline-block"></span>
+                                            <span class="tasks-dot w-1.5 h-1.5 rounded-full <?php echo e($tasks >= 80 ? 'bg-emerald-400' : ($tasks >= 50 ? 'bg-blue-400' : 'bg-amber-400')); ?> inline-block"></span>
                                             Tâches
                                         </span>
-                                        <span class="text-xs font-extrabold <?php echo e($tasks >= 80 ? 'text-emerald-500' : ($tasks >= 50 ? 'text-blue-500' : 'text-amber-500')); ?>"><?php echo e($tasks); ?>%</span>
+                                        <span class="tasks-text text-xs font-extrabold <?php echo e($tasks >= 80 ? 'text-emerald-500' : ($tasks >= 50 ? 'text-blue-500' : 'text-amber-500')); ?>"><?php echo e($tasks); ?>%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                        <div class="h-2 rounded-full transition-all duration-700 <?php echo e($tasks >= 80 ? 'bg-emerald-400' : ($tasks >= 50 ? 'bg-blue-400' : 'bg-amber-400')); ?>" style="width: <?php echo e($tasks); ?>%"></div>
+                                        <div class="tasks-bar h-2 rounded-full transition-all duration-700 <?php echo e($tasks >= 80 ? 'bg-emerald-400' : ($tasks >= 50 ? 'bg-blue-400' : 'bg-amber-400')); ?>" style="width: <?php echo e($tasks); ?>%"></div>
                                     </div>
                                 </div>
                             </div>
@@ -270,6 +279,96 @@
 
         function confirmDeleteDept(url) {
             window.confirmDelete(url, 'département');
+        }
+
+        // --- Period Toggle AJAX Logic ---
+        document.querySelectorAll('.period-toggle').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const period = this.getAttribute('data-period');
+                
+                // Update UI toggle buttons
+                document.querySelectorAll('.period-toggle').forEach(b => {
+                    b.className = 'period-toggle px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all text-slate-400 hover:bg-slate-50 hover:text-slate-600';
+                });
+                this.className = 'period-toggle px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all bg-slate-800 text-white shadow-md';
+
+                // Fetch new data
+                fetch(`<?php echo e(route('departements.index')); ?>?period=${period}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // Update global KPIs
+                    if (data.state) {
+                        animateValue('global-presence', data.state.presenceMoyenne);
+                        animateValue('global-tasks', data.state.tachesMoyenne);
+                    }
+
+                    // Update each department card
+                    if (data.departements) {
+                        data.departements.forEach(dept => {
+                            const card = document.querySelector(`.dept-card[data-dept-id="${dept.id}"]`);
+                            if (card) {
+                                // Update Presence
+                                const pText = card.querySelector('.presence-text');
+                                const pBar = card.querySelector('.presence-bar');
+                                const pDot = card.querySelector('.presence-dot');
+                                
+                                pText.textContent = `${dept.presence}%`;
+                                pBar.style.width = `${dept.presence}%`;
+                                
+                                // Reset colors for presence
+                                pText.className = `presence-text text-xs font-extrabold ${getPresenceTextColor(dept.presence)}`;
+                                pBar.className = `presence-bar h-2 rounded-full transition-all duration-700 ${getPresenceBgColor(dept.presence)}`;
+                                pDot.className = `presence-dot w-1.5 h-1.5 rounded-full ${getPresenceBgColor(dept.presence)} inline-block`;
+
+                                // Update Tasks
+                                const tText = card.querySelector('.tasks-text');
+                                const tBar = card.querySelector('.tasks-bar');
+                                const tDot = card.querySelector('.tasks-dot');
+
+                                tText.textContent = `${dept.tasks}%`;
+                                tBar.style.width = `${dept.tasks}%`;
+
+                                // Reset colors for tasks
+                                tText.className = `tasks-text text-xs font-extrabold ${getTasksTextColor(dept.tasks)}`;
+                                tBar.className = `tasks-bar h-2 rounded-full transition-all duration-700 ${getTasksBgColor(dept.tasks)}`;
+                                tDot.className = `tasks-dot w-1.5 h-1.5 rounded-full ${getTasksBgColor(dept.tasks)} inline-block`;
+                            }
+                        });
+                    }
+                })
+                .catch(err => console.error('Error fetching period stats:', err));
+            });
+        });
+
+        // Helpers for dynamic colors
+        function getPresenceTextColor(val) { return val >= 80 ? 'text-emerald-500' : (val >= 40 ? 'text-amber-500' : 'text-red-500'); }
+        function getPresenceBgColor(val) { return val >= 80 ? 'bg-emerald-400' : (val >= 40 ? 'bg-amber-400' : 'bg-red-400'); }
+        
+        function getTasksTextColor(val) { return val >= 80 ? 'text-emerald-500' : (val >= 50 ? 'text-blue-500' : 'text-amber-500'); }
+        function getTasksBgColor(val) { return val >= 80 ? 'bg-emerald-400' : (val >= 50 ? 'bg-blue-400' : 'bg-amber-400'); }
+
+        // Number animation for global KPIs
+        function animateValue(id, end) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let start = parseInt(el.textContent) || 0;
+            if (start === end) return;
+            let duration = 500; // ms
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = Math.min((timestamp - startTime) / duration, 1);
+                el.textContent = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    el.textContent = end;
+                }
+            }
+            window.requestAnimationFrame(step);
         }
     </script>
  <?php echo $__env->renderComponent(); ?>

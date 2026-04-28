@@ -100,8 +100,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Reunion::class, 'reunion_participants', 'idUser', 'idReunion')->withTimestamps();
     }
-    public function dossiers(){
-        return $this->hasMany(Dossier::class, 'idUser', 'idUser')->withTimestamps();
+    public function dossiers()
+    {
+        return $this->hasMany(Dossier::class, 'idUser', 'idUser');
     }
     public function primes(){
         return $this->hasMany(Prime::class, 'idUser', 'idUser');

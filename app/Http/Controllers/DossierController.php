@@ -16,12 +16,19 @@ class DossierController extends Controller
     public function assign(Request $request, $id)
     {
         $request->validate([
-            'idUser' => 'required|exists:users,idUser', 
+            'idUser' => 'required|exists:users,idUser',
         ]);
+
+        $user = User::findOrFail($request->idUser);
+
+        $dossiersActifs = $user->dossiers()->where('status', '!=', 'ferme')->count();
+
+        if ($dossiersActifs >= 5) {
+            return redirect()->back()->with('error', 'Cet employé a déjà 5 dossiers actifs, impossible de lui assigner un nouveau dossier.');
+        }
+
         $dossier = Dossier::findOrFail($id);
-        $dossier->update([
-            'idUser' => $request->idUser
-        ]);
+        $dossier->update(['idUser' => $request->idUser]);
 
         return redirect()->back()->with('msg', 'Dossier assigné avec succès !');
     }
@@ -45,61 +52,67 @@ class DossierController extends Controller
         return redirect()->back()->with('msg', 'Département assigné avec succès !');
     }
     public function getEmployes($id)
-{
-    $employes = User::where('idDepartement', $id)
-        ->whereHas('roles', function ($q) {
-            $q->where('name', 'employee');
-        })
-        ->select('idUser', 'firstName', 'lastName')
-        ->get();
-
-    return response()->json($employes);
-        }
+    {
+        $employes = User::where('idDepartement', $id)
+            ->where('type', 'employee') 
+            ->select('idUser', 'firstName', 'lastName')
+            ->withCount([
+                'dossiers as dossiers_actifs' => function ($q) {
+                    $q->whereIn('status', ['ouvert', 'en_cours']);
+                },
+                'dossiers as dossiers_fermes' => function ($q) {
+                    $q->where('status', 'ferme');
+                }
+            ])
+            ->get()
+            ->map(function ($user) {
+                $user->dossiers_actifs = $user->dossiers_actifs ?? 0;
+                $user->dossiers_fermes = $user->dossiers_fermes ?? 0;
+                $user->peut_assigner = $user->dossiers_actifs < 5;
+                return $user;
+            });
+        
+        return response()->json($employes);
+    }
     public function index(Request $request)
     {
-    Gate::authorize('dossier.view');
+        Gate::authorize('dossier.view');
 
-    $user = auth()->user();
+        $user = auth()->user();
 
-    $query = Dossier::with(['client', 'departement', 'user']);
+        $query = Dossier::with(['client', 'departement', 'user']);
 
-    // 🔥 FILTRAGE PAR ROLE
-    if ($user->hasRole('manager')) {
-        // manager voit seulement dossiers de son département
-        $query->where('idDepartement', $user->idDepartement);
+        if ($user->hasRole('manager')) {
+            $query->where('idDepartement', $user->idDepartement);
+        }
+
+        if ($user->hasRole('employee')) {
+            $query->where('idUser', $user->idUser);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('reference', 'like', "%{$search}%")
+                ->orWhere('distination', 'like', "%{$search}%")
+                ->orWhere('commentaire', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('idDepartement') && !$user->hasRole('manager')) {
+            $query->where('idDepartement', $request->idDepartement);
+        }
+
+        $dossiers     = $query->latest()->paginate(10)->withQueryString();
+        $departements = Departement::all();
+        $clients      = Client::all();
+
+        return view('dossiers.index', compact('dossiers', 'departements', 'clients'));
     }
-
-    if ($user->hasRole('employee')) {
-        // employé voit seulement ses dossiers assignés
-        $query->where('idUser', $user->idUser);
-    }
-
-    // 🔍 filtres existants
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('reference', 'like', "%{$search}%")
-              ->orWhere('distination', 'like', "%{$search}%")
-              ->orWhere('commentaire', 'like', "%{$search}%");
-        });
-    }
-
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    if ($request->filled('idDepartement') && !$user->hasRole('manager')) {
-        // manager ne doit pas filtrer par autre département
-        $query->where('idDepartement', $request->idDepartement);
-    }
-
-    $dossiers     = $query->latest()->paginate(10)->withQueryString();
-    $departements = Departement::all();
-    $clients      = Client::all();
-
-    return view('dossiers.index', compact('dossiers', 'departements', 'clients'));
-}
-
     public function store(Request $request)
     {
         Gate::authorize('dossier.create');

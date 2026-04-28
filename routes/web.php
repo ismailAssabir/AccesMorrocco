@@ -232,12 +232,15 @@ Route::get('/leads/{id}/edit',[LeadController::class, 'edit'])->name('leads.edit
 Route::put('/leads/{id}',[LeadController::class, 'update'])->name('leads.update');
 Route::post('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
 Route::delete('/leads/{id}',[LeadController::class, 'destroy'])->name('leads.destroy');
-Route::get('/departements/{id}/users', function ($id) {
-    $users = App\Models\User::where('idDepartement', $id)
-                ->where('type', 'employee')
-                ->get(['idUser', 'firstName', 'lastName']);
-    return response()->json($users);
-})->name('departements.users');
+// Route::get('/departements/{id}/users', function ($id) {
+//     $users = App\Models\User::where('idDepartement', $id)
+//                 ->where('type', 'employee')
+//                 ->get(['idUser', 'firstName', 'lastName']);
+//     return response()->json($users);
+// })->name('departements.users');
+Route::get('/departements/{id}/users', [DossierController::class, 'getEmployes'])
+    ->name('departements.users')
+    ->middleware(['auth']);
 //Dossier Routes
 Route::get('/dossiers', [DossierController::class, 'index'])->name('dossiers.index');
 Route::post('/dossiers', [DossierController::class, 'store'])->name('dossiers.store');
