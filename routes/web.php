@@ -206,6 +206,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::middleware('role:admin')->group(function() {
         Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
+        Route::get('/admin/pointages/export', [PointageController::class, 'exportPdf'])->name('admin.pointages.export');
         Route::post('/admin/settings/update', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
         Route::post('/admin/pointages/{id}/validate', [PointageController::class, 'validateJustification'])->name('admin.pointages.validate');
     });

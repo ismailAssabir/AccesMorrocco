@@ -124,20 +124,59 @@
                 </div>
 
                 {{-- Filters --}}
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3 w-full">
+                    <div class="relative">
+                        <select name="period" id="periodSelect" onchange="toggleCustomDates()"
+                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Toutes les dates</option>
+                            <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>Aujourd'hui</option>
+                            <option value="week" {{ request('period') == 'week' ? 'selected' : '' }}>Cette semaine</option>
+                            <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>Ce mois-ci</option>
+                            <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>Personnalisé</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div id="customDatesContainer" class="flex items-center gap-2 {{ request('period') == 'custom' ? '' : 'hidden' }}">
+                        <input type="date" name="start_date" id="startDate" value="{{ request('start_date') }}"
+                            class="filter-select bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all">
+                        <span class="text-xs text-slate-400 font-bold">au</span>
+                        <input type="date" name="end_date" id="endDate" value="{{ request('end_date') }}"
+                            class="filter-select bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all">
+                    </div>
+
+                    <div class="relative">
+                        <select name="user_id"
+                            class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                            <option value="">Tous les employés</option>
+                            @if(isset($users))
+                                @foreach($users as $u)
+                                    <option value="{{ $u->idUser }}" {{ request('user_id') == $u->idUser ? 'selected' : '' }}>{{ $u->firstName }} {{ $u->lastName }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+
                     <div class="relative">
                         <select name="status"
                             class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
                             <option value="">Tous les statuts</option>
-                            <option value="present" {{ request('status') == 'present' ? 'selected' : '' }}>Présent
-                            </option>
+                            <option value="present" {{ request('status') == 'present' ? 'selected' : '' }}>Présent</option>
                             <option value="retard" {{ request('status') == 'retard' ? 'selected' : '' }}>Retard</option>
                             <option value="absent" {{ request('status') == 'absent' ? 'selected' : '' }}>Absent</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </div>
                     </div>
@@ -148,29 +187,25 @@
                             <option value="">Tous les rôles</option>
                             <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-                            <option value="employee" {{ request('role') == 'employee' ? 'selected' : '' }}>Employé
-                            </option>
+                            <option value="employee" {{ request('role') == 'employee' ? 'selected' : '' }}>Employé</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </div>
                     </div>
 
                     <div class="relative">
-                        <select name="departement"
+                        <select name="has_justification"
                             class="filter-select appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
-                            <option value="">Tous les départements</option>
-                            @foreach(\App\Models\Departement::orderBy('title')->get() as $dept)
-                                <option value="{{ $dept->title }}" {{ request('departement') == $dept->title ? 'selected' : '' }}>{{ $dept->title }}</option>
-                            @endforeach
+                            <option value="">Justificatif : Tous</option>
+                            <option value="yes" {{ request('has_justification') == 'yes' ? 'selected' : '' }}>Avec Justificatif</option>
+                            <option value="no" {{ request('has_justification') == 'no' ? 'selected' : '' }}>Sans Justificatif</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                <path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </div>
                     </div>
@@ -179,9 +214,17 @@
                         class="p-3 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center"
                         title="Réinitialiser les filtres">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
+                    </button>
+
+                    <button type="button" onclick="exportToPdf()"
+                        class="px-4 py-2.5 rounded-xl bg-[#be2346] text-white hover:bg-[#a01d3a] active:scale-95 transition-all flex items-center gap-2 font-bold text-xs shadow-md shadow-[#be2346]/10 ml-auto">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export PDF
                     </button>
                 </div>
             </form>
@@ -274,14 +317,11 @@
                                         <div>
                                             <p class="font-bold text-slate-800 text-sm leading-tight">{{ $empName }}</p>
                                             @if($user)
-                                                <div class="flex items-center gap-2 mt-0.5">
-                                                    <p class="text-[10px] text-slate-400 font-medium">{{ $user->email ?? '' }}
+                                                <div class="flex flex-col mt-0.5">
+                                                    <p class="text-[10px] font-bold {{ ($user->type ?? '') === 'admin' ? 'text-[#be2346]' : (($user->type ?? '') === 'manager' ? 'text-indigo-500' : 'text-slate-400') }}">
+                                                        {{ ucfirst($user->type ?? 'User') }}
                                                     </p>
-                                                    <span
-                                                        class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border
-                                                    {{ ($user->type ?? '') === 'admin' ? 'bg-red-50 text-[#be2346] border-red-100' : (($user->type ?? '') === 'manager' ? 'bg-indigo-50 text-indigo-500 border-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-100') }}">
-                                                        {{ $user->type ?? 'User' }}
-                                                    </span>
+                                                    <p class="text-[9px] text-slate-400 font-medium">{{ $user->email ?? '' }}</p>
                                                 </div>
                                             @endif
                                         </div>
@@ -603,7 +643,6 @@
                         </button>
                     </form>
                 </div>
-            </div>
         </div>
     </div>
 
@@ -814,5 +853,21 @@
             }
         });
 
+        function toggleCustomDates() {
+            const period = document.getElementById('periodSelect').value;
+            const customDates = document.getElementById('customDatesContainer');
+            if (period === 'custom') {
+                customDates.classList.remove('hidden');
+            } else {
+                customDates.classList.add('hidden');
+            }
+            fetchTableData();
+        }
+
+        function exportToPdf() {
+            const form = document.getElementById('filterForm');
+            const params = new URLSearchParams(new FormData(form)).toString();
+            window.open("{{ route('admin.pointages.export') }}?" + params, '_blank');
+        }
     </script>
 </x-app-layout>

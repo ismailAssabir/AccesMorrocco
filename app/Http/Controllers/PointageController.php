@@ -21,50 +21,103 @@ class PointageController extends Controller
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
-    public function index()
+    private function buildPointageQuery(Request $request)
     {
-        Gate::authorize('pointage.view');
-
         $query = Pointage::with(['user', 'user.departement']);
 
         // Filter: search by name
-        if ($search = request('search')) {
+        if ($search = $request->get('search')) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('firstName', 'like', "%{$search}%")
                   ->orWhere('lastName',  'like', "%{$search}%");
             });
         }
 
+        // Period Filtering
+        $period = $request->get('period');
+        $start = null;
+        $end = null;
+
+        if ($period === 'today') {
+            $start = now()->startOfDay();
+            $end = now()->endOfDay();
+        } elseif ($period === 'week') {
+            $start = now()->startOfWeek();
+            $end = now()->endOfWeek();
+        } elseif ($period === 'month') {
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
+        } elseif ($period === 'custom') {
+            $start = $request->filled('start_date') ? Carbon::parse($request->start_date)->startOfDay() : null;
+            $end = $request->filled('end_date') ? Carbon::parse($request->end_date)->endOfDay() : null;
+        }
+
+        if ($start && $end) {
+            $query->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
+        } elseif ($start) {
+            $query->where('date', '>=', $start->toDateString());
+        } elseif ($end) {
+            $query->where('date', '<=', $end->toDateString());
+        }
+
         // Filter: status
-        if ($status = request('status')) {
+        if ($status = $request->get('status')) {
             $query->where('status', $status);
         }
 
         // Filter: role
-        if ($role = request('role')) {
+        if ($role = $request->get('role')) {
             $query->whereHas('user', fn($q) => $q->where('type', $role));
         }
 
         // Filter: departement
-        if ($dept = request('departement')) {
+        if ($dept = $request->get('departement')) {
             $query->whereHas('user.departement', fn($q) => $q->where('title', 'like', "%{$dept}%"));
         }
+
+        // Filter: user_id
+        if ($idUser = $request->get('user_id')) {
+            $query->where('idUser', $idUser);
+        }
+
+        // Filter: justification
+        if ($request->has('has_justification') && $request->get('has_justification') !== '') {
+            if ($request->get('has_justification') === '1' || $request->get('has_justification') === 'yes') {
+                $query->whereNotNull('justification');
+            } else {
+                $query->whereNull('justification');
+            }
+        }
+
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        Gate::authorize('pointage.view');
+
+        $query = $this->buildPointageQuery($request);
 
         $pointages = $query->orderBy('date', 'desc')
             ->orderBy('heureEntree', 'desc')
             ->paginate(10)
             ->withQueryString();
             
+        $statsQuery = clone $query;
         $stats = [
-            'total' => Pointage::count(),
-            'presents' => Pointage::where('status', 'present')->count(),
-            'retards' => Pointage::where('status', 'retard')->count(),
-            'absents' => Pointage::where('status', 'absent')->count(),
-            'withJustif' => Pointage::whereNotNull('justification')->count(),
+            'total' => $statsQuery->count(),
+            'presents' => (clone $statsQuery)->where('status', 'present')->count(),
+            'retards' => (clone $statsQuery)->where('status', 'retard')->count(),
+            'absents' => (clone $statsQuery)->where('status', 'absent')->count(),
+            'withJustif' => (clone $statsQuery)->whereNotNull('justification')->count(),
         ];
             
         $settings = Company::first();
-        return view('Adminpointage', compact('pointages', 'settings', 'stats'));
+        $users = \App\Models\User::orderBy('firstName')->get();
+        $departements = \App\Models\Departement::orderBy('title')->get();
+        $roles = \App\Models\User::distinct()->pluck('type');
+
+        return view('Adminpointage', compact('pointages', 'settings', 'stats', 'users', 'departements', 'roles'));
     }
 
     public function userPointage()
@@ -421,5 +474,47 @@ class PointageController extends Controller
 
         Company::updateOrCreate(['id' => 1], $updateData);
         return redirect()->back()->with('msg', 'Paramètres mis à jour.');
+    }
+    public function exportPdf(Request $request)
+    {
+        Gate::authorize('view_all_attendance');
+
+        $query = $this->buildPointageQuery($request);
+
+        $pointages = $query->orderBy('date', 'desc')
+            ->orderBy('heureEntree', 'desc')
+            ->get();
+
+        $stats = [
+            'total' => $pointages->count(),
+            'presents' => $pointages->where('status', 'present')->count(),
+            'retards' => $pointages->where('status', 'retard')->count(),
+            'absents' => $pointages->where('status', 'absent')->count(),
+        ];
+
+        $company = Company::first();
+        
+        $data = [
+            'pointages' => $pointages,
+            'stats' => $stats,
+            'company' => $company,
+            'filters' => [
+                'period' => $request->get('period', 'Toutes les dates'),
+                'start' => $request->get('start_date') ? Carbon::parse($request->get('start_date'))->format('d/m/Y') : null,
+                'end' => $request->get('end_date') ? Carbon::parse($request->get('end_date'))->format('d/m/Y') : null,
+                'role' => $request->get('role', 'Tous'),
+                'status' => $request->get('status', 'Tous'),
+                'justified' => $request->has('has_justification') && $request->get('has_justification') !== '' ? ($request->get('has_justification') === 'yes' || $request->get('has_justification') === '1' ? 'Oui' : 'Non') : 'Tous',
+            ],
+            'logo' => public_path('images/logo.png'),
+            'date' => now()->format('d/m/Y H:i')
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pointages.pdf', $data)
+            ->setPaper('a4', 'landscape')
+            ->setOptions(['isRemoteEnabled' => true]);
+        
+        $filename = 'Rapport_Pointage_' . now()->format('Ymd_His') . '.pdf';
+        return $pdf->download($filename);
     }
 }
