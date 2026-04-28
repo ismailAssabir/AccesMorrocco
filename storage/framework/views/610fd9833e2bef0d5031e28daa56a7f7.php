@@ -11,6 +11,8 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+
+        <link rel="icon" type="image/png" href="<?php echo e(asset('images/logo.png')); ?>">
     </head>
     <body class="font-sans antialiased text-gray-900">
        <div class="flex min-h-screen bg-[#FDFCFB]"> 

@@ -26,7 +26,8 @@ class Dossier extends Model
         'nombreJours',
         'document',
         'titreDocument',
-        'status'
+        'status',
+        'idUser'
     ];
     function client(){
         return $this->belongsTo(Client::class, 'idClient', 'idClient');

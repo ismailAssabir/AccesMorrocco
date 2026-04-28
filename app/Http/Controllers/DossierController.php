@@ -6,13 +6,44 @@ use Illuminate\Http\Request;
 use App\Models\Dossier;
 use App\Models\Client;
 use App\Models\Departement;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DossierController extends Controller
 {
+    public function assign(Request $request, $id)
+    {
+        $request->validate([
+            'idUser' => 'required|exists:users,idUser', 
+        ]);
+        $dossier = Dossier::findOrFail($id);
+        $dossier->update([
+            'idUser' => $request->idUser
+        ]);
 
+        return redirect()->back()->with('msg', 'Dossier assigné avec succès !');
+    }
+
+    public function assignDepartement(Request $request, $id)
+    {
+        // Seulement l'admin peut faire ça
+        Gate::authorize('dossier.edit');
+
+        $request->validate([
+            'idDepartement' => 'required|exists:departements,idDepartement',
+        ]);
+
+        $dossier = Dossier::findOrFail($id);
+
+        // Sécurité : on n'écrase pas un département déjà assigné via cette route
+        abort_if($dossier->idDepartement !== null, 403, 'Ce dossier a déjà un département.');
+
+        $dossier->update(['idDepartement' => $request->idDepartement]);
+
+        return redirect()->back()->with('msg', 'Département assigné avec succès !');
+    }
     public function getEmployes($id)
 {
     $employes = User::where('idDepartement', $id)
@@ -25,7 +56,7 @@ class DossierController extends Controller
     return response()->json($employes);
         }
     public function index(Request $request)
-{
+    {
     Gate::authorize('dossier.view');
 
     $user = auth()->user();
@@ -38,9 +69,9 @@ class DossierController extends Controller
         $query->where('idDepartement', $user->idDepartement);
     }
 
-    if ($user->hasRole('employe')) {
+    if ($user->hasRole('employee')) {
         // employé voit seulement ses dossiers assignés
-        $query->where('idUser', $user->id);
+        $query->where('idUser', $user->idUser);
     }
 
     // 🔍 filtres existants
