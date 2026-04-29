@@ -20,12 +20,31 @@ use App\Http\Controllers\DossierController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\ClientAuthController;        
+use App\Http\Controllers\Client\ClientDashboardController;
+use App\Http\Controllers\Admin\ClientPermissionController;
+
 
 /*
 |--------------------------------------------------------------------------
 | Entry Point & Dashboard
 |--------------------------------------------------------------------------
 */
+//route client auth
+// Routes Client
+Route::prefix('clients')->name('clients.')->group(function () {
+    // Routes publiques (sans auth)
+    Route::get('/login', [ClientAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [ClientAuthController::class, 'login'])->name('login.post');
+    
+    // Routes protégées (avec middleware auth.client)
+    Route::middleware(['auth.client'])->group(function () {
+        Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
+    });
+
+});
+
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');

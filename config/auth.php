@@ -48,6 +48,10 @@ return [
             'driver' => 'session',
             'provider' => 'users', // Utilise le même provider que web
         ],
+        'client' => [                    
+        'driver'   => 'session',
+        'provider' => 'clients',
+    ],
     ],
 
     /*
@@ -78,6 +82,10 @@ return [
         //     'driver' => 'eloquent',
         //     'model' => App\Models\Manager::class,
         // ],
+         'clients' => [                   // ✅ زيد
+        'driver' => 'eloquent',
+        'model'  => App\Models\Client::class,
+    ],
     ],
 
     /*
