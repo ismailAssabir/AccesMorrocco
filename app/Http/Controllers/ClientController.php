@@ -70,11 +70,26 @@ public function store(Request $request) {
 
     return redirect()->route('clients.index')->with('msg', 'Le client a été ajouté avec succès!');
 }
-public function show($id){
-            Gate::authorize('client.view');
+public function show(Request $request, $id)
+{
+    Gate::authorize('client.view');
 
+    // 🔥 client
     $client = Client::findOrFail($id);
-    return view('showClient' , compact('client'));
+
+    // 🔥 IMPORTANT : on crée query ici
+    $query = Dossier::with(['user', 'departement'])
+        ->where('idClient', $id);
+
+    // 🔥 filtre status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // 🔥 pagination
+    $dossiers = $query->orderBy('idDossier', 'desc')->paginate(5);
+
+    return view('showClient', compact('client', 'dossiers'));
 }
 
 public function edit($id){

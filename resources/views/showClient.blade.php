@@ -157,5 +157,101 @@
 
             </div>
         </div>
+        {{-- ===== DOSSIERS ===== --}}
+
+<form method="GET" class="flex gap-3 items-center mb-4">
+    <select name="status"
+        onchange="this.form.submit()"
+        class="px-3 py-2 border rounded-xl text-sm">
+
+        <option value="">Tous les statuts</option>
+        <option value="ouvert" {{ request('status')=='ouvert' ? 'selected' : '' }}>Ouvert</option>
+        <option value="en_cours" {{ request('status')=='en_cours' ? 'selected' : '' }}>En cours</option>
+        <option value="valide" {{ request('status')=='valide' ? 'selected' : '' }}>Validé</option>
+        <option value="refuse" {{ request('status')=='refuse' ? 'selected' : '' }}>Refusé</option>
+    </select>
+</form>
+
+    <div class="mt-4 bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+
+        <div class="p-6 flex items-center justify-between">
+            <h3 class="text-lg font-extrabold text-slate-800">
+                Dossiers du client
+            </h3>
+
+            <span class="text-sm font-bold text-slate-400">
+                Total : {{ $dossiers->total() }}
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Référence</th>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Destination</th>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Employé</th>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Département</th>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Statut</th>
+                        <th class="px-4 py-3 text-left text-xs text-slate-400 uppercase">Montant</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-50">
+
+                    @forelse($dossiers as $dossier)
+                    <tr class="hover:bg-slate-50 transition">
+
+                        <td class="px-4 py-3 font-bold text-slate-700">
+                            {{ $dossier->reference }}
+                        </td>
+
+                        <td class="px-4 py-3 text-slate-600">
+                            {{ $dossier->distination ?? '—' }}
+                        </td>
+
+                        <td class="px-4 py-3 text-slate-600">
+                            {{ $dossier->user?->firstName . ' ' . $dossier->user?->lastName ?? 'Non assigné' }}
+                        </td>
+
+                        <td class="px-4 py-3 text-slate-600">
+                            {{ $dossier->departement->title ?? '—' }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            @if($dossier->status == 'ouvert')
+                                <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-600 rounded-lg font-bold">Ouvert</span>
+                            @elseif($dossier->status == 'en_cours')
+                                <span class="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-lg font-bold">En cours</span>
+                            @elseif($dossier->status == 'valide')
+                                <span class="px-2 py-1 text-xs bg-green-100 text-green-600 rounded-lg font-bold">Validé</span>
+                            @else
+                                <span class="px-2 py-1 text-xs bg-red-100 text-red-500 rounded-lg font-bold">Refusé</span>
+                            @endif
+                        </td>
+
+                        <td class="px-4 py-3 font-bold text-slate-700">
+                            {{ number_format($dossier->montant, 2) }} DH
+                        </td>
+
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-slate-400">
+                            Aucun dossier trouvé
+                        </td>
+                    </tr>
+                    @endforelse
+
+                </tbody>
+            </table>
+        </div>
+
+        {{-- PAGINATION --}}
+        <div class="p-4">
+            {{ $dossiers->withQueryString()->links() }}
+        </div>
+    </div>
     </div>
 </x-app-layout>
