@@ -68,12 +68,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     #Client Routes
 
     #Category Routes
-    Route::get('/category', [CategoryController::class, 'index']);
-    Route::post('/category', [CategoryController::class, 'store']);
-    Route::get('/category/{id}' , [CategoryController::class , 'show' ]); 
-    Route::get('/category/edit/{id}' , [CategoryController::class , 'edit' ]);
-    Route::put('/category/edit/{id}' , [CategoryController::class , 'update' ]);
-    Route::delete('/category/delete/{id}' , [CategoryController::class , 'destroy' ]);
+Route::get('categories/export-pdf', [CategoryController::class, 'exportPdf'])->name('categories.export-pdf');
+Route::resource('categories', CategoryController::class);
 
     #Permission Routes
     Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');

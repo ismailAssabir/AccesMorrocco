@@ -8,7 +8,7 @@ use App\Models\Lead;
 use App\Models\Departement;
 use App\Models\Dossier;
 use Illuminate\Support\Str;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Gate;
 
 class ClientController extends Controller
@@ -19,7 +19,7 @@ class ClientController extends Controller
 
         $clients = Client::orderBy('idClient', 'desc')->get();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('clients.pdf', compact('clients'))
+        $pdf = Pdf::loadView('clients.pdf', compact('clients'))
                     ->setPaper('a4', 'landscape');
 
         return $pdf->download('clients-' . now()->format('Y-m-d') . '.pdf');
