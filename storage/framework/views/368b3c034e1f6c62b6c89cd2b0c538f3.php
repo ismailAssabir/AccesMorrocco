@@ -105,10 +105,11 @@
 <script>
     function openEditDeptModal(id) {
         // Build the URLs
-        const url = '<?php echo e(url("/departements/edit")); ?>/' + id;
+        const editUrl = '<?php echo e(url("/departements")); ?>/' + id + '/edit';
+        const updateUrl = '<?php echo e(url("/departements")); ?>/' + id;
 
         // Fetch data via AJAX
-        fetch(url, {
+        fetch(editUrl, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -125,8 +126,8 @@
             document.getElementById('edit_dept_manager').value = data.idUser || '';
             
             // Set form action and hidden URL input
-            document.getElementById('editDepartmentForm').action = url;
-            document.getElementById('edit_url_input').value = url;
+            document.getElementById('editDepartmentForm').action = updateUrl;
+            document.getElementById('edit_url_input').value = updateUrl;
 
             // Open modal
             document.getElementById('editDepartmentModal').classList.remove('hidden');

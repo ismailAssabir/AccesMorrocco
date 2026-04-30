@@ -58,11 +58,50 @@
             margin-left: 0;
         }
     }
+    [x-cloak] { display: none !important; }
 </style>
 </head>
 <body class="bg-[#F8FAFC] font-sans">
 
-<?php $client = Auth::guard('client')->user(); ?>
+<?php 
+    $client = Auth::guard('client')->user(); 
+    $recentNotifications = collect();
+    if ($client) {
+        $dossierIds = $client->dossiers()->pluck('idDossier');
+        
+        // New Presentations
+        $presentations = \App\Models\Presentation::whereIn('idDossier', $dossierIds)
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'title' => 'Nouvelle Présentation',
+                    'desc' => $item->titre,
+                    'time' => $item->created_at->toDateTimeString(),
+                    'url' => route('clients.presentations')
+                ];
+            });
+        $recentNotifications = $recentNotifications->concat($presentations);
+
+        // Payment Updates
+        $paiements = \App\Models\Paiement::whereIn('idDossier', $dossierIds)
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'title' => 'Mise à jour Paiement',
+                    'desc' => 'Le paiement de ' . number_format($item->montantPaye, 2) . ' MAD est ' . $item->status,
+                    'time' => $item->updated_at->toDateTimeString(),
+                    'url' => route('clients.paiements')
+                ];
+            });
+        $recentNotifications = $recentNotifications->concat($paiements);
+        
+        $recentNotifications = $recentNotifications->sortByDesc('time')->take(5)->values();
+    }
+?>
 
 
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -220,11 +259,82 @@
             <div class="flex items-center gap-3 ml-auto">
 
                 
-                <button class="relative w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
-                    <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </button>
+                <div x-data="{ 
+                    open: false,
+                    lastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>') || '0'),
+                    displayLastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>') || '0'),
+                    notifications: <?php echo e(json_encode($recentNotifications->map(function($n) {
+                        $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
+                        $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
+                        return $n;
+                    }))); ?>,
+                    get unreadNotifications() {
+                        return this.notifications;
+                    },
+                    get hasNew() {
+                        return this.notifications.some(n => n.timestamp > this.lastChecked);
+                    },
+                    toggle() {
+                        if (!this.open) {
+                            this.open = true;
+                            this.lastChecked = Date.now();
+                            localStorage.setItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>', this.lastChecked);
+                        } else {
+                            this.close();
+                        }
+                    },
+                    close() {
+                        this.open = false;
+                        setTimeout(() => { this.displayLastChecked = this.lastChecked; }, 300);
+                    }
+                }" @click.away="close()" class="relative">
+                    <button @click="toggle()" 
+                        class="relative w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors group">
+                        
+                        <template x-if="hasNew">
+                            <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
+                            </span>
+                        </template>
+                        
+                        <svg class="w-4 h-4 text-slate-500 group-hover:text-[#be2346] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </button>
+
+                    
+                    <div x-show="open" 
+                        x-cloak
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        class="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden z-50">
+                        
+                        <div class="px-5 py-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-[#be2346]">Notifications</p>
+                        </div>
+
+                        <div class="max-h-80 overflow-y-auto">
+                            <template x-for="notif in notifications" :key="notif.time + notif.title">
+                                <a :href="notif.url" class="block p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <p class="text-xs font-bold text-slate-800 group-hover:text-[#be2346]" x-text="notif.title"></p>
+                                        <span class="text-[9px] text-slate-400 font-medium whitespace-nowrap ml-2" x-text="notif.time_human"></span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 line-clamp-2 mt-1" x-text="notif.desc"></p>
+                                </a>
+                            </template>
+
+                            <div x-show="notifications.length === 0" class="p-8 text-center">
+                                <svg class="w-8 h-8 text-slate-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                <p class="text-xs font-bold text-slate-400">Aucune notification</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
