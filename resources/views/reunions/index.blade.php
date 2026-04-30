@@ -590,7 +590,7 @@
 
         function openEditModal(reunion) {
             const form = document.getElementById('editReunionForm');
-            form.action = `/reunions/edit/${reunion.idReunion}`;
+            form.action = `/reunions/${reunion.idReunion}`;
             
             document.getElementById('edit_titre').value = reunion.titre || '';
             document.getElementById('edit_type').value = reunion.type || 'Interne';
@@ -630,7 +630,7 @@
         }
 
         function confirmDeleteReunion(id) {
-            window.confirmDelete(`/reunions/delete/${id}`, 'réunion');
+            window.confirmDelete(`/reunions/${id}`, 'réunion');
         }
 
         document.addEventListener('keydown', function(e) {

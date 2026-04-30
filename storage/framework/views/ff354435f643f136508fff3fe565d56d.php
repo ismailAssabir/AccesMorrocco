@@ -142,6 +142,9 @@
         } else if (entityType === 'lead') {
             title = "Supprimer le lead ?";
             description = "Toutes les données de ce prospect seront définitivement supprimées.";
+        } else if (entityType === 'historique' || entityType === 'pointage') {
+            title = "Vider l'historique ?";
+            description = "TOUS les enregistrements de pointage seront définitivement supprimés. Cette action est irréversible.";
         }
 
         openGlobalDeleteModal(url, title, description);

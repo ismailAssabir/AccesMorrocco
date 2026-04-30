@@ -69,7 +69,7 @@ class ObjectifController extends Controller
             'description' => 'nullable|string|max:255',
             'dateFin' => 'nullable|date',
             'status' => 'nullable|string',
-            'avancement' => 'required|integer|min:0|max:100',
+            'avancement' => 'nullable|integer|min:0|max:100',
             'dateDebut' => 'nullable|date',
             'idDepartement'=> 'nullable|exists:departements,idDepartement'
         ]);
@@ -134,14 +134,14 @@ class ObjectifController extends Controller
             'dateFin'       => 'nullable|date',
             'dateDebut'     => 'nullable|date',
             'status'        => 'required|string|in:en_cours,atteint,echoue',
-            'avancement'    => 'required|integer|min:0|max:100',
+            'avancement'    => 'nullable|integer|min:0|max:100',
             'idDepartement' => 'nullable|exists:departements,idDepartement'
         ]);
 
         $obj = Objectif::findOrFail($id);
         $obj->update($data);
 
-        return redirect()->route('goals.index')->with('msg', "L'objectif stratégique a été mis à jour avec succès.");
+        return redirect()->route('objectifs.index')->with('msg', "L'objectif stratégique a été mis à jour avec succès.");
     }
 
     /**
@@ -152,6 +152,6 @@ class ObjectifController extends Controller
         Gate::authorize('objectif.delete');
         $obj = Objectif::findOrFail($id);
         $obj->delete();
-        return redirect()->route('goals.index')->with('msg', "L'objectif a été supprimé");
+        return redirect()->route('objectifs.index')->with('msg', "L'objectif a été supprimé");
     }
 }

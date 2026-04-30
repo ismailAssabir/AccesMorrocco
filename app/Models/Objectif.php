@@ -56,4 +56,34 @@ class Objectif extends Model
         $completed = $this->taches()->where('status', 'termine')->count();
         return round(($completed / $total) * 100);
     }
+
+    /**
+     * Automatically calculate avancement based on dates (duration)
+     */
+    public function getAvancementAttribute($value)
+    {
+        if ($this->dateDebut && $this->dateFin) {
+            $now = \Carbon\Carbon::now()->startOfDay();
+            $debut = \Carbon\Carbon::parse($this->dateDebut)->startOfDay();
+            $fin = \Carbon\Carbon::parse($this->dateFin)->startOfDay();
+
+            if ($now->lt($debut)) {
+                return 0;
+            }
+
+            if ($now->gte($fin)) {
+                return 100;
+            }
+
+            $totalDays = $debut->diffInDays($fin);
+            if ($totalDays == 0) return 100;
+
+            $passedDays = $debut->diffInDays($now);
+            $progress = round(($passedDays / $totalDays) * 100);
+            
+            return min(100, max(0, $progress));
+        }
+
+        return $value ?? 0;
+    }
 }

@@ -285,6 +285,24 @@
                         <textarea name="motif" id="edit-motif" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5"></textarea>
                     </div>
 
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Justification (Fichier)</label>
+                        <div class="relative group">
+                            <input type="file" name="justification" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="updateFileNameEdit(this)">
+                            <div class="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl px-4 py-5 flex items-center justify-center gap-3 transition-all group-hover:border-[#be2346]/30 group-hover:bg-[#be2346]/5">
+                                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-[#be2346] group-hover:border-[#be2346]/20 transition-all shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-bold text-slate-600 group-hover:text-[#be2346] transition-all" id="fileNameDisplayEdit">Modifier le fichier</p>
+                                    <p class="text-[10px] text-slate-400 font-medium">Laissez vide pour conserver l'ancien</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex gap-3 pt-4">
                         <button type="button" onclick="closeEditCongeModal()" class="flex-1 py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
                         <button type="submit" class="flex-1 py-4 rounded-2xl bg-[#be2346] hover:bg-[#a01d3a] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#be2346]/20 text-sm">Mettre à jour</button>
@@ -297,7 +315,7 @@
     
     <div id="showCongeDetailsModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeCongeDetailsModal()"></div>
-        <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
+        <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] z-10" style="animation: modalIn .2s ease-out">
             <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-lg font-black text-slate-800">Détails de la Demande</h2>
@@ -308,7 +326,7 @@
                 </button>
             </div>
             
-            <div class="p-7 space-y-4 text-sm text-slate-700" id="detail-body">
+            <div class="p-7 space-y-4 text-sm text-slate-700 flex-1 overflow-y-scroll min-h-0 custom-scrollbar" id="detail-body">
                 <div class="flex items-center gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg shrink-0" id="detail-avatar">
                         E
@@ -355,7 +373,7 @@
                     <p class="text-slate-600 mt-1" id="detail-sold">...</p>
                 </div>
             </div>
-            <div class="px-7 py-5 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end">
+            <div class="px-7 py-5 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end shrink-0">
                 <button type="button" onclick="closeCongeDetailsModal()" class="px-5 py-2.5 rounded-xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-white hover:text-slate-600 transition-all text-sm shadow-sm">
                     Fermer
                 </button>
@@ -495,10 +513,23 @@
             })
             .then(data => {
                 const conge = data;
-                let empName = conge.user ? (conge.user.firstName + ' ' + conge.user.lastName) : 'Employé Inconnu';
+                let empName = 'Employé Inconnu';
+                let initials = 'E';
+                
+                if (conge.user) {
+                    const first = conge.user.firstName || '';
+                    const last = conge.user.lastName || '';
+                    empName = (first + ' ' + last).trim() || 'Employé Inconnu';
+                    
+                    if (first && last) {
+                        initials = first.charAt(0).toUpperCase() + last.charAt(0).toUpperCase();
+                    } else if (empName !== 'Employé Inconnu') {
+                        initials = empName.charAt(0).toUpperCase();
+                    }
+                }
                 
                 document.getElementById('detail-employe').innerText = empName;
-                document.getElementById('detail-avatar').innerText = empName.charAt(0).toUpperCase();
+                document.getElementById('detail-avatar').innerText = initials;
                 
                 document.getElementById('detail-dateDemande').innerText = conge.dateDemande || '-';
                 document.getElementById('detail-dateDebut').innerText = conge.dateDebut || '-';
@@ -541,6 +572,19 @@
                 display.classList.add('text-[#be2346]');
             } else {
                 display.innerText = 'Choisir un fichier';
+                display.classList.remove('text-[#be2346]');
+                display.classList.add('text-slate-600');
+            }
+        }
+
+        function updateFileNameEdit(input) {
+            const display = document.getElementById('fileNameDisplayEdit');
+            if (input.files && input.files.length > 0) {
+                display.innerText = input.files[0].name;
+                display.classList.remove('text-slate-600');
+                display.classList.add('text-[#be2346]');
+            } else {
+                display.innerText = 'Modifier le fichier';
                 display.classList.remove('text-[#be2346]');
                 display.classList.add('text-slate-600');
             }

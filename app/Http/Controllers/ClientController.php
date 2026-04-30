@@ -8,7 +8,7 @@ use App\Models\Lead;
 use App\Models\Departement;
 use App\Models\Dossier;
 use Illuminate\Support\Str;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Gate;
 
 class ClientController extends Controller
@@ -19,7 +19,7 @@ class ClientController extends Controller
 
         $clients = Client::orderBy('idClient', 'desc')->get();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('clients.pdf', compact('clients'))
+        $pdf = Pdf::loadView('clients.pdf', compact('clients'))
                     ->setPaper('a4', 'landscape');
 
         return $pdf->download('clients-' . now()->format('Y-m-d') . '.pdf');
@@ -70,11 +70,26 @@ public function store(Request $request) {
 
     return redirect()->route('clients.index')->with('msg', 'Le client a été ajouté avec succès!');
 }
-public function show($id){
-            Gate::authorize('client.view');
+public function show(Request $request, $id)
+{
+    Gate::authorize('client.view');
 
+    // 🔥 client
     $client = Client::findOrFail($id);
-    return view('showClient' , compact('client'));
+
+    // 🔥 IMPORTANT : on crée query ici
+    $query = Dossier::with(['user', 'departement'])
+        ->where('idClient', $id);
+
+    // 🔥 filtre status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // 🔥 pagination
+    $dossiers = $query->orderBy('idDossier', 'desc')->paginate(5);
+
+    return view('showClient', compact('client', 'dossiers'));
 }
 
 public function edit($id){

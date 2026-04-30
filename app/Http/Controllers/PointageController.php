@@ -576,4 +576,17 @@ class PointageController extends Controller
         $filename = 'Rapport_Pointage_' . now()->format('Ymd_His') . '.pdf';
         return $pdf->download($filename);
     }
+
+    /**
+     * Clear all pointage history (admin only).
+     */
+    public function clearHistory(Request $request)
+    {
+        Gate::authorize('pointage.delete');
+
+        Pointage::query()->delete();
+
+        return redirect()->route('admin.pointages.index')
+            ->with('msg', 'Tout l\'historique de pointage a été supprimé.');
+    }
 }

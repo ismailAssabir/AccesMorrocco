@@ -164,7 +164,7 @@
 
 
             
-            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['client.view', 'lead.view', 'dossier.view'])): ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['client.view', 'lead.view', 'dossier.view', 'category.view'])): ?>
             <div class="px-4 mt-8 mb-6">
                 <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -197,6 +197,19 @@
                     <span class="font-medium text-sm">Leads</span>
                 </a>
             <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('category.view')): ?>
+                <a href="<?php echo e(route('categories.index')); ?>" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   <?php echo e(request()->routeIs('categories.*') || request()->is('categories*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                    <div class="transition-transform duration-300 <?php echo e(request()->routeIs('categories.*') || request()->is('categories*') ? '' : 'group-hover:rotate-12'); ?>">
+                        <svg class="w-5 h-5 <?php echo e(request()->routeIs('categories.*') || request()->is('categories*') ? 'text-white' : 'group-hover:text-blue-500'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Catégories</span>
+                </a>
+            <?php endif; ?>
+
 
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
                 <a href="<?php echo e(Route::has('dossiers.index') ? route('dossiers.index') : '/dossiers'); ?>" 
@@ -208,6 +221,19 @@
                         </svg>
                     </div>
                     <span class="font-medium text-sm">Dossiers</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('paiement.view')): ?>
+                <a href="<?php echo e(route('paiements.index')); ?>" 
+                   class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
+                   <?php echo e(request()->routeIs('paiements.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                    <div class="transition-transform duration-300 <?php echo e(request()->routeIs('paiements.*') ? '' : 'group-hover:rotate-12'); ?>">
+                        <svg class="w-5 h-5 <?php echo e(request()->routeIs('paiements.*') ? 'text-white' : 'group-hover:text-blue-500'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span class="font-medium text-sm">Paiements</span>
                 </a>
             <?php endif; ?>
             <?php endif; ?>

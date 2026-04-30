@@ -85,30 +85,32 @@ class ReclamationController extends Controller
 
 
 
-// public function destroy($id)
-// {   $Reclamation = Reclamation::findOrFail($id);
-//     $Reclamation->delete();
-//     return redirect()->back()->with('msg', 'La Reclamation a été supprimée');
-// }
+    public function destroy($id)
+    {
+        // Gate::authorize('reclamation.delete'); // Optional depending on permissions setup
+        $Reclamation = Reclamation::findOrFail($id);
+        
+        // Only allow admins/managers or the owner to delete
+        if (auth()->user()->type === 'employee' && $Reclamation->idUser !== auth()->id()) {
+            abort(403, "Vous n'êtes pas autorisé à supprimer cette réclamation.");
+        }
 
-// public function edit($id){
-//     $Reclamation = Reclamation::findOrFail($id);
-//     return view('editReclamation' , compact('Reclamation'));
-// }
+        $Reclamation->delete();
+        return redirect()->back()->with('msg', 'La réclamation a été supprimée avec succès.');
+    }
 
-// public function update(Request $request ,$id){
-//     $Reclamation = Reclamation::findOrFail($id);
-//     $ReclamationUpdate = $request->validate([
-//         'idUser'     => 'required|exists:users,idUser',
-//         'description'    => 'nullable|string|min:10|max:255',
-//         'status'  => 'in:ouverte,en_cours,resolue',
-//         'priorite' => 'in:basse,moyenne,haute',
-//         'titre' => 'string|min:2|max:20',
-//         'fichier' =>'nullable|mimes:pdf,jpg,jpeg,png|max:5120',
-//         'reponse' => 'string|max:255|nullable'
-//     ]);
+    public function reponse(Request $request, $id)
+    {
+        // Gate::authorize('reclamation.edit'); // Assuming edit permission is required to reply
+        $Reclamation = Reclamation::findOrFail($id);
+        
+        $data = $request->validate([
+            'reponse' => 'required|string|max:500'
+        ]);
 
-//    $Reclamation->update($ReclamationUpdate);
-//     return redirect()->back()->with('msg' , 'La Reclamation été mises à jour avec succès');
-// }
+        $data['status'] = 'resolue'; // Automatically resolve as per UI
+
+        $Reclamation->update($data);
+        return redirect()->back()->with('msg', 'La réponse a été ajoutée et la réclamation est marquée comme résolue.');
+    }
 }

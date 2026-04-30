@@ -130,8 +130,8 @@
                             </select>
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-[#be2346]">*</span></label>
-                            <input type="number" name="avancement" required min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-slate-400 font-normal lowercase">(Auto si dates fournies)</span></label>
+                            <input type="number" name="avancement" min="0" max="100" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
                         <div class="md:col-span-2 space-y-1.5">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Département responsable</label>
@@ -214,8 +214,8 @@
                         </div>
 
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) *</label>
-                            <input type="number" name="avancement" id="edit_avancement" required min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Avancement (%) <span class="text-slate-400 font-normal lowercase">(Auto si dates fournies)</span></label>
+                            <input type="number" name="avancement" id="edit_avancement" min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                         </div>
 
                         <div class="md:col-span-2 space-y-1.5">
@@ -264,7 +264,7 @@
             const container = document.getElementById('objectifs-container');
             container.style.opacity = '0.5';
 
-            let url = `{{ route('goals.index') }}?search=${encodeURIComponent(search)}&status=${status}&idDepartement=${idDepartement}`;
+            let url = `{{ route('objectifs.index') }}?search=${encodeURIComponent(search)}&status=${status}&idDepartement=${idDepartement}`;
 
             fetch(url, {
                 headers: {
@@ -309,7 +309,7 @@
 
         function openEditModal(id) {
             const form = document.getElementById('editObjectifForm');
-            form.action = `/objectifs/edit/${id}`;
+            form.action = `/objectifs/${id}`;
             
             // Show modal immediately for better UX
             toggleModal('editObjectifModal', 'open');
@@ -356,7 +356,7 @@
         }
 
         function confirmDeleteObjectif(id) {
-            window.confirmDelete('/objectifs/delete/' + id, 'objectif');
+            window.confirmDelete('/objectifs/' + id, 'objectif');
         }
 
         document.addEventListener('keydown', function(e) {

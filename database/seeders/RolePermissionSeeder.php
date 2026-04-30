@@ -153,12 +153,8 @@ class RolePermissionSeeder extends Seeder
             $adminRole->givePermissionTo($viewAll);
         }
         // Keep existing admin permission.edit / permission.view
-        if (!$adminRole->hasPermissionTo('permission.edit')) {
-            $adminRole->givePermissionTo('permission.edit');
-        }
-        if (!$adminRole->hasPermissionTo('permission.view')) {
-            $adminRole->givePermissionTo('permission.view');
-        }
+        $adminRole->syncPermissions(['permission.edit', 'permission.view']);
+        
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }

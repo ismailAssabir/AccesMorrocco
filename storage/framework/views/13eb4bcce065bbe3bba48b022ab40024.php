@@ -1,5 +1,7 @@
 <?php
-    $userType = auth()->user()->type;
+    $user = auth()->user();
+    $client = auth()->guard('client')->user();
+    $userType = $user ? $user->type : ($client ? 'client' : null);
     $searchItems = \Illuminate\Support\Facades\Cache::remember('global_search_items_' . $userType, 600, function() use ($userType) {
         $items = [
             ['title' => 'Accueil', 'url' => '/dashboard', 'type' => 'Page', 'keywords' => 'home dashboard tableau de bord accueil', 'icon' => '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />'],
@@ -223,18 +225,32 @@
             <div x-data="{ 
                 open: false,
                 lastChecked: parseInt(localStorage.getItem('notifications_last_checked_<?php echo e(auth()->id()); ?>') || '0'),
-                newestTimestamp: <?php echo e($newestTimestamp); ?>,
+                displayLastChecked: parseInt(localStorage.getItem('notifications_last_checked_<?php echo e(auth()->id()); ?>') || '0'),
+                notifications: <?php echo e(json_encode($recentNotifications->map(function($n) {
+                    $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
+                    $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
+                    return $n;
+                }))); ?>,
+                get unreadNotifications() {
+                    return this.notifications.filter(n => n.timestamp > this.displayLastChecked);
+                },
                 get hasNew() {
-                    return this.newestTimestamp > this.lastChecked && this.newestTimestamp > 0;
+                    return this.notifications.some(n => n.timestamp > this.lastChecked);
                 },
                 toggle() {
-                    this.open = !this.open;
-                    if (this.open) {
+                    if (!this.open) {
+                        this.open = true;
                         this.lastChecked = Date.now();
                         localStorage.setItem('notifications_last_checked_<?php echo e(auth()->id()); ?>', this.lastChecked);
+                    } else {
+                        this.close();
                     }
+                },
+                close() {
+                    this.open = false;
+                    setTimeout(() => { this.displayLastChecked = this.lastChecked; }, 300);
                 }
-            }" class="relative">
+            }" @click.away="close()" class="relative">
                 <button @click="toggle()" 
                     class="relative p-2 rounded-xl hover:bg-[#be2346]/5 transition-all duration-300 group">
                     
@@ -250,12 +266,11 @@
                     </svg>
                 </button>
 
-                <div x-show="open" 
+                    <div x-show="open" 
                     x-cloak
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                    @click.away="open = false" 
                     class="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50">
                     
                     <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
@@ -263,20 +278,20 @@
                     </div>
 
                     <div class="max-h-64 overflow-y-auto">
-                        <?php $__empty_1 = true; $__currentLoopData = $recentNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notif): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <a href="<?php echo e($notif['url']); ?>" class="block p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
-                            <div class="flex justify-between items-start mb-1">
-                                <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]"><?php echo e($notif['title']); ?></p>
-                                <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2"><?php echo e(\Carbon\Carbon::parse($notif['time'])->diffForHumans()); ?></span>
-                            </div>
-                            <p class="text-xs text-gray-500 line-clamp-2 mt-1"><?php echo e($notif['desc']); ?></p>
-                        </a>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <div class="p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
+                        <template x-for="notif in unreadNotifications" :key="notif.url + notif.timestamp">
+                            <a :href="notif.url" class="block p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
+                                <div class="flex justify-between items-start mb-1">
+                                    <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]" x-text="notif.title"></p>
+                                    <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2" x-text="notif.time_human"></span>
+                                </div>
+                                <p class="text-xs text-gray-500 line-clamp-2 mt-1" x-text="notif.desc"></p>
+                            </a>
+                        </template>
+
+                        <div x-show="unreadNotifications.length === 0" class="p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
                             <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]">Mise à jour système</p>
                             <p class="text-xs text-gray-500 mt-1">Nouveaux objectifs ajoutés pour le projet Access Morocco.</p>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>

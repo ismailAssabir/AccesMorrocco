@@ -1,29 +1,31 @@
 <x-app-layout>
     <div class="p-8 bg-[#F8FAFC] min-h-screen">
 
-        {{-- Header --}}
+        {{-- ═══════ HEADER ═══════ --}}
         <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-800">Gestion des Clients</h1>
-                <p class="text-slate-500 text-sm">Liste de tous vos clients actifs.</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Gestion des Clients</h1>
+                <p class="text-slate-500 text-sm mt-1 font-medium">Liste de tous vos clients enregistrés.</p>
             </div>
-            <div class="flex gap-3">
+            <div class="flex items-center gap-3">
+                {{-- Stats --}}
+                <div class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ $clients->count() }} Clients</span>
+                </div>
+
                 @can('client.view')
                 <a href="{{ route('clients.export-pdf') }}"
-                    class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Exporter PDF
+                    class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-[#be2346] hover:text-white hover:border-transparent transition-all text-sm shadow-sm active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    PDF
                 </a>
                 @endcan
 
                 @can('client.create')
                 <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-                        class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
+                        class="flex items-center gap-2 px-5 py-2.5 bg-[#be2346] text-white font-bold rounded-xl hover:bg-[#a01d3a] transition-all text-sm shadow-md shadow-[#be2346]/20 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     Nouveau Client
                 </button>
                 @endcan
@@ -32,14 +34,80 @@
 
         {{-- Flash --}}
         @if(session('msg'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
+            <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-semibold">
+                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ session('msg') }}
             </div>
         @endif
 
+        {{-- ═══════════ FILTER BAR ═══════════ --}}
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-8">
+            <div class="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                {{-- Search --}}
+                <div class="flex-1 min-w-[200px] shrink-0 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="client-search" oninput="filterClients()"
+                        placeholder="Rechercher par nom, email, CNE..."
+                        class="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 outline-none">
+                </div>
+
+                {{-- Type Filter --}}
+                <div class="relative shrink-0">
+                    <select id="client-type" onchange="filterClients()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
+                        <option value="">Type (Tous)</option>
+                        <option value="particulier">Particulier</option>
+                        <option value="famille">Famille</option>
+                        <option value="entreprise">Entreprise</option>
+                        <option value="groupe">Groupe</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                {{-- Status Filter --}}
+                <div class="relative shrink-0">
+                    <select id="client-status" onchange="filterClients()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
+                        <option value="">Statut (Tous)</option>
+                        <option value="actif">Actif</option>
+                        <option value="inactif">Inactif</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                {{-- Nationalité Filter --}}
+                <div class="relative shrink-0">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <input type="text" id="client-nationalite" oninput="filterClients()"
+                        placeholder="Nationalité..."
+                        class="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 w-36">
+                </div>
+
+                {{-- Reset Button --}}
+                <button type="button" onclick="resetClientFilters()" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center shadow-sm shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="client-results-info" class="hidden mb-4 px-4 py-2 bg-[#be2346]/5 border border-[#be2346]/15 rounded-2xl">
+            <p class="text-xs font-bold text-[#be2346]"><span id="client-count">0</span> client(s) trouvé(s)</p>
+        </div>
+
         {{-- Table --}}
-        <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-            <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+        <div class="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
+            <div class="h-1.5 w-full bg-gradient-to-r from-[#be2346] to-[#7c1233]"></div>
 
             <table class="w-full text-sm table-fixed">
                 <thead>
@@ -55,7 +123,13 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     @forelse($clients as $client)
-                    <tr class="hover:bg-slate-50 transition-colors">
+                    <tr class="client-row hover:bg-slate-50 transition-colors"
+                        data-name="{{ strtolower($client->firstName . ' ' . $client->lastName) }}"
+                        data-email="{{ strtolower($client->email) }}"
+                        data-cne="{{ strtolower($client->CNE ?? '') }}"
+                        data-type="{{ strtolower($client->type ?? '') }}"
+                        data-status="{{ strtolower($client->status ?? '') }}"
+                        data-nationalite="{{ strtolower($client->nationalite ?? '') }}">
 
                         {{-- Client --}}
                         <td class="px-4 py-4">
@@ -356,5 +430,39 @@ window.onclick = function(event) {
 }
 </script>
 @endcan
+
+<script>
+    function filterClients() {
+        const search      = document.getElementById('client-search').value.trim().toLowerCase();
+        const type        = document.getElementById('client-type').value.toLowerCase();
+        const status      = document.getElementById('client-status').value.toLowerCase();
+        const nationalite = document.getElementById('client-nationalite').value.trim().toLowerCase();
+        const hasFilter   = search || type || status || nationalite;
+        let visible = 0;
+
+        document.querySelectorAll('.client-row').forEach(row => {
+            const nameMatch   = !search      || row.dataset.name.includes(search) || row.dataset.email.includes(search) || row.dataset.cne.includes(search);
+            const typeMatch   = !type        || row.dataset.type === type;
+            const statusMatch = !status      || row.dataset.status === status;
+            const natMatch    = !nationalite || row.dataset.nationalite.includes(nationalite);
+            const show = nameMatch && typeMatch && statusMatch && natMatch;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const info = document.getElementById('client-results-info');
+        info.classList.toggle('hidden', !hasFilter);
+        if (hasFilter) document.getElementById('client-count').textContent = visible;
+    }
+
+    function resetClientFilters() {
+        document.getElementById('client-search').value = '';
+        document.getElementById('client-type').value = '';
+        document.getElementById('client-status').value = '';
+        document.getElementById('client-nationalite').value = '';
+        document.querySelectorAll('.client-row').forEach(r => r.style.display = '');
+        document.getElementById('client-results-info').classList.add('hidden');
+    }
+</script>
 
 </x-app-layout>

@@ -1,5 +1,6 @@
 <div id="tasks-table" class="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm transition-all duration-300">
-    <table class="w-full text-left border-collapse">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[800px]">
         <thead>
             <tr class="bg-slate-50/80">
                 <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Tâche</th>
@@ -44,12 +45,15 @@
                     <td class="px-6 py-4">
                         <div class="flex -space-x-2">
                             @foreach($tache->users as $u)
-                                <div class="w-6 h-6 rounded-lg bg-slate-100 border border-white flex items-center justify-center text-[8px] font-black text-[#be2346] shadow-sm" title="{{ $u->firstName }} {{ $u->lastName }}">
-                                    {{ substr($u->firstName, 0, 1) }}
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-slate-100 to-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-black text-[#be2346] shadow-sm transition-transform hover:scale-110 hover:z-10 cursor-help" title="{{ $u->firstName }} {{ $u->lastName }}">
+                                    {{ substr($u->firstName ?? '', 0, 1) }}{{ substr($u->lastName ?? '', 0, 1) }}
                                 </div>
                             @endforeach
                             @if($tache->users->isEmpty())
-                                <span class="text-[10px] text-slate-400 italic">Non assigné</span>
+                                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium bg-slate-50 px-2 py-1 rounded-lg border border-dashed border-slate-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2.5"/></svg>
+                                    Non assigné
+                                </div>
                             @endif
                         </div>
                     </td>
@@ -90,7 +94,7 @@
             @endforelse
         </tbody>
     </table>
-    
+    </div>
     @if($taches instanceof \Illuminate\Pagination\LengthAwarePaginator && $taches->hasPages())
         <div class="px-6 py-4 bg-white border-t border-slate-100 tasks-pagination">
             {{ $taches->links('vendor.pagination.tailwind_saas') }}

@@ -124,15 +124,15 @@
                 <div class="flex flex-wrap items-center gap-3">
                     
                     <div class="bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex items-center">
-                        <a href="<?php echo e(route('departements.show', ['id' => $departement->idDepartement, 'period' => 'today'])); ?>" 
+                        <a href="<?php echo e(route('departements.show', ['departement' => $departement->idDepartement, 'period' => 'today'])); ?>" 
                            class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all <?php echo e($period == 'today' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'); ?>">
                             Aujourd'hui
                         </a>
-                        <a href="<?php echo e(route('departements.show', ['id' => $departement->idDepartement, 'period' => 'weekly'])); ?>" 
+                        <a href="<?php echo e(route('departements.show', ['departement' => $departement->idDepartement, 'period' => 'weekly'])); ?>" 
                            class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all <?php echo e($period == 'weekly' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'); ?>">
                             7 Jours
                         </a>
-                        <a href="<?php echo e(route('departements.show', ['id' => $departement->idDepartement, 'period' => 'monthly'])); ?>" 
+                        <a href="<?php echo e(route('departements.show', ['departement' => $departement->idDepartement, 'period' => 'monthly'])); ?>" 
                            class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all <?php echo e($period == 'monthly' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'); ?>">
                             Ce Mois
                         </a>

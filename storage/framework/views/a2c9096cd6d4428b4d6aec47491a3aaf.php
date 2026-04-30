@@ -8,352 +8,649 @@
 <?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-    <div class="p-8 bg-[#F8FAFC] min-h-screen">
+<div class="p-8 bg-[#F8FAFC] min-h-screen">
 
-        
-        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-extrabold text-slate-800">Gestion des Dossiers</h1>
-                <p class="text-slate-500 text-sm">Suivez tous les dossiers de voyage.</p>
-            </div>
-            <div class="flex gap-3">
-                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
-                <a href="<?php echo e(route('dossiers.export-pdf', request()->query())); ?>"
-                   class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Exporter PDF
-                </a>
-                <?php endif; ?>
-                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
-                <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-                        class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Nouveau Dossier
-                </button>
-                <?php endif; ?>
-            </div>
+    
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Gestion des Dossiers</h1>
+            <p class="text-slate-500 text-sm">Suivez et gérez tous vos dossiers.</p>
         </div>
 
-        
-        <?php if(session('msg')): ?>
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
-            <?php echo e(session('msg')); ?>
+        <div class="flex gap-3">
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
+    <a href="<?php echo e(route('dossiers.export-pdf', request()->query())); ?>"
+        class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Exporter PDF
+    </a>
+    <?php endif; ?>
 
-        </div>
-        <?php endif; ?>
-
-        
-        <form method="GET" action="<?php echo e(route('dossiers.index')); ?>" class="mb-6 flex flex-col md:flex-row gap-3">
-            <div class="flex-1 relative">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
-                </svg>
-                <input type="text" name="search" value="<?php echo e(request('search')); ?>"
-                       placeholder="Rechercher par référence, destination..."
-                       class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-            </div>
-
-            <select name="status"
-                    class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40]">
-                <option value="">Tous les statuts</option>
-                <option value="ouvert"   <?php echo e(request('status') === 'ouvert'   ? 'selected' : ''); ?>>Ouvert</option>
-                <option value="en_cours" <?php echo e(request('status') === 'en_cours' ? 'selected' : ''); ?>>En cours</option>
-                <option value="ferme"    <?php echo e(request('status') === 'ferme'    ? 'selected' : ''); ?>>Fermé</option>
-            </select>
-
-            <select name="idDepartement"
-                    class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40]">
-                <option value="">Tous les départements</option>
-                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <option value="<?php echo e($dept->idDepartement); ?>" <?php echo e(request('idDepartement') == $dept->idDepartement ? 'selected' : ''); ?>>
-                        <?php echo e($dept->title); ?>
-
-                    </option>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </select>
-
-            <button type="submit"
-                    class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm">
-                Filtrer
-            </button>
-
-            <?php if(request('search') || request('status') || request('idDepartement')): ?>
-            <a href="<?php echo e(route('dossiers.index')); ?>"
-               class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
-                Réinitialiser
-            </a>
-            <?php endif; ?>
-        </form>
-
-        
-        <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-            <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
-
-            <table class="w-full text-sm table-fixed">
-                <thead>
-                    <tr class="border-b border-slate-100 bg-slate-50">
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[14%]">Référence</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[16%]">Client</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[13%]">Destination</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[12%]">Département</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[8%]">Pers.</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[10%]">Montant</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[10%]">Statut</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[10%]">Voyage</th>
-                        <th class="text-left px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-[7%]">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    <?php
-                        $statusColors = [
-                            'ouvert'   => 'bg-blue-100 text-blue-600',
-                            'en_cours' => 'bg-yellow-100 text-yellow-700',
-                            'ferme'    => 'bg-slate-100 text-slate-500',
-                        ];
-                        $statusLabels = [
-                            'ouvert'   => 'Ouvert',
-                            'en_cours' => 'En cours',
-                            'ferme'    => 'Fermé',
-                        ];
-                    ?>
-
-                    <?php $__empty_1 = true; $__currentLoopData = $dossiers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dossier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <tr class="hover:bg-slate-50 transition-colors">
-
-                        <td class="px-4 py-4">
-                            <p class="font-black text-slate-700 text-xs"><?php echo e($dossier->reference); ?></p>
-                            <p class="text-slate-400 text-xs"><?php echo e($dossier->nombreJours); ?> jour(s)</p>
-                        </td>
-
-                        <td class="px-4 py-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-[#b11d40]/10 flex items-center justify-center flex-shrink-0">
-                                    <span class="text-[#b11d40] font-black" style="font-size:9px">
-                                        <?php echo e(strtoupper(substr($dossier->client->firstName ?? '?', 0, 1))); ?><?php echo e(strtoupper(substr($dossier->client->lastName ?? '?', 0, 1))); ?>
-
-                                    </span>
-                                </div>
-                                <p class="text-xs font-bold text-slate-700 truncate">
-                                    <?php echo e($dossier->client->firstName ?? '—'); ?> <?php echo e($dossier->client->lastName ?? ''); ?>
-
-                                </p>
-                            </div>
-                        </td>
-
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($dossier->distination ?? '—'); ?></td>
-
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($dossier->departement->title ?? '—'); ?></td>
-
-                        <td class="px-4 py-4 text-slate-600 text-xs"><?php echo e($dossier->nombrePersonnes); ?></td>
-
-                        <td class="px-4 py-4">
-                            <p class="text-xs font-black text-slate-700"><?php echo e(number_format($dossier->montant, 2)); ?></p>
-                            <p class="text-xs text-slate-400">MAD</p>
-                        </td>
-
-                        <td class="px-4 py-4">
-                            <span class="px-2 py-1 rounded-lg text-xs font-black uppercase <?php echo e($statusColors[$dossier->status] ?? 'bg-slate-100 text-slate-500'); ?>">
-                                <?php echo e($statusLabels[$dossier->status] ?? $dossier->status); ?>
-
-                            </span>
-                        </td>
-
-                        <td class="px-4 py-4 text-slate-500 text-xs">
-                            <?php echo e($dossier->dateVoyage ? \Carbon\Carbon::parse($dossier->dateVoyage)->format('d/m/Y') : '—'); ?>
-
-                        </td>
-
-                        <td class="px-4 py-4">
-                            <div class="flex items-center gap-1">
-                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
-                                <a href="<?php echo e(route('dossiers.show', $dossier->idDossier)); ?>"
-                                   class="p-1.5 rounded-lg text-slate-400 hover:text-[#b11d40] hover:bg-[#b11d40]/10 transition-all" title="Voir">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </a>
-                                <?php endif; ?>
-                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.edit')): ?>
-                                <a href="<?php echo e(route('dossiers.edit', $dossier->idDossier)); ?>"
-                                   class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all" title="Modifier">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </a>
-                                <?php endif; ?>
-                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.delete')): ?>
-                                <form method="POST" action="<?php echo e(route('dossiers.destroy', $dossier->idDossier)); ?>"
-                                      onsubmit="return confirm('Supprimer ce dossier ?')">
-                                    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
-                                    <button type="submit"
-                                            class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all" title="Supprimer">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-
-                    </tr>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <tr>
-                        <td colspan="9" class="px-6 py-16 text-center text-slate-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <p class="font-bold text-slate-500">Aucun dossier trouvé</p>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-
-            
-            <?php if($dossiers->hasPages()): ?>
-            <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-                <p class="text-xs text-slate-400 font-semibold">
-                    <?php echo e($dossiers->firstItem()); ?>–<?php echo e($dossiers->lastItem()); ?> sur <?php echo e($dossiers->total()); ?> dossiers
-                </p>
-                <div class="flex gap-1">
-                    <?php if($dossiers->onFirstPage()): ?>
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 bg-slate-50 cursor-not-allowed">‹</span>
-                    <?php else: ?>
-                        <a href="<?php echo e($dossiers->previousPageUrl()); ?>" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all">‹</a>
-                    <?php endif; ?>
-                    <?php $__currentLoopData = $dossiers->getUrlRange(1, $dossiers->lastPage()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $page => $url): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php if($page == $dossiers->currentPage()): ?>
-                            <span class="px-3 py-1.5 rounded-lg text-xs font-black text-white bg-[#b11d40]"><?php echo e($page); ?></span>
-                        <?php else: ?>
-                            <a href="<?php echo e($url); ?>" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all"><?php echo e($page); ?></a>
-                        <?php endif; ?>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    <?php if($dossiers->hasMorePages()): ?>
-                        <a href="<?php echo e($dossiers->nextPageUrl()); ?>" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all">›</a>
-                    <?php else: ?>
-                        <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 bg-slate-50 cursor-not-allowed">›</span>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
-        </div>
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
+    <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+        class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
+        ➕ Nouveau Dossier
+    </button>
+    <?php endif; ?>
+</div>
     </div>
 
     
-    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
-    <div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-lg font-extrabold text-slate-800">Nouveau Dossier</h2>
-                    <button onclick="document.getElementById('modal-create').classList.add('hidden')"
-                            class="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
+    <?php if(session('msg')): ?>
+    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
+        <?php echo e(session('msg')); ?>
+
+    </div>
+    <?php endif; ?>
+
+    
+    <form method="GET" class="mb-6 flex flex-col md:flex-row gap-3">
+
+        <input type="text" name="search" value="<?php echo e(request('search')); ?>"
+            placeholder="Recherche..."
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+
+        <?php if (! (auth()->user()->hasRole('manager'))): ?>
+        <select name="idDepartement"
+            class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+            <option value="">Tous les départements</option>
+            <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($dept->idDepartement); ?>"
+                    <?php echo e(request('idDepartement') == $dept->idDepartement ? 'selected' : ''); ?>>
+                    <?php echo e($dept->title); ?>
+
+                </option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+        <?php endif; ?>
+
+        <select name="status"
+            class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+            <option value="">Tous les statuts</option>
+            <option value="ouvert" <?php echo e(request('status')=='ouvert'?'selected':''); ?>>Ouvert</option>
+            <option value="en_cours" <?php echo e(request('status')=='en_cours'?'selected':''); ?>>En cours</option>
+            <option value="ferme" <?php echo e(request('status')=='ferme'?'selected':''); ?>>Fermé</option>
+        </select>
+
+        <button class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm">
+            Filtrer
+        </button>
+
+        <?php if(request()->hasAny(['search','status','idDepartement'])): ?>
+        <a href="<?php echo e(route('dossiers.index')); ?>"
+            class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-sm">
+            Reset
+        </a>
+        <?php endif; ?>
+    </form>
+
+    
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-50 text-slate-400 text-xs uppercase">
+                    <th class="px-4 py-4 text-left">Ref</th>
+                    <th class="px-4 py-4 text-left">Client</th>
+                    <th class="px-4 py-4 text-left">Destination</th>
+                    <th class="px-4 py-4 text-left">Département</th>
+                    <th class="px-4 py-4 text-left">Assigné</th>
+                    <th class="px-4 py-4 text-left">Statut</th>
+                    <th class="px-4 py-4 text-left">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-slate-50">
+                <?php $__empty_1 = true; $__currentLoopData = $dossiers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dossier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr class="hover:bg-slate-50">
+
+                    <td class="px-4 py-4 font-bold text-slate-700">
+                        <?php echo e($dossier->reference); ?>
+
+                    </td>
+
+                    <td class="px-4 py-4">
+                        <?php echo e($dossier->client->firstName ?? ''); ?>
+
+                        <?php echo e($dossier->client->lastName ?? ''); ?>
+
+                    </td>
+
+                    <td class="px-4 py-4"><?php echo e($dossier->distination); ?></td>
+
+                    <td class="px-4 py-4">
+                        <?php if(!$dossier->idDepartement && auth()->user()->hasRole('admin')): ?>
+                            <button onclick="openDeptModal(<?php echo e($dossier->idDossier); ?>)"
+                                class="px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+                                ⚠ Non assigné
+                            </button>
+                        <?php else: ?>
+                            <?php echo e($dossier->departement->title ?? '-'); ?>
+
+                        <?php endif; ?>
+                    </td>
+
+                    <td class="px-4 py-4 text-green-600 font-bold">
+                        <?php echo e($dossier->idUser? $dossier->user->firstName." ".$dossier->user->lastName : 'Non assigné'); ?>
+
+                    </td>
+
+                    <td class="px-4 py-4">
+                    <?php
+                        $statusColors = [
+                            'ouvert' => 'bg-blue-100 text-blue-700',
+                            'en_cours' => 'bg-amber-100 text-amber-700',
+                            'ferme' => 'bg-green-100 text-green-700'
+                        ];
+                        $statusLabels = [
+                            'ouvert' => '📋 Ouvert',
+                            'en_cours' => '⚙️ En cours',
+                            'ferme' => '✅ Fermé'
+                        ];
+                        // Vérifier si l'utilisateur connecté est l'employé assigné à ce dossier
+                        $canEditStatus = ($dossier->idUser == auth()->user()->idUser && auth()->user()->hasRole('employee'));
+                    ?>
+                    
+                    <?php if($canEditStatus): ?>
+                        <select onchange="updateStatus(<?php echo e($dossier->idDossier); ?>, this.value)"
+                                class="px-2 py-1 rounded-lg text-xs font-bold border-0 focus:ring-2 focus:ring-[#b11d40] cursor-pointer <?php echo e($statusColors[$dossier->status] ?? 'bg-slate-100'); ?>">
+                            <option value="ouvert" <?php echo e($dossier->status == 'ouvert' ? 'selected' : ''); ?>>📋 Ouvert</option>
+                            <option value="en_cours" <?php echo e($dossier->status == 'en_cours' ? 'selected' : ''); ?>>⚙️ En cours</option>
+                            <option value="ferme" <?php echo e($dossier->status == 'ferme' ? 'selected' : ''); ?>>✅ Fermé</option>
+                        </select>
+                    <?php else: ?>
+                        <span class="px-2 py-1 rounded-lg text-xs font-bold <?php echo e($statusColors[$dossier->status] ?? 'bg-slate-100'); ?>">
+                            <?php echo e($statusLabels[$dossier->status] ?? $dossier->status); ?>
+
+                        </span>
+                    <?php endif; ?>
+                </td>
+
+                    <td class="px-4 py-4 flex gap-2">
+
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.view')): ?>
+                        <a href="<?php echo e(route('dossiers.show',$dossier->idDossier)); ?>">👁</a>
+                        <?php endif; ?>
+
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.edit')): ?>
+                        <a href="<?php echo e(route('dossiers.edit',$dossier->idDossier)); ?>">✏</a>
+                        <?php endif; ?>
+
+                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.delete')): ?>
+                        <form method="POST" action="<?php echo e(route('dossiers.destroy',$dossier->idDossier)); ?>">
+                            <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
+                            <button>🗑</button>
+                        </form>
+                        <?php endif; ?>
+
+                        
+                        <?php if (\Illuminate\Support\Facades\Blade::check('role', 'manager')): ?>
+                        <?php if(auth()->user()->idDepartement == $dossier->idDepartement): ?>
+                        <button onclick="openAssignModal(<?php echo e($dossier->idDossier); ?>, <?php echo e($dossier->idDepartement); ?>)">
+                            👤
+                        </button>
+                        <?php endif; ?>
+                        <?php endif; ?>
+
+                    </td>
+
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr>
+                    <td colspan="7" class="text-center py-16 text-slate-400">
+                        Aucun dossier trouvé
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        
+        <div class="p-4">
+            <?php echo e($dossiers->links()); ?>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<div id="modal-assign" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+            <h2 class="font-extrabold text-slate-800">Assigner un employé</h2>
+            <button onclick="document.getElementById('modal-assign').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+
+        <div class="px-6 py-4 overflow-y-auto flex-1 space-y-3">
+
+            
+            <div id="assign-loading" class="hidden text-center text-slate-400 text-sm py-4">
+                Chargement...
+            </div>
+
+            
+            <div id="assign-list" class="space-y-2"></div>
+
+        </div>
+
+        <form method="POST" id="assignForm" class="px-6 pb-6 pt-4 border-t border-slate-100 bg-slate-50 shrink-0">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
+
+            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Sélectionner</label>
+            <select name="idUser" id="assign-user"
+                class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm mb-4">
+            </select>
+
+            <button class="w-full bg-[#b11d40] text-white py-2.5 rounded-xl font-bold text-sm hover:bg-[#7c1233] transition">
+                Assigner
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="modal-dept" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+        <h2 class="font-bold mb-1 text-slate-800">Assigner un Département</h2>
+        <p class="text-xs text-slate-400 mb-4">Ce dossier n'est assigné à aucun département.</p>
+
+        <form method="POST" id="deptForm">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
+
+            <select name="idDepartement" id="dept-select"
+                class="w-full px-3 py-2 border border-slate-200 rounded-xl mb-4 text-sm">
+                <option value="">Choisir un département...</option>
+                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                    class="flex-1 bg-[#b11d40] text-white py-2 rounded-xl font-bold text-sm hover:bg-[#7c1233] transition">
+                    Assigner
+                </button>
+                <button type="button" onclick="document.getElementById('modal-dept').classList.add('hidden')"
+                    class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
+<div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+
+        
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233] rounded-t-3xl shrink-0"></div>
+        <div class="p-6 flex justify-between items-center border-b border-slate-100 shrink-0">
+            <h2 class="text-lg font-extrabold text-slate-800">Nouveau Dossier</h2>
+            <button onclick="document.getElementById('modal-create').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+
+        <form method="POST" action="<?php echo e(route('dossiers.store')); ?>" class="flex flex-col flex-1 overflow-hidden">
+            <?php echo csrf_field(); ?>
+
+            
+            <div class="px-6 py-4 space-y-4 overflow-y-auto flex-1">
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Client *</label>
+                    <select name="idClient" required
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                        <option value="">— Choisir un client —</option>
+                        <?php $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($client->idClient); ?>"><?php echo e($client->firstName); ?> <?php echo e($client->lastName); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
                 </div>
-                <form method="POST" action="<?php echo e(route('dossiers.store')); ?>">
-                    <?php echo csrf_field(); ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Client *</label>
-                            <select name="idClient" required
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Choisir un client —</option>
-                                <?php $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($client->idClient); ?>"><?php echo e($client->firstName); ?> <?php echo e($client->lastName); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département </label>
+                    <select name="idDepartement" 
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                        <option value="">— Choisir un département —</option>
+                        <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                </div>
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Département</label>
-                            <select name="idDepartement"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="">— Aucun —</option>
-                                <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->name); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                        </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Destination</label>
+                    <input name="distination" placeholder="Ex: Paris, Dubai..."
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
 
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Destination</label>
-                            <input name="distination" placeholder="Ex: Paris, Dubai..."
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Date de voyage</label>
-                            <input name="dateVoyage" type="date"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de personnes *</label>
-                            <input name="nombrePersonnes" type="number" min="1" value="1" required
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de jours *</label>
-                            <input name="nombreJours" type="number" min="0" value="0" required
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Montant (MAD) *</label>
-                            <input name="montant" type="number" step="0.01" min="0" value="0" required
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Statut</label>
-                            <select name="status"
-                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                                <option value="ouvert">Ouvert</option>
-                                <option value="en_cours">En cours</option>
-                                <option value="ferme">Fermé</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Titre du document</label>
-                            <input name="titreDocument" placeholder="Ex: Passeport, Visa..."
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Commentaire</label>
-                            <textarea name="commentaire" rows="2" placeholder="Commentaire..."
-                                      class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
-                        </div>
-
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de personnes *</label>
+                        <input name="nombrePersonnes" type="number" min="1" value="1" required
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                     </div>
-                    <div class="flex gap-3 justify-end mt-6">
-                        <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
-                                class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
-                            Annuler
-                        </button>
-                        <button type="submit"
-                                class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-                            Créer le Dossier
-                        </button>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nombre de jours *</label>
+                        <input name="nombreJours" type="number" min="0" value="0" required
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                     </div>
-                </form>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Montant *</label>
+                    <input name="montant" type="number" min="0" step="0.01" value="0" required
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Date de voyage</label>
+                    <input name="dateVoyage" type="date"
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Commentaire</label>
+                    <textarea name="commentaire" rows="3"
+                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] resize-none"></textarea>
+                </div>
+
+            </div>
+
+            
+            <div class="px-6 py-4 flex gap-3 justify-end border-t border-slate-100 bg-slate-50 shrink-0">
+                <button type="button"
+                    onclick="document.getElementById('modal-create').classList.add('hidden')"
+                    class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm">
+                    Annuler
+                </button>
+                <button type="submit"
+                    class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm shadow">
+                    Créer le Dossier
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+
+<div id="modal-confirm-status" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
+        <div class="p-6">
+            <div class="flex items-center gap-4 mb-4">
+                <div id="confirm-icon" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"></div>
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-base">Confirmer le changement</h3>
+                    <p id="confirm-message" class="text-slate-500 text-sm mt-0.5"></p>
+                </div>
+            </div>
+            <div id="confirm-status-preview" class="mb-5 p-3 rounded-xl border text-center text-sm font-bold"></div>
+            <div class="flex gap-3">
+                <button onclick="cancelStatusChange()"
+                    class="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-50 transition">
+                    Annuler
+                </button>
+                <button onclick="confirmStatusChange()"
+                    class="flex-1 px-4 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm hover:bg-[#7c1233] transition shadow">
+                    Confirmer
+                </button>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+</div>
+
+<script>
+    let pendingStatusChange = null;
+
+    function openDeptModal(dossierId) {
+        const modal = document.getElementById('modal-dept');
+        const form = document.getElementById('deptForm');
+        form.action = '/dossiers/' + dossierId + '/assign-departement';
+        modal.classList.remove('hidden');
+    }
+
+    window.addEventListener('click', function(event) {
+        const deptModal = document.getElementById('modal-dept');
+        if (event.target == deptModal) {
+            deptModal.classList.add('hidden');
+        }
+    });
+
+    function openAssignModal(dossierId, departementId) {
+        const modal = document.getElementById('modal-assign');
+        const select = document.getElementById('assign-user');
+        const form = document.getElementById('assignForm');
+        const loadingEl = document.getElementById('assign-loading');
+        const listEl = document.getElementById('assign-list');
+
+        modal.classList.remove('hidden');
+        form.action = '/dossiers/' + dossierId + '/assign';
+
+        loadingEl.classList.remove('hidden');
+        listEl.innerHTML = '';
+        select.innerHTML = '';
+
+        fetch('/departements/' + departementId + '/users')
+            .then(res => res.json())
+            .then(data => {
+                loadingEl.classList.add('hidden');
+                select.innerHTML = '<option value="">Choisir un employé...</option>';
+                data.sort((a, b) => a.dossiers_actifs - b.dossiers_actifs);
+
+                data.forEach(user => {
+                    const actifs = user.dossiers_actifs ?? 0;
+                    const fermes = user.dossiers_fermes ?? 0;
+                    const maxDossiers = 5;
+                    const isFull = actifs >= maxDossiers;
+                    const chargePercent = Math.min((actifs / maxDossiers) * 100, 100);
+
+                    let chargeColor = '#16a34a';
+                    if (actifs >= 5) chargeColor = '#dc2626';
+                    else if (actifs >= 3) chargeColor = '#f59e0b';
+                    else if (actifs >= 2) chargeColor = '#3b82f6';
+
+                    const opt = document.createElement('option');
+                    opt.value = user.idUser;
+                    opt.textContent = `${user.firstName} ${user.lastName} - ${actifs}/5 actifs, ${fermes} fermés`;
+                    if (isFull) {
+                        opt.disabled = true;
+                        opt.textContent += ' (complet)';
+                    }
+                    select.appendChild(opt);
+
+                    listEl.innerHTML += `
+                        <div class="p-3 rounded-xl border ${isFull ? 'bg-red-50 border-red-200 opacity-60' : 'bg-slate-50 border-slate-200'}">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">${user.firstName} ${user.lastName}</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">📋 ${actifs} actif(s) | ✅ ${fermes} fermé(s)</p>
+                                </div>
+                                ${isFull
+                                    ? '<span class="text-xs font-bold text-red-500 bg-red-100 px-2 py-1 rounded-lg">🔴 COMPLET (5/5)</span>'
+                                    : '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-lg">🟢 Disponible</span>'
+                                }
+                            </div>
+                            <div class="mb-1">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-600">Charge de travail</span>
+                                    <span class="font-bold" style="color: ${chargeColor};">${actifs}/${maxDossiers}</span>
+                                </div>
+                                <div class="bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                                    <div class="h-2.5 rounded-full transition-all duration-300"
+                                        style="width: ${chargePercent}%; background: ${chargeColor};"></div>
+                                </div>
+                            </div>
+                            ${actifs === 4 ? `<div class="mt-2 text-xs text-orange-600 bg-orange-50 p-1.5 rounded-lg">⚠️ Capacité proche du maximum (4/5 dossiers)</div>` : ''}
+                            ${isFull ? `<div class="mt-2 text-xs text-red-600 bg-red-50 p-1.5 rounded-lg">🚫 Impossible d'assigner un nouveau dossier</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                const availableUsers = data.filter(u => (u.dossiers_actifs ?? 0) < 5);
+                if (availableUsers.length === 0) {
+                    listEl.innerHTML += `
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
+                            <p class="text-amber-700 font-medium">⚠️ Aucun employé disponible</p>
+                            <p class="text-amber-600 text-sm mt-1">Tous les employés ont atteint leur capacité maximale (5 dossiers actifs)</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                loadingEl.classList.add('hidden');
+                listEl.innerHTML = '<div class="text-center text-red-500 text-sm py-4">❌ Erreur de chargement</div>';
+                console.error(err);
+            });
+    }
+
+    // ===== STATUS =====
+
+    function updateStatus(dossierId, newStatus) {
+        const select = event.target;
+        const oldValue = select.getAttribute('data-old') || select.value;
+        select.setAttribute('data-old', oldValue);
+
+        const labels = {
+            'ouvert':   { label: '📋 Ouvert',   bg: '#eff6ff', color: '#1d4ed8', icon: '📋', iconBg: '#dbeafe' },
+            'en_cours': { label: '⚙️ En cours', bg: '#fffbeb', color: '#b45309', icon: '⚙️', iconBg: '#fef3c7' },
+            'ferme':    { label: '✅ Fermé',    bg: '#f0fdf4', color: '#15803d', icon: '✅', iconBg: '#dcfce7' },
+        };
+
+        const info = labels[newStatus] || { label: newStatus, bg: '#f8fafc', color: '#475569', icon: '🔄', iconBg: '#f1f5f9' };
+
+        document.getElementById('confirm-icon').textContent = info.icon;
+        document.getElementById('confirm-icon').style.background = info.iconBg;
+        document.getElementById('confirm-message').textContent = `Voulez-vous changer le statut vers :`;
+
+        const preview = document.getElementById('confirm-status-preview');
+        preview.textContent = info.label;
+        preview.style.background = info.bg;
+        preview.style.color = info.color;
+        preview.style.borderColor = info.color + '33';
+
+        pendingStatusChange = { dossierId, newStatus, oldValue, select };
+        document.getElementById('modal-confirm-status').classList.remove('hidden');
+    }
+
+    function cancelStatusChange() {
+        if (pendingStatusChange) {
+            pendingStatusChange.select.value = pendingStatusChange.oldValue;
+        }
+        pendingStatusChange = null;
+        document.getElementById('modal-confirm-status').classList.add('hidden');
+    }
+
+    function confirmStatusChange() {
+        if (!pendingStatusChange) return;
+
+        const { dossierId, newStatus, oldValue, select } = pendingStatusChange;
+        document.getElementById('modal-confirm-status').classList.add('hidden');
+        pendingStatusChange = null;
+
+        select.disabled = true;
+
+        fetch(`/dossiers/${dossierId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '<?php echo e(csrf_token()); ?>',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showFlashMessage(data.message || 'Statut mis à jour avec succès !', 'success');
+                updateSelectColor(select, newStatus);
+                select.setAttribute('data-old', newStatus);
+            } else {
+                showFlashMessage(data.message || 'Erreur lors de la mise à jour', 'error');
+                select.value = oldValue;
+            }
+            select.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showFlashMessage('Erreur lors de la mise à jour du statut', 'error');
+            select.value = oldValue;
+            select.disabled = false;
+        });
+    }
+
+    function updateSelectColor(select, status) {
+        select.classList.remove('bg-blue-100', 'text-blue-700', 'bg-amber-100', 'text-amber-700', 'bg-green-100', 'text-green-700');
+        if (status === 'ouvert') select.classList.add('bg-blue-100', 'text-blue-700');
+        else if (status === 'en_cours') select.classList.add('bg-amber-100', 'text-amber-700');
+        else if (status === 'ferme') select.classList.add('bg-green-100', 'text-green-700');
+    }
+
+    function showFlashMessage(message, type = 'success') {
+        const existingFlash = document.querySelector('.custom-flash-message');
+        if (existingFlash) existingFlash.remove();
+
+        const isSuccess = type === 'success';
+
+        const flashDiv = document.createElement('div');
+        flashDiv.className = 'custom-flash-message fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border';
+        flashDiv.style.cssText = `
+            background: ${isSuccess ? '#f0fdf4' : '#fef2f2'};
+            border-color: ${isSuccess ? '#bbf7d0' : '#fecaca'};
+            min-width: 300px; max-width: 420px;
+            transform: translateX(120%); opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        `;
+
+        flashDiv.innerHTML = `
+            <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${isSuccess ? '#dcfce7' : '#fee2e2'};font-size:16px;">
+                ${isSuccess ? '✅' : '❌'}
+            </div>
+            <div style="flex:1;">
+                <p style="font-weight:800;font-size:13px;color:${isSuccess ? '#15803d' : '#dc2626'};margin:0;">
+                    ${isSuccess ? 'Succès' : 'Erreur'}
+                </p>
+                <p style="font-size:12px;color:${isSuccess ? '#16a34a' : '#ef4444'};margin:0;margin-top:2px;">
+                    ${message}
+                </p>
+            </div>
+            <button onclick="this.parentElement.remove()" style="color:${isSuccess ? '#86efac' : '#fca5a5'};background:none;border:none;cursor:pointer;font-size:16px;padding:0;">✕</button>
+        `;
+
+        document.body.appendChild(flashDiv);
+        requestAnimationFrame(() => {
+            flashDiv.style.transform = 'translateX(0)';
+            flashDiv.style.opacity = '1';
+        });
+
+        setTimeout(() => {
+            flashDiv.style.transform = 'translateX(120%)';
+            flashDiv.style.opacity = '0';
+            setTimeout(() => flashDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Fermer modal assign en cliquant dehors
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal-assign');
+        if (event.target == modal) modal.classList.add('hidden');
+
+        const confirmModal = document.getElementById('modal-confirm-status');
+        if (event.target == confirmModal) cancelStatusChange();
+    }
+</script>
 
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

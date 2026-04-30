@@ -56,10 +56,23 @@
             <tr>
                 <td width="33%" style="text-align: left; vertical-align: top;">
                     <div style="display: inline-block; text-align: center; white-space: nowrap;">
-                        <div style="width: 100px; height: 40px; background: #f3f4f6; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <img src="{{ asset('images/logo.png') }}" alt="logo" style="max-height: 100%; max-width: 100%;">
-                        </div>                       
-                        <div style="color: #b11d40; font-size: 11px; font-weight: 900; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">ACCESS MOROCCO</div>
+                        @php
+                            $logoPath = public_path('images/logo.png');
+                            $logoSrc = null;
+                            if (file_exists($logoPath)) {
+                                try {
+                                    $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                                    $data = file_get_contents($logoPath);
+                                    $logoSrc = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                                } catch (\Exception $e) { $logoSrc = null; }
+                            }
+                        @endphp
+                        @if($logoSrc)
+                            <img src="{{ $logoSrc }}" style="width: 100px; display: block; margin: 0 auto;">
+                        @else
+                            <div style="width: 100px; height: 40px; background: #f3f4f6; border: 1px dashed #ccc; vertical-align: middle; text-align: center; font-size: 8px; color: #999; display: block; margin: 0 auto;">LOGO</div>
+                        @endif
+                        <div style="color: #be2346; font-size: 11px; font-weight: 900; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">ACCESS MOROCCO</div>
                     </div>
                 </td>
                 <td width="34%" style="text-align: center; vertical-align: middle;">

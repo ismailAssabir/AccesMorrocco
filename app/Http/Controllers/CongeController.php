@@ -57,20 +57,26 @@ public function store(Request $request)
         $request->merge(['idUser' => auth()->user()->idUser ?? auth()->id()]);
     }
 
-    $newConge = $request->validate([
-        'idUser'        => 'required|exists:users,idUser',
-        'sold'          => 'nullable|integer',
-        'type'          => 'required|in:annuel,maladie,sans_solde',
-        'justification' => 'nullable|string',
-        'motif'         => 'nullable|string|max:255',
-        'dateDebut'     => 'nullable|date',
-        'dateFin'       => 'nullable|date',
-    ]);
+        $request->validate([
+            'idUser'        => 'required|exists:users,idUser',
+            'sold'          => 'nullable|integer',
+            'type'          => 'required|in:annuel,maladie,sans_solde',
+            'justification' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
+            'motif'         => 'nullable|string|max:255',
+            'dateDebut'     => 'nullable|date',
+            'dateFin'       => 'nullable|date',
+        ]);
 
-    $newConge['dateDemande'] = now()->toDateString(); 
-    $newConge['status'] = "en_attente"; 
+        $data = $request->only(['idUser', 'sold', 'type', 'motif', 'dateDebut', 'dateFin']);
 
-    Conge::create($newConge);
+        if ($request->hasFile('justification')) {
+            $data['justification'] = $request->file('justification')->store('conges', 'public');
+        }
+
+        $data['dateDemande'] = now()->toDateString(); 
+        $data['status'] = "en_attente"; 
+
+        Conge::create($data);
 
     return redirect()->back()->with('msg', 'La demande de congé a été ajoutée avec succès');
 }
@@ -114,9 +120,20 @@ public function store(Request $request)
             'motif'         => 'nullable|string|max:255',
             'dateDebut'     => 'required|date',
             'dateFin'       => 'required|date',
+            'justification' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
         ]);
 
-        $conge->update($validated);
+        $data = $request->only(['type', 'motif', 'dateDebut', 'dateFin']);
+
+        if ($request->hasFile('justification')) {
+            // Optional: delete old file if it exists
+            if ($conge->justification && \Illuminate\Support\Facades\Storage::disk('public')->exists($conge->justification)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($conge->justification);
+            }
+            $data['justification'] = $request->file('justification')->store('conges', 'public');
+        }
+
+        $conge->update($data);
 
         return redirect()->back()->with('msg', 'La demande a été modifiée avec succès.');
     }
