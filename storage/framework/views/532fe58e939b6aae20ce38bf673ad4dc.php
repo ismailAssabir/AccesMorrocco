@@ -45,6 +45,7 @@
 <?php $component = $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
 <?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
 <?php endif; ?>
+
         
         <?php
             $totalConges = $conges->count();
@@ -95,6 +96,58 @@
         </div>
 
         
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-8">
+            <div class="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                
+                <div class="flex-1 min-w-[200px] shrink-0 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" oninput="debounceFilter()" 
+                        placeholder="Rechercher un employé..." 
+                        class="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 outline-none">
+                </div>
+
+                
+                <div class="relative shrink-0">
+                    <select id="statusFilter" onchange="fetchFilteredConges()" 
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                        <option value="">Statut (Tous)</option>
+                        <option value="en_attente">En attente</option>
+                        <option value="approuve">Approuvé</option>
+                        <option value="refuse">Refusé</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                
+                <div class="relative shrink-0">
+                    <select id="typeFilter" onchange="fetchFilteredConges()" 
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                        <option value="">Type (Tous)</option>
+                        <option value="annuel">Annuel</option>
+                        <option value="maladie">Maladie</option>
+                        <option value="sans_solde">Sans Solde</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                
+                <button type="button" onclick="resetFilters()" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center shadow-sm shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-slate-600">
@@ -109,106 +162,8 @@
                             <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <?php
-                            $filteredConges = auth()->user()->type === 'employee' 
-                                ? $conges->where('idUser', auth()->user()->idUser) 
-                                : $conges;
-                        ?>
-
-                        <?php $__empty_1 = true; $__currentLoopData = $filteredConges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conge): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <?php
-                            $empName = $conge->user ? trim(($conge->user->firstName ?? '') . ' ' . ($conge->user->lastName ?? '')) : 'Employé';
-                        ?>
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 font-bold text-slate-800">#<?php echo e($conge->idConge); ?></td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs shrink-0">
-                                        <?php echo e(mb_substr($empName, 0, 1)); ?>
-
-                                    </div>
-                                    <span class="font-bold text-slate-800"><?php echo e($empName); ?></span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 font-bold text-slate-600 capitalize">
-                                <?php echo e(str_replace('_', ' ', $conge->type)); ?>
-
-                            </td>
-                            <td class="px-6 py-4 text-slate-500">
-                                <div class="text-xs">
-                                    <span class="block">Du: <span class="font-bold text-slate-700"><?php echo e($conge->dateDebut); ?></span></span>
-                                    <span class="block mt-0.5">Au: <span class="font-bold text-slate-700"><?php echo e($conge->dateFin); ?></span></span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 font-bold text-slate-600">
-                                <?php echo e($conge->dateDemande); ?>
-
-                            </td>
-                            <td class="px-6 py-4">
-                                <?php if($conge->status == 'approuve'): ?>
-                                    <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200">Approuvé</span>
-                                <?php elseif($conge->status == 'refuse'): ?>
-                                    <span class="bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-xs border border-red-200">Refusé</span>
-                                <?php else: ?>
-                                    <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">En attente</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    
-                                    <button onclick="openShowCongeModal('<?php echo e($conge->idConge); ?>')" class="text-slate-400 hover:text-blue-500 bg-white hover:bg-blue-50 p-2 rounded-lg border border-slate-200 transition-colors shadow-sm" title="Voir les détails">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    </button>
-
-                                    
-                                    <?php if(auth()->user()->type === 'admin' || auth()->user()->type === 'manager'): ?>
-                                        <?php if($conge->status != 'approuve'): ?>
-                                            <form action="<?php echo e(route('conge.update', $conge->idConge)); ?>" method="POST" class="inline">
-                                                <?php echo csrf_field(); ?>
-                                                <?php echo method_field('PUT'); ?>
-                                                <input type="hidden" name="status" value="approuve">
-                                                <button type="submit" class="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 p-2 rounded-lg transition-colors shadow-sm" title="Approuver">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
-                                        
-                                        <?php if($conge->status != 'refuse'): ?>
-                                            <form action="<?php echo e(route('conge.update', $conge->idConge)); ?>" method="POST" class="inline">
-                                                <?php echo csrf_field(); ?>
-                                                <?php echo method_field('PUT'); ?>
-                                                <input type="hidden" name="status" value="refuse">
-                                                <button type="submit" class="text-[#b11d40] hover:text-[#911633] bg-[#b11d40]/10 hover:bg-[#b11d40]/20 border border-[#b11d40]/30 p-2 rounded-lg transition-colors shadow-sm" title="Refuser">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-
-                                    
-                                    <?php if(auth()->check() && (auth()->user()->idUser == $conge->idUser || auth()->id() == $conge->idUser) && $conge->status == 'en_attente'): ?>
-                                        <button onclick="openEditCongeModal('<?php echo e($conge->idConge); ?>')" class="text-amber-500 hover:text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2 rounded-lg transition-colors shadow-sm" title="Modifier">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                        </button>
-                                    <?php endif; ?>
-
-                                    
-                                    <?php if(auth()->user()->type === 'admin' || ((auth()->user()->idUser == $conge->idUser || auth()->id() == $conge->idUser) && $conge->status == 'en_attente')): ?>
-                                        <button type="button" onclick="confirmDeleteConge('<?php echo e($conge->idConge); ?>', '<?php echo e(route('conge.destroy', $conge->idConge)); ?>')" class="text-slate-500 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 p-2 rounded-lg transition-colors shadow-sm" title="Supprimer">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <tr>
-                            <td colspan="7" class="px-6 py-10 text-center text-slate-500">
-                                Aucune demande de congé trouvée.
-                            </td>
-                        </tr>
-                        <?php endif; ?>
+                    <tbody id="conges-table-body" class="divide-y divide-slate-100">
+                        <?php echo $__env->make('conges.partials.table', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </tbody>
                 </table>
             </div>
@@ -261,7 +216,20 @@
                     
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Justification (Fichier)</label>
-                        <input type="file" name="justification" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                        <div class="relative group">
+                            <input type="file" name="justification" id="justificationInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="updateFileName(this)">
+                            <div class="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl px-4 py-5 flex items-center justify-center gap-3 transition-all group-hover:border-[#be2346]/30 group-hover:bg-[#be2346]/5">
+                                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-[#be2346] group-hover:border-[#be2346]/20 transition-all shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-bold text-slate-600 group-hover:text-[#be2346] transition-all" id="fileNameDisplay">Choisir un fichier</p>
+                                    <p class="text-[10px] text-slate-400 font-medium">PDF, JPG, PNG (Max. 5MB)</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex gap-3 pt-4">
@@ -399,6 +367,48 @@
 
 
     <script>
+        let debounceTimer;
+
+        function debounceFilter() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchFilteredConges();
+            }, 400);
+        }
+
+        function fetchFilteredConges() {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            
+            const container = document.getElementById('conges-table-body');
+            container.style.opacity = '0.5';
+
+            let url = `<?php echo e(route('conge.index')); ?>?search=${encodeURIComponent(search)}&status=${status}&type=${type}`;
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+            })
+            .catch(error => {
+                console.error('Error fetching filtered conges:', error);
+                container.style.opacity = '1';
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            fetchFilteredConges();
+        }
+
         // Modals Toggle Functions
         function openCongeModal() {
             document.getElementById('addCongeModal').classList.remove('hidden');
@@ -522,6 +532,19 @@
             });
         }
         
+        // Update file name display
+        function updateFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files.length > 0) {
+                display.innerText = input.files[0].name;
+                display.classList.remove('text-slate-600');
+                display.classList.add('text-[#be2346]');
+            } else {
+                display.innerText = 'Choisir un fichier';
+                display.classList.remove('text-[#be2346]');
+                display.classList.add('text-slate-600');
+            }
+        }
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

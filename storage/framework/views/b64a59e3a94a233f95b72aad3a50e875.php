@@ -184,14 +184,14 @@
                         </svg>
                     </div>
                     <input type="text" name="search" value="<?php echo e(request('search')); ?>" onchange="this.form.submit()" placeholder="Rechercher par nom..." 
-                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
+                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 outline-none">
                 </div>
 
                 
                 <div class="flex flex-wrap items-center gap-3">
                     
                     <div class="relative">
-                        <select name="status" onchange="this.form.submit()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="status" onchange="this.form.submit()" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Statut (Tous)</option>
                             <option value="present" <?php echo e(request('status') == 'present' ? 'selected' : ''); ?>>Présent</option>
                             <option value="retard" <?php echo e(request('status') == 'retard' ? 'selected' : ''); ?>>Retard</option>
@@ -204,7 +204,7 @@
 
                     
                     <div class="relative">
-                        <select name="role" onchange="this.form.submit()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="role" onchange="this.form.submit()" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Rôle (Tous)</option>
                             <option value="employee" <?php echo e(request('role') == 'employee' ? 'selected' : ''); ?>>Employé</option>
                             <option value="manager" <?php echo e(request('role') == 'manager' ? 'selected' : ''); ?>>Manager</option>
@@ -217,7 +217,7 @@
 
                     
                     <div class="relative">
-                        <select name="departement" onchange="this.form.submit()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="departement" onchange="this.form.submit()" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Département (Tous)</option>
                             <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <option value="<?php echo e($dept->idDepartement); ?>" <?php echo e(request('departement') == $dept->idDepartement ? 'selected' : ''); ?>><?php echo e($dept->title); ?></option>
@@ -230,7 +230,7 @@
 
                     
                     <div class="relative">
-                        <select name="post" onchange="this.form.submit()" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="post" onchange="this.form.submit()" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Poste (Tous)</option>
                             <?php $__currentLoopData = $uniquePosts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <option value="<?php echo e($p); ?>" <?php echo e(request('post') == $p ? 'selected' : ''); ?>><?php echo e($p); ?></option>

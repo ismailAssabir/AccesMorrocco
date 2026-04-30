@@ -62,13 +62,13 @@
                         </svg>
                     </div>
                     <input type="text" name="search" id="searchInput" placeholder="Rechercher par nom, email, poste..." 
-                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 outline-none">
+                        class="block w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 outline-none">
                 </div>
 
                 {{-- Filters --}}
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="relative">
-                        <select name="poste" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="poste" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Poste (Tous)</option>
                             @foreach($posts as $post)
                                 <option value="{{ $post }}">{{ $post }}</option>
@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="relative">
-                        <select name="type" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="type" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Rôle (Tous)</option>
                             <option value="employee">Employé</option>
                             <option value="manager">Manager</option>
@@ -92,7 +92,7 @@
                     </div>
 
                     <div class="relative">
-                        <select name="typeContrat" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="typeContrat" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Contrat (Tous)</option>
                             <option value="CD">CDI</option>
                             <option value="CI">CI</option>
@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="relative">
-                        <select name="departement" class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#be2346] transition-all cursor-pointer">
+                        <select name="departement" class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
                             <option value="">Département (Tous)</option>
                             @foreach($departements as $dept)
                                 <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>

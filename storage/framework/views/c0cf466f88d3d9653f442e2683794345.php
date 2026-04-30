@@ -25,87 +25,101 @@
             </button>
             <?php endif; ?>
         </div>
+        <script>
+            function fetchMeetings() {
+                const search = document.getElementById('searchInput').value;
+                const type = document.getElementById('typeFilter').value;
+                const dept = document.getElementById('deptFilter').value;
+                const cardsContainer = document.getElementById('cards-container');
+                
+                const url = `<?php echo e(route('reunions.index')); ?>?search=${encodeURIComponent(search)}&idDepartement=${dept}&type=${type}`;
+                
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(res => res.text())
+                    .then(html => {
+                        cardsContainer.innerHTML = html;
+                    })
+                    .catch(err => console.error('Error:', err));
+            }
+
+            let searchTimeout = null;
+            function debounceSearch() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(fetchMeetings, 400);
+            }
+
+            function resetFilters() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('typeFilter').value = '';
+                document.getElementById('deptFilter').value = '';
+                fetchMeetings();
+            }
+        </script>
+
         
-        
-        <?php if (isset($component)) { $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-messages','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('status-messages'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes([]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
-<?php $attributes = $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
-<?php unset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
-<?php $component = $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
-<?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
-<?php endif; ?>
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+            <form onsubmit="return false;" class="flex flex-wrap items-center gap-4">
+                
+                <div class="flex-1 min-w-[280px] relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" oninput="debounceSearch()" 
+                        placeholder="Rechercher par titre, lieu..." 
+                        class="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 outline-none">
+                </div>
+
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    
+                    <div class="relative">
+                        <select id="typeFilter" onchange="fetchMeetings()" 
+                            class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 transition-all cursor-pointer">
+                            <option value="">Format (Tous)</option>
+                            <option value="Interne">Interne</option>
+                            <option value="Externe">Externe</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+
+                    
+                    <div class="relative">
+                        <select id="deptFilter" onchange="fetchMeetings()" 
+                            class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-600 outline-none focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 transition-all cursor-pointer">
+                            <option value="">Département (Tous)</option>
+                            <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $d): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($d->idDepartement); ?>"><?php echo e($d->title); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+
+                    
+                    <button type="button" onclick="resetFilters()" 
+                        class="p-3 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center" 
+                        title="Réinitialiser les filtres">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
 
         
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden p-6">
-            <h2 class="text-lg font-extrabold text-slate-800 mb-6">Prochaines Réunions</h2>
-            <div class="space-y-4">
-                <?php $__empty_1 = true; $__currentLoopData = $reunions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reunion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <div class="flex flex-col md:flex-row md:items-center gap-4 bg-slate-50 border border-slate-100 p-5 rounded-2xl hover:shadow-md transition-shadow relative group">
-                    
-                    
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex flex-col items-center justify-center text-indigo-600 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                    </div>
-
-                    
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base font-bold text-slate-800 truncate"><?php echo e($reunion->titre); ?></h3>
-                        <p class="text-sm text-slate-500 mt-1 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <?php echo e($reunion->dateHeure->translatedFormat('d M Y, H:i')); ?>
-
-                            <?php if($reunion->lieu): ?>
-                                <span class="text-slate-300 mx-1">|</span>
-                                <span class="text-xs font-medium"><?php echo e($reunion->lieu); ?></span>
-                            <?php endif; ?>
-                        </p>
-                    </div>
-
-                    
-                    <div class="flex items-center gap-4 sm:ml-auto">
-                        <span class="<?php echo e($reunion->type_color); ?> font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider"><?php echo e($reunion->type); ?></span>
-
-                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button" onclick='viewReunionDetails(<?php echo e(json_encode($reunion)); ?>)' class="flex items-center gap-2 px-4 py-2 bg-slate-200/50 text-slate-600 rounded-xl hover:bg-slate-200 hover:text-slate-800 transition-all font-bold text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                Voir
-                            </button>
-
-                            <?php if(auth()->user()->type !== 'employee'): ?>
-                            <button type="button" onclick='openEditModal(<?php echo e(json_encode($reunion)); ?>)' class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all font-bold text-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Modifier
-                            </button>
-                            <button type="button" onclick="confirmDeleteReunion(<?php echo e($reunion->idReunion); ?>)" class="flex items-center justify-center w-9 h-9 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                            <?php endif; ?>
-                            <?php if($reunion->lien): ?>
-                            <a href="<?php echo e($reunion->lien); ?>" target="_blank" class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm" title="Rejoindre">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <div class="py-20 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-                    <p class="text-slate-400 font-medium">Aucune réunion prévue.</p>
-                </div>
-                <?php endif; ?>
+            <h2 class="text-lg font-extrabold text-slate-800 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#be2346]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Liste des Réunions
+            </h2>
+            <div class="space-y-4" id="cards-container">
+                <?php echo $__env->make('reunions.partials.cards', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
         </div>
     </div>

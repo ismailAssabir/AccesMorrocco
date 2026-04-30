@@ -8,19 +8,42 @@ use Illuminate\Support\Facades\Gate;
 
 class ReclamationController extends Controller
 {
-    public function index()
-         
-    {   
+    public function index(Request $request)
+    {
         Gate::authorize('reclamation.view');
 
-        
         $query = Reclamation::with('user');
 
+        // Role-based filtering: employees only see their own requests
         if (auth()->user()->type === 'employee') {
             $query->where('idUser', auth()->id());
         }
 
-        $Reclamations = $query->get();
+        // Search logic
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function($q) use ($s) {
+                $q->where('titre', 'LIKE', "%$s%")
+                  ->orWhere('description', 'LIKE', "%$s%");
+            });
+        }
+
+        // Status logic
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Priority logic
+        if ($request->filled('priorite')) {
+            $query->where('priorite', $request->priorite);
+        }
+
+        $Reclamations = $query->latest()->get();
+
+        if ($request->ajax()) {
+            return view('partials.reclamations-table', compact('Reclamations'))->render();
+        }
+
         return view('AllReclamations', compact("Reclamations"));
     }
 

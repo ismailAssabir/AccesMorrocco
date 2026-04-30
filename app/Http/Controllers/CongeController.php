@@ -9,11 +9,42 @@ use Illuminate\Support\Facades\Gate;
 
 class CongeController extends Controller
 {
-    public function index()
-    {   
-                Gate::authorize('conge.view');
+    public function index(Request $request)
+    {
+        Gate::authorize('conge.view');
 
-        $conges = Conge::with('user')->get();
+        $query = Conge::with('user');
+
+        // Role-based filtering: employees only see their own requests
+        if (auth()->user()->type === 'employee') {
+            $query->where('idUser', auth()->user()->idUser);
+        }
+
+        // Search logic
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->whereHas('user', function($q) use ($s) {
+                $q->where('firstName', 'LIKE', "%$s%")
+                  ->orWhere('lastName', 'LIKE', "%$s%");
+            });
+        }
+
+        // Status logic
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Type logic
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $conges = $query->latest()->get();
+
+        if ($request->ajax()) {
+            return view('conges.partials.table', compact('conges'))->render();
+        }
+
         return view('conges.index', compact('conges'));
     }
 

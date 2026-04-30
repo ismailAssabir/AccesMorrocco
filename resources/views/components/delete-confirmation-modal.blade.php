@@ -145,6 +145,9 @@
         } else if (entityType === 'historique' || entityType === 'pointage') {
             title = "Vider l'historique ?";
             description = "TOUS les enregistrements de pointage seront définitivement supprimés. Cette action est irréversible.";
+        } else if (entityType === 'prime') {
+            title = "Supprimer la prime ?";
+            description = "Cette action est irréversible. Voulez-vous vraiment supprimer cette prime ?";
         }
 
         openGlobalDeleteModal(url, title, description);
