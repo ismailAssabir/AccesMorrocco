@@ -264,7 +264,7 @@ Route::get('/leads/export-pdf',[LeadController::class, 'exportPdf'])->name('lead
 Route::get('/leads/{id}',[LeadController::class, 'show'])->name('leads.show');
 Route::get('/leads/{id}/edit',[LeadController::class, 'edit'])->name('leads.edit');
 Route::put('/leads/{id}',[LeadController::class, 'update'])->name('leads.update');
-Route::post('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
+Route::patch('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
 Route::delete('/leads/{id}',[LeadController::class, 'destroy'])->name('leads.destroy');
 // Route::get('/departements/{id}/users', function ($id) {
 //     $users = App\Models\User::where('idDepartement', $id)
