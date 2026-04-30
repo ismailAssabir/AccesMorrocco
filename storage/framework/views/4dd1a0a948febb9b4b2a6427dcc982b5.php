@@ -1,36 +1,39 @@
-{{-- ============================================================
-     PREMIUM SAAS LOGIN PAGE — CLIENT ACCESS
-     Split layout: Brand left · Auth right
-     ============================================================ --}}
-<x-guest-layout>
+
+<?php if (isset($component)) { $__componentOriginal69dc84650370d1d4dc1b42d016d7226b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal69dc84650370d1d4dc1b42d016d7226b = $attributes; } ?>
+<?php $component = App\View\Components\GuestLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('guest-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\GuestLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
 
 <div class="login-wrapper">
 
-    {{-- ══════════════════════════════════════════════════
-         LEFT PANEL — Brand / Marketing
-         Hidden on mobile, shown on lg+
-    ══════════════════════════════════════════════════ --}}
+    
     <div class="login-left">
 
-        {{-- Animated blur blobs --}}
+        
         <div class="blob-1"></div>
         <div class="blob-2"></div>
         <div class="blob-3"></div>
 
         <div class="login-left-content">
 
-            {{-- ── Top: Logo ── --}}
+            
             <div>
                 <div class="login-logo-badge">
-                    <img src="{{ asset('images/logo.png') }}" alt="logo" class="logo-img">
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="logo" class="logo-img">
                     <span class="login-logo-text">ACCESS MOROCCO</span>
                 </div>
             </div>
 
-            {{-- ── Center: Headline + features ── --}}
+            
             <div>
 
-                {{-- Feature pills --}}
+                
                 <div class="login-pills">
                     <span class="login-pill">
                         <span class="login-pill-dot"></span>
@@ -46,7 +49,7 @@
                     </span>
                 </div>
 
-                {{-- Main headline --}}
+                
                 <h1 class="login-headline mt-6">
                     Manage Your<br>
                     <span>Travel Experience</span>
@@ -56,7 +59,7 @@
                     Access your dossiers, download documents, and track your travel journey securely.
                 </p>
 
-                {{-- Stats row --}}
+                
                 <div class="login-stats">
                     <div class="login-stat">
                         <span class="login-stat-value">15K+</span>
@@ -74,7 +77,7 @@
                     </div>
                 </div>
 
-                {{-- Preview --}}
+                
                 <div class="login-preview mt-8">
                     <div class="login-preview-bar">
                         <span class="login-preview-dot bg-rose-400/60"></span>
@@ -85,22 +88,22 @@
 
                     <div class="login-preview-body">
 
-                        {{-- Cards --}}
+                        
                         <div class="grid grid-cols-3 gap-2 mb-3">
-                            @foreach(['bg-rose-500/20', 'bg-amber-500/15', 'bg-emerald-500/15'] as $color)
-                            <div class="rounded-lg p-3 {{ $color }} border border-white/5">
+                            <?php $__currentLoopData = ['bg-rose-500/20', 'bg-amber-500/15', 'bg-emerald-500/15']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $color): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="rounded-lg p-3 <?php echo e($color); ?> border border-white/5">
                                 <div class="h-1.5 w-8 rounded-full bg-white/20 mb-2"></div>
                                 <div class="h-4 w-12 rounded bg-white/30"></div>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
-                        {{-- Chart --}}
+                        
                         <div class="flex items-end gap-1 h-12 mt-1">
-                            @foreach([40, 60, 35, 80, 55, 90, 45, 70, 60, 85, 50, 75] as $h)
+                            <?php $__currentLoopData = [40, 60, 35, 80, 55, 90, 45, 70, 60, 85, 50, 75]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $h): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="flex-1 rounded-t"
-                                style="height: {{ $h }}%; background: rgba(225,29,72,{{ $h > 70 ? '0.45' : '0.20' }});"></div>
-                            @endforeach
+                                style="height: <?php echo e($h); ?>%; background: rgba(225,29,72,<?php echo e($h > 70 ? '0.45' : '0.20'); ?>);"></div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
                         <div class="login-preview-row mt-3"></div>
@@ -112,34 +115,32 @@
 
             </div>
 
-            {{-- ── Bottom: Footer note ── --}}
+            
             <p class="login-left-footer">
-                &copy; {{ date('Y') }} ACCESS MOROCCO. All rights reserved.
+                &copy; <?php echo e(date('Y')); ?> ACCESS MOROCCO. All rights reserved.
             </p>
 
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════════
-         RIGHT PANEL — Auth Card
-    ══════════════════════════════════════════════════ --}}
+    
     <div class="login-right">
 
         <div class="w-full max-w-[420px]">
 
-            {{-- Mobile-only logo (shown below lg) --}}
+            
             <div class="login-mobile-logo">
                 <div class="login-mobile-logo-badge">
-                    <img src="{{ asset('images/logo.png') }}" alt="logo" class="logo-img">
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="logo" class="logo-img">
                     <span class="login-mobile-logo-text">ACCESS MOROCCO</span>
                 </div>
             </div>
 
-            {{-- ── Glass Auth Card ── --}}
+            
         <div class="card">
             <div class="auth-card">
 
-                {{-- Card logo icon --}}
+                
                 <div class="auth-card-logo">
                     <div class="auth-card-logo-inner">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -152,23 +153,25 @@
                 <h2 class="auth-card-title">Client Access</h2>
                 <p class="auth-card-subtitle">Sign in to your space</p>
 
-                {{-- Session status message --}}
-                @if (session('status'))
+                
+                <?php if(session('status')): ?>
                     <div class="mt-4 mb-2 text-sm text-brand-600 font-medium text-center">
-                        {{ session('status') }}
+                        <?php echo e(session('status')); ?>
+
                     </div>
-                @endif
-                @if ($errors->any())
+                <?php endif; ?>
+                <?php if($errors->any()): ?>
                     <div class="mt-4 mb-2 text-sm text-brand-600 font-medium text-center">
-                        {{ $errors->first() }}
+                        <?php echo e($errors->first()); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
 
-                {{-- ── Login Form ── --}}
-                <form method="POST" action="{{ route('clients.login.post') }}" class="mt-7 space-y-5" id="login-form">
-                    @csrf
+                
+                <form method="POST" action="<?php echo e(route('clients.login.post')); ?>" class="mt-7 space-y-5" id="login-form">
+                    <?php echo csrf_field(); ?>
 
-                    {{-- Email --}}
+                    
                     <div>
                         <label for="email" class="auth-label">Email address</label>
                         <div class="relative">
@@ -183,18 +186,25 @@
                                 class="auth-field pl-10"
                                 type="email"
                                 name="email"
-                                value="{{ old('email') }}"
+                                value="<?php echo e(old('email')); ?>"
                                 placeholder="you@example.com"
                                 required
                                 autofocus
                                 autocomplete="username"/>
                         </div>
-                        @error('email')
-                            <p class="mt-1.5 text-xs text-brand-600 font-medium">{{ $message }}</p>
-                        @enderror
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1.5 text-xs text-brand-600 font-medium"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
-                    {{-- Password --}}
+                    
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label for="password" class="auth-label mb-0">Password</label>
@@ -218,7 +228,7 @@
                                 placeholder="••••••••"
                                 required
                                 autocomplete="current-password"/>
-                            {{-- Toggle password visibility --}}
+                            
                             <button type="button"
                                     id="toggle-password"
                                     class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-150"
@@ -231,12 +241,19 @@
                                 </svg>
                             </button>
                         </div>
-                        @error('password')
-                            <p class="mt-1.5 text-xs text-brand-600 font-medium">{{ $message }}</p>
-                        @enderror
+                        <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1.5 text-xs text-brand-600 font-medium"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
-                    {{-- Remember me --}}
+                    
                     <div class="flex items-center gap-2.5">
                         <input
                             id="remember_me"
@@ -248,10 +265,10 @@
                         </label>
                     </div>
 
-                    {{-- Submit button --}}
+                    
                     <button type="submit" id="sign-in-btn" class="btn-brand mt-2">
                         <span>
-                            {{-- Arrow icon --}}
+                            
                             Sign in
                             <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -264,7 +281,7 @@
 
             </div>
 
-            {{-- Trust badges --}}
+            
             <div class="auth-trust">
                 <div class="auth-trust-item">
                     <svg class="auth-trust-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -289,10 +306,10 @@
                 </div>
             </div>
 
-            {{-- Link to Staff Login --}}
+            
             <p class="text-center text-xs mt-6 text-gray-500">
                 Staff access?
-                <a href="{{ route('login') }}" class="text-brand-600 hover:text-brand-700 font-bold ml-1 transition-colors">
+                <a href="<?php echo e(route('login')); ?>" class="text-brand-600 hover:text-brand-700 font-bold ml-1 transition-colors">
                     Login here &rarr;
                 </a>
             </p>
@@ -302,7 +319,7 @@
 
 </div>
 
-{{-- ── Password toggle script (no backend change) ── --}}
+
 <script>
 (function () {
     const btn   = document.getElementById('toggle-password');
@@ -320,7 +337,7 @@
         icon.innerHTML = isPassword ? eyeClosed : eyeOpen;
     });
 
-    {{-- Button loading state on submit --}}
+    
     const form = document.getElementById('login-form');
     const signInBtn = document.getElementById('sign-in-btn');
     if (form && signInBtn) {
@@ -337,4 +354,13 @@
 })();
 </script>
 
-</x-guest-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>
+<?php $attributes = $__attributesOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
+<?php unset($__attributesOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>
+<?php $component = $__componentOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
+<?php unset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
+<?php endif; ?><?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/clients/auth/login.blade.php ENDPATH**/ ?>

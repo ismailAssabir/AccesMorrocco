@@ -12,10 +12,21 @@ class PaimentController extends Controller
 {
    
     public function index()
-    {           Gate::authorize('paiement.view');
+    {
+        Gate::authorize('paiement.view');
 
-        $paiements = Paiement::with('dossier')->latest()->get();
-        return view('paiements.index', compact('paiements'));
+        $paiements = Paiement::with('dossier.client')->latest()->get();
+        $dossiers = Dossier::select('idDossier', 'reference')->get();
+
+        // Stats Globales
+        $stats = [
+            'totalPaye'    => $paiements->sum('montantPaye'),
+            'totalReste'   => $paiements->sum('montantReste'),
+            'completCount' => $paiements->where('status', 'complet')->count(),
+            'totalTransactions' => $paiements->count()
+        ];
+
+        return view('paiements.index', compact('paiements', 'dossiers', 'stats'));
     }
 
     

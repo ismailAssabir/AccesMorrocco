@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Espace Client - Access Morocco')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', 'Espace Client - Access Morocco'); ?></title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 <style>
     /* Configuration de base de la sidebar */
     .sidebar-wrapper {
@@ -63,7 +63,7 @@
 </head>
 <body class="bg-[#F8FAFC] font-sans">
 
-@php 
+<?php 
     $client = Auth::guard('client')->user(); 
     $recentNotifications = collect();
     if ($client) {
@@ -101,14 +101,14 @@
         
         $recentNotifications = $recentNotifications->sortByDesc('time')->take(5)->values();
     }
-@endphp
+?>
 
-{{-- SIDEBAR OVERLAY (mobile) --}}
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-{{-- SIDEBAR --}}
+
 <aside class="sidebar-wrapper w-72 h-screen sticky top-0 bg-[#0F1115] text-white flex flex-col font-sans border-r border-white/5 shadow-2xl" id="sidebar">
-    {{-- ═══════════════ TOP SECTION (Logo) ═══════════════ --}}
+    
     <div class="flex-shrink-0">
         <div class="flex items-center gap-4 px-6 py-10">
             <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
@@ -123,10 +123,10 @@
         </div>
     </div>
 
-    {{-- ═══════════════ MIDDLE SECTION (Navigation) ═══════════════ --}}
+    
     <div id="sidebar-scroll-container" class="flex-1 overflow-y-auto custom-scrollbar min-h-0 px-4">
         
-        {{-- Section: Mon Espace --}}
+        
         <div class="px-4 mb-4">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#be2346]"></span>
@@ -135,48 +135,48 @@
         </div>
 
         <nav class="space-y-1 mb-8">
-            {{-- Dashboard --}}
-            <a href="{{ route('clients.dashboard') }}" 
+            
+            <a href="<?php echo e(route('clients.dashboard')); ?>" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('clients.dashboard') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('clients.dashboard') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('clients.dashboard') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <?php echo e(request()->routeIs('clients.dashboard') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                <div class="transition-transform duration-300 <?php echo e(request()->routeIs('clients.dashboard') ? '' : 'group-hover:rotate-12'); ?>">
+                    <svg class="w-5 h-5 <?php echo e(request()->routeIs('clients.dashboard') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span class="font-medium text-sm">Tableau de bord</span>
             </a>
 
-            {{-- Dossiers --}}
-            <a href="{{ route('clients.dossiers') }}" 
+            
+            <a href="<?php echo e(route('clients.dossiers')); ?>" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('clients.dossiers*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('clients.dossiers*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('clients.dossiers*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <?php echo e(request()->routeIs('clients.dossiers*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                <div class="transition-transform duration-300 <?php echo e(request()->routeIs('clients.dossiers*') ? '' : 'group-hover:rotate-12'); ?>">
+                    <svg class="w-5 h-5 <?php echo e(request()->routeIs('clients.dossiers*') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span class="font-medium text-sm">Mes Dossiers</span>
             </a>
 
-            {{-- Présentations --}}
-            <a href="{{ route('clients.presentations') }}" 
+            
+            <a href="<?php echo e(route('clients.presentations')); ?>" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('clients.presentations*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('clients.presentations*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('clients.presentations*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <?php echo e(request()->routeIs('clients.presentations*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                <div class="transition-transform duration-300 <?php echo e(request()->routeIs('clients.presentations*') ? '' : 'group-hover:rotate-12'); ?>">
+                    <svg class="w-5 h-5 <?php echo e(request()->routeIs('clients.presentations*') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span class="font-medium text-sm">Présentations</span>
             </a>
 
-            {{-- Paiements --}}
-            <a href="{{ route('clients.paiements') }}" 
+            
+            <a href="<?php echo e(route('clients.paiements')); ?>" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('clients.paiements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('clients.paiements*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('clients.paiements*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <?php echo e(request()->routeIs('clients.paiements*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                <div class="transition-transform duration-300 <?php echo e(request()->routeIs('clients.paiements*') ? '' : 'group-hover:rotate-12'); ?>">
+                    <svg class="w-5 h-5 <?php echo e(request()->routeIs('clients.paiements*') ? 'text-white' : 'group-hover:text-[#be2346]'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
@@ -184,7 +184,7 @@
             </a>
         </nav>
 
-        {{-- Section: Compte --}}
+        
         <div class="px-4 mb-4">
             <p class="text-[10px] font-bold text-white/30 uppercase tracking-[0.25em] flex items-center gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -193,11 +193,11 @@
         </div>
 
         <nav class="space-y-1">
-            <a href="{{ route('clients.profile') }}" 
+            <a href="<?php echo e(route('clients.profile')); ?>" 
                class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-               {{ request()->routeIs('clients.profile*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                <div class="transition-transform duration-300 {{ request()->routeIs('clients.profile*') ? '' : 'group-hover:rotate-12' }}">
-                    <svg class="w-5 h-5 {{ request()->routeIs('clients.profile*') ? 'text-white' : 'group-hover:text-blue-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <?php echo e(request()->routeIs('clients.profile*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1'); ?>">
+                <div class="transition-transform duration-300 <?php echo e(request()->routeIs('clients.profile*') ? '' : 'group-hover:rotate-12'); ?>">
+                    <svg class="w-5 h-5 <?php echo e(request()->routeIs('clients.profile*') ? 'text-white' : 'group-hover:text-blue-500'); ?> transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
@@ -206,22 +206,23 @@
         </nav>
     </div>
 
-    {{-- ═══════════════ BOTTOM SECTION (Profile & Logout) ═══════════════ --}}
+    
     <div class="flex-shrink-0 px-6 py-8 border-t border-white/5 bg-[#0F1115]">
         <div class="flex items-center justify-between mb-6">
             <div class="group/profile flex items-center gap-3 min-w-0 p-2 -ml-2 rounded-xl transition-all duration-300">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0">
-                    {{ strtoupper(mb_substr($client->firstName ?? 'C', 0, 1) . mb_substr($client->lastName ?? '', 0, 1)) }}
+                    <?php echo e(strtoupper(mb_substr($client->firstName ?? 'C', 0, 1) . mb_substr($client->lastName ?? '', 0, 1))); ?>
+
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <p class="text-white font-bold text-sm truncate">{{ $client->firstName ." ".$client->lastName}}</p>
+                    <p class="text-white font-bold text-sm truncate"><?php echo e($client->firstName ." ".$client->lastName); ?></p>
                     <p class="text-white/30 text-[10px] font-medium uppercase tracking-wider">Espace Client</p>
                 </div>
             </div>
         </div>
 
-        <form method="POST" action="{{ route('clients.logout') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('clients.logout')); ?>">
+            <?php echo csrf_field(); ?>
             <button type="submit" 
                     class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 text-white/50 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 text-sm font-semibold border border-white/5">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,14 +234,14 @@
     </div>
 </aside>
 
-{{-- MAIN CONTENT --}}
+
 <div class="main-content">
 
-    {{-- TOP NAV --}}
+    
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="px-6 py-3 flex items-center justify-between">
 
-            {{-- Mobile menu button --}}
+            
             <button onclick="toggleSidebar()"
                     class="lg:hidden w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
                 <svg class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -248,25 +249,25 @@
                 </svg>
             </button>
 
-            {{-- Page title --}}
+            
             <div class="hidden lg:block">
-                <h2 class="text-sm font-black text-slate-800">@yield('page-title', 'Tableau de bord')</h2>
-                <p class="text-[11px] text-slate-400">@yield('page-subtitle', 'Bienvenue dans votre espace client')</p>
+                <h2 class="text-sm font-black text-slate-800"><?php echo $__env->yieldContent('page-title', 'Tableau de bord'); ?></h2>
+                <p class="text-[11px] text-slate-400"><?php echo $__env->yieldContent('page-subtitle', 'Bienvenue dans votre espace client'); ?></p>
             </div>
 
-            {{-- Right side --}}
+            
             <div class="flex items-center gap-3 ml-auto">
 
-                {{-- Dynamic Notification --}}
+                
                 <div x-data="{ 
                     open: false,
-                    lastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_{{ $client->idClient ?? 0 }}') || '0'),
-                    displayLastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_{{ $client->idClient ?? 0 }}') || '0'),
-                    notifications: {{ json_encode($recentNotifications->map(function($n) {
+                    lastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>') || '0'),
+                    displayLastChecked: parseInt(localStorage.getItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>') || '0'),
+                    notifications: <?php echo e(json_encode($recentNotifications->map(function($n) {
                         $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
                         $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
                         return $n;
-                    })) }},
+                    }))); ?>,
                     get unreadNotifications() {
                         return this.notifications;
                     },
@@ -277,7 +278,7 @@
                         if (!this.open) {
                             this.open = true;
                             this.lastChecked = Date.now();
-                            localStorage.setItem('client_notifications_last_checked_{{ $client->idClient ?? 0 }}', this.lastChecked);
+                            localStorage.setItem('client_notifications_last_checked_<?php echo e($client->idClient ?? 0); ?>', this.lastChecked);
                         } else {
                             this.close();
                         }
@@ -302,7 +303,7 @@
                         </svg>
                     </button>
 
-                    {{-- Dropdown --}}
+                    
                     <div x-show="open" 
                         x-cloak
                         x-transition:enter="transition ease-out duration-200"
@@ -335,13 +336,14 @@
                     </div>
                 </div>
 
-                {{-- Avatar --}}
+                
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
                     <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#b11d40] to-[#7c1233] flex items-center justify-center text-[11px] font-black text-white">
-                        {{ strtoupper(mb_substr($client->firstName ?? 'C', 0, 1)) }}
+                        <?php echo e(strtoupper(mb_substr($client->firstName ?? 'C', 0, 1))); ?>
+
                     </div>
                     <div class="hidden sm:block">
-                        <p class="text-xs font-bold text-slate-700">{{ $client->firstName }}</p>
+                        <p class="text-xs font-bold text-slate-700"><?php echo e($client->firstName); ?></p>
                         <p class="text-[10px] text-slate-400">Client</p>
                     </div>
                 </div>
@@ -349,29 +351,31 @@
         </div>
     </header>
 
-    {{-- PAGE CONTENT --}}
+    
     <main class="p-6 md:p-8">
 
-        {{-- Flash messages --}}
-        @if(session('success'))
+        
+        <?php if(session('success')): ?>
         <div class="mb-6 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-4 rounded-2xl font-semibold text-sm">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            {{ session('success') }}
-        </div>
-        @endif
+            <?php echo e(session('success')); ?>
 
-        @if(session('error'))
+        </div>
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
         <div class="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl font-semibold text-sm">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            {{ session('error') }}
-        </div>
-        @endif
+            <?php echo e(session('error')); ?>
 
-        @yield('content')
+        </div>
+        <?php endif; ?>
+
+        <?php echo $__env->yieldContent('content'); ?>
     </main>
 </div>
 
@@ -385,4 +389,4 @@ function toggleSidebar() {
 </script>
 
 </body>
-</html>
+</html><?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/layouts/client.blade.php ENDPATH**/ ?>

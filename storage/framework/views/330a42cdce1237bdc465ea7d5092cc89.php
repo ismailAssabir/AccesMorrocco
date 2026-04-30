@@ -1,71 +1,74 @@
-{{-- ============================================================
-     PREMIUM SAAS LOGIN PAGE — CLIENT ACCESS
-     Split layout: Brand left · Auth right
-     ============================================================ --}}
-<x-guest-layout>
+
+<?php if (isset($component)) { $__componentOriginal69dc84650370d1d4dc1b42d016d7226b = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal69dc84650370d1d4dc1b42d016d7226b = $attributes; } ?>
+<?php $component = App\View\Components\GuestLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('guest-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\GuestLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
 
 <div class="login-wrapper">
 
-    {{-- ══════════════════════════════════════════════════
-         LEFT PANEL — Brand / Marketing
-         Hidden on mobile, shown on lg+
-    ══════════════════════════════════════════════════ --}}
+    
     <div class="login-left">
 
-        {{-- Animated blur blobs --}}
+        
         <div class="blob-1"></div>
         <div class="blob-2"></div>
         <div class="blob-3"></div>
 
         <div class="login-left-content">
 
-            {{-- ── Top: Logo ── --}}
+            
             <div>
                 <div class="login-logo-badge">
-                    <img src="{{ asset('images/logo.png') }}" alt="logo" class="logo-img">
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="logo" class="logo-img">
                     <span class="login-logo-text">ACCESS MOROCCO</span>
                 </div>
             </div>
 
-            {{-- ── Center: Headline + features ── --}}
+            
             <div>
 
-                {{-- Feature pills --}}
+                
                 <div class="login-pills">
                     <span class="login-pill">
                         <span class="login-pill-dot"></span>
-                        Track Trips
+                        Trip Planning
                     </span>
                     <span class="login-pill">
                         <span class="login-pill-dot"></span>
-                        Documents
+                        Client Booking
                     </span>
                     <span class="login-pill">
                         <span class="login-pill-dot"></span>
-                        Payments
+                        Agency Management
                     </span>
                 </div>
 
-                {{-- Main headline --}}
+                
                 <h1 class="login-headline mt-6">
-                    Manage Your<br>
-                    <span>Travel Experience</span>
+                    Welcome to Your<br>
+                    <span>Travel Agency Hub</span>
                 </h1>
 
                 <p class="login-subtext">
-                    Access your dossiers, download documents, and track your travel journey securely.
+                    Manage clients, organize trips, and handle reservations efficiently — everything your travel agency needs in one place.
                 </p>
 
-                {{-- Stats row --}}
+                
                 <div class="login-stats">
                     <div class="login-stat">
-                        <span class="login-stat-value">15K+</span>
-                        <span class="login-stat-label">Clients</span>
+                        <span class="login-stat-value">150+</span>
+                        <span class="login-stat-label">Destinations</span>
                     </div>
                     <div class="login-stat-divider"></div>
                     <div class="login-stat">
-                        <span class="login-stat-value">50+</span>
-                        <span class="login-stat-label">Destinations</span>
+                        <span class="login-stat-value">500+</span>
+                        <span class="login-stat-label">Trips Created</span>
                     </div>
                     <div class="login-stat-divider"></div>
                     <div class="login-stat">
@@ -74,33 +77,33 @@
                     </div>
                 </div>
 
-                {{-- Preview --}}
+                
                 <div class="login-preview mt-8">
                     <div class="login-preview-bar">
                         <span class="login-preview-dot bg-rose-400/60"></span>
                         <span class="login-preview-dot bg-amber-400/60"></span>
                         <span class="login-preview-dot bg-emerald-400/60"></span>
-                        <span class="ml-3 text-white/30 text-xs font-mono">client.access.ma</span>
+                        <span class="ml-3 text-white/30 text-xs font-mono">agency.travel.local</span>
                     </div>
 
                     <div class="login-preview-body">
 
-                        {{-- Cards --}}
+                        
                         <div class="grid grid-cols-3 gap-2 mb-3">
-                            @foreach(['bg-rose-500/20', 'bg-amber-500/15', 'bg-emerald-500/15'] as $color)
-                            <div class="rounded-lg p-3 {{ $color }} border border-white/5">
+                            <?php $__currentLoopData = ['bg-rose-500/20', 'bg-amber-500/15', 'bg-emerald-500/15']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $color): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="rounded-lg p-3 <?php echo e($color); ?> border border-white/5">
                                 <div class="h-1.5 w-8 rounded-full bg-white/20 mb-2"></div>
                                 <div class="h-4 w-12 rounded bg-white/30"></div>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
-                        {{-- Chart --}}
+                        
                         <div class="flex items-end gap-1 h-12 mt-1">
-                            @foreach([40, 60, 35, 80, 55, 90, 45, 70, 60, 85, 50, 75] as $h)
+                            <?php $__currentLoopData = [40, 60, 35, 80, 55, 90, 45, 70, 60, 85, 50, 75]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $h): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="flex-1 rounded-t"
-                                style="height: {{ $h }}%; background: rgba(225,29,72,{{ $h > 70 ? '0.45' : '0.20' }});"></div>
-                            @endforeach
+                                style="height: <?php echo e($h); ?>%; background: rgba(225,29,72,<?php echo e($h > 70 ? '0.45' : '0.20'); ?>);"></div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
                         <div class="login-preview-row mt-3"></div>
@@ -112,63 +115,71 @@
 
             </div>
 
-            {{-- ── Bottom: Footer note ── --}}
+            
             <p class="login-left-footer">
-                &copy; {{ date('Y') }} ACCESS MOROCCO. All rights reserved.
+                &copy; <?php echo e(date('Y')); ?> ACCESS MOROCCO. All rights reserved.
             </p>
 
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════════
-         RIGHT PANEL — Auth Card
-    ══════════════════════════════════════════════════ --}}
+    
     <div class="login-right">
 
         <div class="w-full max-w-[420px]">
 
-            {{-- Mobile-only logo (shown below lg) --}}
+            
             <div class="login-mobile-logo">
                 <div class="login-mobile-logo-badge">
-                    <img src="{{ asset('images/logo.png') }}" alt="logo" class="logo-img">
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="logo" class="logo-img">
                     <span class="login-mobile-logo-text">ACCESS MOROCCO</span>
                 </div>
             </div>
 
-            {{-- ── Glass Auth Card ── --}}
+            
         <div class="card">
             <div class="auth-card">
 
-                {{-- Card logo icon --}}
+                
                 <div class="auth-card-logo">
                     <div class="auth-card-logo-inner">
                         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M5.121 17.804A4 4 0 017 17h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0M12 14a5 5 0 00-5 5h10a5 5 0 00-5-5z"/>
+                                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                         </svg>
                     </div>
                 </div>
 
-                <h2 class="auth-card-title">Client Access</h2>
-                <p class="auth-card-subtitle">Sign in to your space</p>
+                <h2 class="auth-card-title">Sign in to your account</h2>
+                <p class="auth-card-subtitle">Enter your credentials to access the dashboard</p>
 
-                {{-- Session status message --}}
-                @if (session('status'))
-                    <div class="mt-4 mb-2 text-sm text-brand-600 font-medium text-center">
-                        {{ session('status') }}
-                    </div>
-                @endif
-                @if ($errors->any())
-                    <div class="mt-4 mb-2 text-sm text-brand-600 font-medium text-center">
-                        {{ $errors->first() }}
-                    </div>
-                @endif
+                
+                <?php if (isset($component)) { $__componentOriginal7c1bf3a9346f208f66ee83b06b607fb5 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7c1bf3a9346f208f66ee83b06b607fb5 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.auth-session-status','data' => ['class' => 'mt-4 mb-2 text-sm text-brand-600 font-medium text-center','status' => session('status')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('auth-session-status'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'mt-4 mb-2 text-sm text-brand-600 font-medium text-center','status' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(session('status'))]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7c1bf3a9346f208f66ee83b06b607fb5)): ?>
+<?php $attributes = $__attributesOriginal7c1bf3a9346f208f66ee83b06b607fb5; ?>
+<?php unset($__attributesOriginal7c1bf3a9346f208f66ee83b06b607fb5); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7c1bf3a9346f208f66ee83b06b607fb5)): ?>
+<?php $component = $__componentOriginal7c1bf3a9346f208f66ee83b06b607fb5; ?>
+<?php unset($__componentOriginal7c1bf3a9346f208f66ee83b06b607fb5); ?>
+<?php endif; ?>
 
-                {{-- ── Login Form ── --}}
-                <form method="POST" action="{{ route('clients.login.post') }}" class="mt-7 space-y-5" id="login-form">
-                    @csrf
+                
+                <form method="POST" action="<?php echo e(route('login')); ?>" class="mt-7 space-y-5" id="login-form">
+                    <?php echo csrf_field(); ?>
 
-                    {{-- Email --}}
+                    
                     <div>
                         <label for="email" class="auth-label">Email address</label>
                         <div class="relative">
@@ -183,25 +194,34 @@
                                 class="auth-field pl-10"
                                 type="email"
                                 name="email"
-                                value="{{ old('email') }}"
+                                value="<?php echo e(old('email')); ?>"
                                 placeholder="you@example.com"
                                 required
                                 autofocus
                                 autocomplete="username"/>
                         </div>
-                        @error('email')
-                            <p class="mt-1.5 text-xs text-brand-600 font-medium">{{ $message }}</p>
-                        @enderror
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1.5 text-xs text-brand-600 font-medium"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
-                    {{-- Password --}}
+                    
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label for="password" class="auth-label mb-0">Password</label>
-                            <a href="#"
-                               class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors duration-150">
-                                Forgot password?
-                            </a>
+                            <?php if(Route::has('password.request')): ?>
+                                <a href="<?php echo e(route('password.request')); ?>"
+                                   class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors duration-150">
+                                    Forgot password?
+                                </a>
+                            <?php endif; ?>
                         </div>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -218,7 +238,7 @@
                                 placeholder="••••••••"
                                 required
                                 autocomplete="current-password"/>
-                            {{-- Toggle password visibility --}}
+                            
                             <button type="button"
                                     id="toggle-password"
                                     class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-150"
@@ -231,12 +251,19 @@
                                 </svg>
                             </button>
                         </div>
-                        @error('password')
-                            <p class="mt-1.5 text-xs text-brand-600 font-medium">{{ $message }}</p>
-                        @enderror
+                        <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1.5 text-xs text-brand-600 font-medium"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
-                    {{-- Remember me --}}
+                    
                     <div class="flex items-center gap-2.5">
                         <input
                             id="remember_me"
@@ -248,10 +275,10 @@
                         </label>
                     </div>
 
-                    {{-- Submit button --}}
+                    
                     <button type="submit" id="sign-in-btn" class="btn-brand mt-2">
                         <span>
-                            {{-- Arrow icon --}}
+                            
                             Sign in
                             <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -264,7 +291,7 @@
 
             </div>
 
-            {{-- Trust badges --}}
+            
             <div class="auth-trust">
                 <div class="auth-trust-item">
                     <svg class="auth-trust-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -278,31 +305,23 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
-                    <span>Data Protected</span>
+                    <span>GDPR Compliant</span>
                 </div>
                 <div class="auth-trust-item">
                     <svg class="auth-trust-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
-                    <span>Fast Access</span>
+                    <span>99.9% Uptime</span>
                 </div>
             </div>
-
-            {{-- Link to Staff Login --}}
-            <p class="text-center text-xs mt-6 text-gray-500">
-                Staff access?
-                <a href="{{ route('login') }}" class="text-brand-600 hover:text-brand-700 font-bold ml-1 transition-colors">
-                    Login here &rarr;
-                </a>
-            </p>
 
         </div>
     </div>
 
 </div>
 
-{{-- ── Password toggle script (no backend change) ── --}}
+
 <script>
 (function () {
     const btn   = document.getElementById('toggle-password');
@@ -320,7 +339,7 @@
         icon.innerHTML = isPassword ? eyeClosed : eyeOpen;
     });
 
-    {{-- Button loading state on submit --}}
+    
     const form = document.getElementById('login-form');
     const signInBtn = document.getElementById('sign-in-btn');
     if (form && signInBtn) {
@@ -337,4 +356,13 @@
 })();
 </script>
 
-</x-guest-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>
+<?php $attributes = $__attributesOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
+<?php unset($__attributesOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>
+<?php $component = $__componentOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
+<?php unset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
+<?php endif; ?><?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/auth/login.blade.php ENDPATH**/ ?>
