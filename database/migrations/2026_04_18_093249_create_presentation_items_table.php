@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('idCategory')->nullable();
             $table->foreign('idPresentation')->references('idPresentation')->on('presentations')->cascadeOnDelete();
             $table->foreign('idCategory')->references('idCategory')->on('categories')->nullOnDelete();
-            $table->string('prixUnitaire');
+            $table->string('nom');
+            $table->decimal('prixUnitaire', 10,3);
             $table->integer('quantity')->default(1);
             $table->decimal('totale', 10, 2)->default(0);
             $table->timestamps();

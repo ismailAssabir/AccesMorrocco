@@ -21,6 +21,7 @@ use App\Http\Controllers\DossierController;
 use App\Http\Controllers\Client\ClientDossierController;
 use App\Http\Controllers\Client\ClientPaiementController;
 use App\Http\Controllers\Client\ClientPresentationController;
+use App\Http\Controllers\Client\ClientProfileController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -106,8 +107,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/users/edit/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
-    #Client Routes
-
     #Category Routes
 Route::get('categories/export-pdf', [CategoryController::class, 'exportPdf'])->name('categories.export-pdf');
 Route::resource('categories', CategoryController::class);
@@ -143,11 +142,11 @@ Route::middleware(['auth', 'verified', 'role:admin|manager'])->group(function ()
     Route::delete('/departements/delete/{id}', [DepartementController::class, 'destroy'])->name('departements.destroy');
 
     #Objectif Routes (Management)
-    Route::get('/objectifs/create', [ObjectifController::class, 'create'])->name('goals.create');
-    Route::post('/objectifs', [ObjectifController::class, 'store'])->name('goals.store');
-    Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit'])->name('goals.edit');
-    Route::put('/objectifs/edit/{id}', [ObjectifController::class, 'update'])->name('goals.update');
-    Route::delete('/objectifs/delete/{id}', [ObjectifController::class, 'destroy'])->name('goals.destroy');
+    Route::get('/objectifs/create', [ObjectifController::class, 'create'])->name('objectifs.create');
+    Route::post('/objectifs', [ObjectifController::class, 'store'])->name('objectifs.store');
+    Route::get('/objectifs/edit/{id}', [ObjectifController::class, 'edit'])->name('objectifs.edit');
+    Route::put('/objectifs/{id}', [ObjectifController::class, 'update'])->name('objectifs.update');
+    Route::delete('/objectifs/{id}', [ObjectifController::class, 'destroy'])->name('objectifs.destroy');
 
     #Demande Routes (Manage)
     Route::get('/demandeDocuments/edit/{id}', [DemandeController::class, 'edit']);
@@ -170,8 +169,8 @@ Route::middleware(['auth', 'verified', 'role:admin|manager'])->group(function ()
 */
 Route::middleware(['auth', 'verified'])->group(function () {
     #Objectif Routes (View only for all)
-    Route::get('/objectifs', [ObjectifController::class, 'index'])->name('goals.index');
-    Route::get('/objectifs/{id}', [ObjectifController::class, 'show'])->name('goals.show');
+    Route::get('/objectifs', [ObjectifController::class, 'index'])->name('objectifs.index');
+    Route::get('/objectifs/{id}', [ObjectifController::class, 'show'])->name('objectifs.show');
 
     #Reclamation Routes
     Route::get('/reclamations' , [ReclamationController::class , 'index' ]);
