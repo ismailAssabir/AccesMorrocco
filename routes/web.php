@@ -193,12 +193,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pointage', [PointageController::class, 'userPointage'])->name('pointages.index');
     Route::post('/pointage/check-in', [PointageController::class, 'checkIn'])->name('pointage.checkin');
     Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
+    Route::post('/pointage/justification', [PointageController::class, 'submitJustification'])->name('justification.submit');
 
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
         Route::get('/admin/pointages/export', [PointageController::class, 'exportPdf'])->name('admin.pointages.export');
-        Route::get('/pointage/status', [PointageController::class, 'status'])
-        ->name('pointage.status');
+        Route::get('/pointage/status', [PointageController::class, 'status'])->name('pointage.status');
+
+        Route::post('/admin/pointages/settings', [PointageController::class, 'updateSettings'])->name('admin.settings.update');
+        Route::delete('/admin/pointages/clear', [PointageController::class, 'destroyAll'])->name('admin.pointages.clear');
+        Route::post('/admin/pointages/{id}/validate', [PointageController::class, 'validateJustification'])->name('admin.pointages.validate');
     });
 });
 
