@@ -26,7 +26,9 @@ class Lead extends Model
         'idUser',
         'idClient',
         'idDepartement',
-        'statut'
+        'statut',
+        "contentAppel",
+        "duree"
     ];
     function client(){
         return $this->belongsTo(Client::class, 'idClient', 'idClient');
