@@ -191,21 +191,36 @@
                                 search: '',
                                 selectedId: '',
                                 selectedRef: '— Sélectionner le dossier —',
+                                totalDossier: 0,
+                                montantPaye: 0,
+                                alreadyPaid: 0,
                                 dossiers: {{ json_encode($dossiers) }},
                                 get filteredDossiers() {
                                     if (this.search === '') return this.dossiers;
                                     return this.dossiers.filter(d => d.reference.toLowerCase().includes(this.search.toLowerCase()));
                                 },
-                                select(id, ref) {
-                                    this.selectedId = id;
-                                    this.selectedRef = ref;
+                                get montantReste() {
+                                    if (!this.selectedId) return 0;
+                                    let reste = this.totalDossier - this.alreadyPaid - this.montantPaye;
+                                    return reste > 0 ? reste : 0;
+                                },
+                                select(d) {
+                                    this.selectedId = d.idDossier;
+                                    this.selectedRef = d.reference;
+                                    this.totalDossier = d.montant || 0;
+                                    this.alreadyPaid = d.paiements_sum_montant_paye || 0;
                                     this.open = false;
                                     this.search = '';
                                 }
                             }" class="relative">
                                 <button type="button" @click="open = !open" 
                                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-left flex items-center justify-between outline-none focus:border-[#be2346] transition-all">
-                                    <span x-text="selectedRef" :class="selectedId ? 'text-slate-800 font-bold' : 'text-slate-400 font-medium'"></span>
+                                    <div class="flex flex-col">
+                                        <span x-text="selectedRef" :class="selectedId ? 'text-slate-800 font-bold' : 'text-slate-400 font-medium'"></span>
+                                        <template x-if="selectedId">
+                                            <span class="text-[10px] text-slate-400 font-bold">Total dossier: <span class="text-slate-600" x-text="parseFloat(totalDossier).toFixed(2) + ' MAD'"></span></span>
+                                        </template>
+                                    </div>
                                     <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </button>
                                 
@@ -219,10 +234,11 @@
                                     </div>
                                     <div class="max-h-60 overflow-y-auto custom-scrollbar py-2">
                                         <template x-for="d in filteredDossiers" :key="d.idDossier">
-                                            <div @click="select(d.idDossier, d.reference)" 
+                                            <div @click="select(d)" 
                                                 class="px-5 py-3 text-sm hover:bg-[#be2346]/5 cursor-pointer transition-colors flex items-center justify-between group">
                                                 <div class="flex flex-col">
                                                     <span x-text="d.reference" class="font-black text-slate-700 group-hover:text-[#be2346]"></span>
+                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.montant).toFixed(2) + ' MAD'"></span>
                                                 </div>
                                                 <svg x-show="selectedId == d.idDossier" class="w-4 h-4 text-[#be2346]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                                             </div>
@@ -232,17 +248,17 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Payé *</label>
-                                <input type="number" step="0.01" name="montantPaye" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Restant</label>
-                                <input type="number" step="0.01" name="montantReste" value="0" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Payé *</label>
+                                        <input type="number" step="0.01" name="montantPaye" x-model="montantPaye" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Restant</label>
+                                        <input type="number" step="0.01" name="montantReste" :value="montantReste" readonly class="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none font-bold text-slate-500">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -289,23 +305,37 @@
             search: '',
             selectedId: '',
             selectedRef: '— Sélectionner le dossier —',
+            totalDossier: 0,
+            montantPaye: 0,
+            alreadyPaidExcludingCurrent: 0,
             dossiers: {{ json_encode($dossiers) }},
             get filteredDossiers() {
                 if (this.search === '') return this.dossiers;
                 return this.dossiers.filter(d => d.reference.toLowerCase().includes(this.search.toLowerCase()));
             },
-            select(id, ref) {
-                this.selectedId = id;
-                this.selectedRef = ref;
+            get montantReste() {
+                if (!this.selectedId) return 0;
+                let reste = this.totalDossier - this.alreadyPaidExcludingCurrent - this.montantPaye;
+                return reste > 0 ? reste : 0;
+            },
+            select(d) {
+                this.selectedId = d.idDossier;
+                this.selectedRef = d.reference;
+                this.totalDossier = d.montant || 0;
+                this.alreadyPaidExcludingCurrent = (d.paiements_sum_montant_paye || 0);
+                // Note: If we select a NEW dossier in edit mode, alreadyPaidExcludingCurrent is just the sum of that dossier's payments
                 this.open = false;
                 this.search = '';
             },
-            initValues(id, ref) {
+            initValues(id, ref, total, paid, totalPaidOnDossier) {
                 this.selectedId = id;
                 this.selectedRef = ref;
+                this.totalDossier = total;
+                this.montantPaye = paid;
+                this.alreadyPaidExcludingCurrent = (totalPaidOnDossier || 0) - (paid || 0);
             }
         }"
-        @set-edit-dossier.window="initValues($event.detail.id, $event.detail.ref)"
+        @set-edit-dossier.window="initValues($event.detail.id, $event.detail.ref, $event.detail.total, $event.detail.paid, $event.detail.totalPaidOnDossier)"
     >
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('editPaiementModal')"></div>
         <div class="relative flex items-center justify-center min-h-screen p-4">
@@ -330,7 +360,12 @@
                             <div class="relative">
                                 <button type="button" @click="open = !open" 
                                     class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm text-left flex items-center justify-between outline-none focus:border-[#be2346] transition-all">
-                                    <span x-text="selectedRef" class="font-bold text-slate-800"></span>
+                                    <div class="flex flex-col">
+                                        <span x-text="selectedRef" class="font-bold text-slate-800"></span>
+                                        <template x-if="selectedId">
+                                            <span class="text-[10px] text-slate-400 font-bold">Total dossier: <span class="text-slate-600" x-text="parseFloat(totalDossier).toFixed(2) + ' MAD'"></span></span>
+                                        </template>
+                                    </div>
                                     <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </button>
                                 
@@ -344,25 +379,28 @@
                                     </div>
                                     <div class="max-h-60 overflow-y-auto custom-scrollbar py-2">
                                         <template x-for="d in filteredDossiers" :key="d.idDossier">
-                                            <div @click="select(d.idDossier, d.reference)" 
+                                            <div @click="select(d)" 
                                                 class="px-5 py-3 text-sm hover:bg-[#be2346]/5 cursor-pointer transition-colors flex items-center justify-between group">
-                                                <span x-text="d.reference" class="font-black text-slate-700 group-hover:text-[#be2346]"></span>
+                                                <div class="flex flex-col">
+                                                    <span x-text="d.reference" class="font-black text-slate-700 group-hover:text-[#be2346]"></span>
+                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.montant).toFixed(2) + ' MAD'"></span>
+                                                </div>
                                                 <svg x-show="selectedId == d.idDossier" class="w-4 h-4 text-[#be2346]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                                             </div>
                                         </template>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Payé *</label>
-                                <input type="number" step="0.01" name="montantPaye" id="edit_montantPaye" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346]">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Restant</label>
-                                <input type="number" step="0.01" name="montantReste" id="edit_montantReste" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346]">
+                                <div class="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Payé *</label>
+                                        <input type="number" step="0.01" name="montantPaye" x-model="montantPaye" id="edit_montantPaye" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346]">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Montant Restant</label>
+                                        <input type="number" step="0.01" name="montantReste" :value="montantReste" readonly class="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none font-bold text-slate-500">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -413,14 +451,21 @@
             const form = document.getElementById('editPaiementForm');
             form.action = `/paiements/${p.idPaiement}`;
             
-            // Dispatch event to Alpine for searchable select
+            // Dispatch event to Alpine for searchable select and auto-calc
             const dossierRef = p.dossier ? p.dossier.reference : '—';
+            const dossierMontant = p.dossier ? p.dossier.montant : 0;
+            const dossierTotalPaid = p.dossier ? p.dossier.paiements_sum_montant_paye : 0;
+            
             window.dispatchEvent(new CustomEvent('set-edit-dossier', { 
-                detail: { id: p.idDossier, ref: dossierRef } 
+                detail: { 
+                    id: p.idDossier, 
+                    ref: dossierRef, 
+                    total: dossierMontant, 
+                    paid: p.montantPaye,
+                    totalPaidOnDossier: dossierTotalPaid
+                } 
             }));
 
-            document.getElementById('edit_montantPaye').value = p.montantPaye;
-            document.getElementById('edit_montantReste').value = p.montantReste;
             document.getElementById('edit_date').value = p.date.split(' ')[0];
             document.getElementById('edit_status').value = p.status;
             document.getElementById('edit_modePaiement').value = p.modePaiement || '';
