@@ -34,6 +34,9 @@ use App\Http\Controllers\Admin\ClientPermissionController;
 | Entry Point & Dashboard
 |--------------------------------------------------------------------------
 */
+//update status dossier
+Route::patch('/dossiers/{id}/status', [DossierController::class, 'updateStatus'])
+    ->middleware(['auth', 'role:employee']);
 //route client auth
 // Routes Client
 Route::prefix('clients')->name('clients.')->group(function () {
@@ -75,7 +78,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 //routes d'assignation
 Route::put('/dossiers/{id}/assign', [DossierController::class, 'assign'])
     ->name('dossiers.assign')
-    ->middleware(['auth', 'role:manager,admin']);
+    ->middleware(['auth', 'role:manager|admin']);
     Route::put('/dossiers/{id}/assign-departement', [DossierController::class, 'assignDepartement'])
     ->name('dossiers.assignDepartement');
 /*
