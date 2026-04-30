@@ -16,7 +16,7 @@ class PaimentController extends Controller
         Gate::authorize('paiement.view');
 
         $paiements = Paiement::with('dossier.client')->latest()->get();
-        $dossiers = Dossier::select('idDossier', 'reference')->get();
+        $dossiers = Dossier::withSum('paiements', 'montantPaye')->get();
 
         // Stats Globales
         $stats = [
