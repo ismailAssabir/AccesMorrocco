@@ -1,7 +1,16 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="p-8 bg-[#F8FAFC] min-h-screen font-sans text-slate-900">
 
-        {{-- ═══════════ TOP BAR ═══════════ --}}
+        
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Gestion Financière</h1>
@@ -17,7 +26,7 @@
             </button>
         </div>
 
-        {{-- ═══════════ KPI CARDS ═══════════ --}}
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between mb-4">
@@ -26,7 +35,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </span>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-800">{{ number_format($stats['totalPaye'], 2) }} <span class="text-xs font-medium text-slate-400">MAD</span></h3>
+                <h3 class="text-2xl font-bold text-slate-800"><?php echo e(number_format($stats['totalPaye'], 2)); ?> <span class="text-xs font-medium text-slate-400">MAD</span></h3>
             </div>
 
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-amber-500">
@@ -36,7 +45,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                     </span>
                 </div>
-                <h3 class="text-2xl font-bold text-amber-600">{{ number_format($stats['totalReste'], 2) }} <span class="text-xs font-medium text-slate-400">MAD</span></h3>
+                <h3 class="text-2xl font-bold text-amber-600"><?php echo e(number_format($stats['totalReste'], 2)); ?> <span class="text-xs font-medium text-slate-400">MAD</span></h3>
             </div>
 
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
@@ -46,7 +55,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </span>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-800">{{ $stats['completCount'] }}</h3>
+                <h3 class="text-2xl font-bold text-slate-800"><?php echo e($stats['completCount']); ?></h3>
             </div>
 
             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
@@ -56,13 +65,32 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                     </span>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-800">{{ $stats['totalTransactions'] }}</h3>
+                <h3 class="text-2xl font-bold text-slate-800"><?php echo e($stats['totalTransactions']); ?></h3>
             </div>
         </div>
 
-        <x-status-messages />
+        <?php if (isset($component)) { $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-messages','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-messages'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $attributes = $__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__attributesOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3)): ?>
+<?php $component = $__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3; ?>
+<?php unset($__componentOriginal22c14bbdfcc4454c743aeeffbde19ea3); ?>
+<?php endif; ?>
 
-        {{-- ═══════════ DATA TABLE ═══════════ --}}
+        
         <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-8">
             <div class="px-7 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-black text-slate-800">Historique des Transactions</h3>
@@ -90,53 +118,53 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($paiements as $p)
+                        <?php $__empty_1 = true; $__currentLoopData = $paiements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr class="hover:bg-slate-50/50 transition-colors group">
                             <td class="px-8 py-6">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-slate-800">{{ $p->dossier->client->firstName ?? '—' }} {{ $p->dossier->client->lastName ?? '' }}</span>
-                                    <span class="text-[10px] font-black text-[#be2346] uppercase tracking-wider mt-0.5">{{ $p->dossier->reference ?? 'DOS-N/A' }}</span>
+                                    <span class="font-bold text-slate-800"><?php echo e($p->dossier->client->firstName ?? '—'); ?> <?php echo e($p->dossier->client->lastName ?? ''); ?></span>
+                                    <span class="text-[10px] font-black text-[#be2346] uppercase tracking-wider mt-0.5"><?php echo e($p->dossier->reference ?? 'DOS-N/A'); ?></span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex items-center gap-2">
                                     <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span class="font-semibold text-slate-600">{{ \Carbon\Carbon::parse($p->date)->format('d/m/Y') }}</span>
+                                    <span class="font-semibold text-slate-600"><?php echo e(\Carbon\Carbon::parse($p->date)->format('d/m/Y')); ?></span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-slate-700 text-xs">{{ strtoupper($p->modePaiement ?? 'VIREMENT') }}</span>
-                                    <span class="text-[10px] text-slate-400 font-medium mt-0.5">Ref: {{ $p->ref ?? '—' }}</span>
+                                    <span class="font-bold text-slate-700 text-xs"><?php echo e(strtoupper($p->modePaiement ?? 'VIREMENT')); ?></span>
+                                    <span class="text-[10px] text-slate-400 font-medium mt-0.5">Ref: <?php echo e($p->ref ?? '—'); ?></span>
                                 </div>
                             </td>
                             <td class="px-8 py-6 text-right">
-                                <span class="font-black text-emerald-600">+ {{ number_format($p->montantPaye, 2) }}</span>
+                                <span class="font-black text-emerald-600">+ <?php echo e(number_format($p->montantPaye, 2)); ?></span>
                             </td>
                             <td class="px-8 py-6 text-right">
-                                <span class="font-bold text-slate-400">{{ number_format($p->montantReste, 2) }}</span>
+                                <span class="font-bold text-slate-400"><?php echo e(number_format($p->montantReste, 2)); ?></span>
                             </td>
                             <td class="px-8 py-6 text-center">
-                                @if($p->status == 'complet')
+                                <?php if($p->status == 'complet'): ?>
                                     <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100">Complet</span>
-                                @elseif($p->status == 'partiel')
+                                <?php elseif($p->status == 'partiel'): ?>
                                     <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase bg-amber-50 text-amber-600 border border-amber-100">Partiel</span>
-                                @else
+                                <?php else: ?>
                                     <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase bg-rose-50 text-rose-600 border border-rose-100">Annulé</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td class="px-8 py-6 text-center">
                                 <div class="flex items-center justify-center gap-2">
-                                    <button onclick='openEditModal(@json($p))' class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all flex items-center justify-center border border-slate-100">
+                                    <button onclick='openEditModal(<?php echo json_encode($p, 15, 512) ?>)' class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-[#be2346]/10 hover:text-[#be2346] transition-all flex items-center justify-center border border-slate-100">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
-                                    <button onclick="confirmDelete('{{ route('paiements.destroy', $p->idPaiement) }}')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center border border-slate-100">
+                                    <button onclick="confirmDelete('<?php echo e(route('paiements.destroy', $p->idPaiement)); ?>')" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center border border-slate-100">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="7" class="px-8 py-20 text-center">
                                 <div class="flex flex-col items-center justify-center text-slate-300">
@@ -145,7 +173,7 @@
                                 </div>
                             </td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -164,7 +192,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
     </style>
 
-    {{-- ═══════════ MODAL: AJOUTER ═══════════ --}}
+    
     <div id="addPaiementModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal('addPaiementModal')"></div>
         <div class="relative flex items-center justify-center min-h-screen p-4">
@@ -179,13 +207,13 @@
                     </button>
                 </div>
 
-                <form action="{{ route('paiements.store') }}" method="POST" class="p-8 space-y-5">
-                    @csrf
+                <form action="<?php echo e(route('paiements.store')); ?>" method="POST" class="p-8 space-y-5">
+                    <?php echo csrf_field(); ?>
                     <div class="space-y-4">
                         <div>
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Dossier Concerné *</label>
                             
-                            {{-- Searchable Select via Alpine --}}
+                            
                             <div x-data="{
                                 open: false,
                                 search: '',
@@ -194,7 +222,7 @@
                                 totalDossier: 0,
                                 montantPaye: 0,
                                 alreadyPaid: 0,
-                                dossiers: {{ json_encode($dossiers) }},
+                                dossiers: <?php echo e(json_encode($dossiers)); ?>,
                                 get filteredDossiers() {
                                     if (this.search === '') return this.dossiers;
                                     return this.dossiers.filter(d => d.reference.toLowerCase().includes(this.search.toLowerCase()));
@@ -265,7 +293,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Date *</label>
-                                <input type="date" name="date" value="{{ date('Y-m-d') }}" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
+                                <input type="date" name="date" value="<?php echo e(date('Y-m-d')); ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                             </div>
                             <div>
                                 <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Status *</label>
@@ -298,7 +326,7 @@
         </div>
     </div>
 
-    {{-- ═══════════ MODAL: MODIFIER ═══════════ --}}
+    
     <div id="editPaiementModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" 
         x-data="{
             open: false,
@@ -308,7 +336,7 @@
             totalDossier: 0,
             montantPaye: 0,
             alreadyPaidExcludingCurrent: 0,
-            dossiers: {{ json_encode($dossiers) }},
+            dossiers: <?php echo e(json_encode($dossiers)); ?>,
             get filteredDossiers() {
                 if (this.search === '') return this.dossiers;
                 return this.dossiers.filter(d => d.reference.toLowerCase().includes(this.search.toLowerCase()));
@@ -351,8 +379,8 @@
                 </div>
 
                 <form id="editPaiementForm" method="POST" class="p-8 space-y-5">
-                    @csrf
-                    @method('PUT')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
                     <div class="space-y-4">
                         <div>
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 block mb-2">Dossier Concerné *</label>
@@ -479,7 +507,7 @@
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = url;
-                form.innerHTML = `@csrf @method('DELETE')`;
+                form.innerHTML = `<?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>`;
                 document.body.appendChild(form);
                 form.submit();
             }
@@ -495,4 +523,14 @@
             });
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php /**PATH C:\Users\4B\Desktop\ExercicesLaravel\voyage\resources\views/paiements/index.blade.php ENDPATH**/ ?>
