@@ -32,7 +32,7 @@
                     <h2 class="text-2xl font-black text-slate-800 tracking-tight">Pointage Digital</h2>
                     <div class="flex items-center gap-2 mt-1">
                         <p class="text-sm text-slate-400 font-medium" x-text="currentTimeDisplay"></p>
-                        @if(auth()->user()->type !== 'employee')
+                        @if(auth('client')->check() && auth('client')->user()->type !== 'employee')
                             <span class="w-1 h-1 rounded-full bg-slate-300"></span>
                             <a href="{{ route('admin.pointages.index') }}" class="text-[10px] font-black text-[#be2346] uppercase hover:underline">Tableau de bord</a>
                         @endif

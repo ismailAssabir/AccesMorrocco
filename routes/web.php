@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -17,15 +18,56 @@ use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\PaimentController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\DossierController;
+use App\Http\Controllers\Client\ClientDossierController;
+use App\Http\Controllers\Client\ClientPaiementController;
+use App\Http\Controllers\Client\ClientPresentationController;
 use App\Models\Reclamation;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\ClientAuthController;        
+use App\Http\Controllers\Client\ClientDashboardController;
+use App\Http\Controllers\Admin\ClientPermissionController;
+use App\Http\Controllers\PresentationItemController;
+use App\Http\Controllers\PresentationsController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
 | Entry Point & Dashboard
 |--------------------------------------------------------------------------
 */
+//route client auth
+// Routes Client
+Route::prefix('clients')->name('clients.')->group(function () {
+
+    // Auth
+    Route::get('/login', [ClientAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [ClientAuthController::class, 'login'])->name('login.post');
+
+    Route::middleware(['auth.client'])->group(function () {
+
+        Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+
+        Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/dossiers', [ClientDossierController::class, 'index'])->name('dossiers');
+        Route::get('/dossiers/{idDossier}', [ClientDossierController::class, 'show'])->name('dossiers.show');
+
+        Route::get('/presentations', [ClientPresentationController::class, 'index'])->name('presentations');
+        Route::get('/paiements', [ClientPaiementController::class, 'index'])->name('paiements');
+        Route::get('/profile', [ClientProfileController::class, 'index'])->name('profile');
+    });
+});
+//dashboard de client 
+Route::middleware('auth.client')->group(function () {
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+    Route::get('/dossiers', [ClientDossierController::class, 'index'])->name('client.dossiers');
+    Route::get('/presentations', [ClientPresentationController::class, 'index'])->name('client.presentations');
+    Route::get('/paiements', [ClientPaiementController::class, 'index'])->name('client.paiements');
+    Route::get('/profile', [ClientProfileController::class, 'index'])->name('client.profile');
+});
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
@@ -226,7 +268,7 @@ Route::get('/leads/export-pdf',[LeadController::class, 'exportPdf'])->name('lead
 Route::get('/leads/{id}',[LeadController::class, 'show'])->name('leads.show');
 Route::get('/leads/{id}/edit',[LeadController::class, 'edit'])->name('leads.edit');
 Route::put('/leads/{id}',[LeadController::class, 'update'])->name('leads.update');
-Route::post('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
+Route::patch('/leads/{id}/statut',[LeadController::class, 'updateStatut'])->name('leads.statut');
 Route::delete('/leads/{id}',[LeadController::class, 'destroy'])->name('leads.destroy');
 // Route::get('/departements/{id}/users', function ($id) {
 //     $users = App\Models\User::where('idDepartement', $id)
@@ -245,6 +287,19 @@ Route::get('/dossiers/{id}', [DossierController::class, 'show'])->name('dossiers
 Route::get('/dossiers/{id}/edit',[DossierController::class, 'edit'])->name('dossiers.edit');
 Route::put('/dossiers/{id}', [DossierController::class, 'update'])->name('dossiers.update');
 Route::delete('/dossiers/{id}',[DossierController::class, 'destroy'])->name('dossiers.destroy');
+
+
+Route::get('/presentation-items', [PresentationItemController::class, 'index']);
+Route::post('/presentation-items', [PresentationItemController::class, 'store']);
+Route::get('/presentation-items/{id}', [PresentationItemController::class, 'show']);
+Route::put('/presentation-items/{id}', [PresentationItemController::class, 'update']);
+Route::delete('/presentation-items/{id}', [PresentationItemController::class, 'destroy']);
+
+Route::get('/presentations', [PresentationsController::class, 'index']);
+Route::post('/presentations', [PresentationsController::class, 'store']);
+Route::get('/presentations/{id}', [PresentationsController::class, 'show']);
+Route::put('/presentations/{id}', [PresentationsController::class, 'update']);
+Route::delete('/presentations/{id}', [PresentationsController::class, 'destroy']);
 
 
 require __DIR__.'/auth.php';

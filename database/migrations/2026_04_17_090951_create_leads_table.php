@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('phoneNumber')->nullable();
             $table->string('type',20);
+            $table->time('duree')->nullable();
+            $table->text('contentAppel')->nullable();
             $table->string('adresse')->nullable();
             $table->string('CNE')->nullable();
             $table->string('source')->nullable();

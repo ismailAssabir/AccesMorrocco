@@ -42,12 +42,22 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+],
         
         // Guard ajouté pour les managers
         'manager' => [
             'driver' => 'session',
             'provider' => 'users', // Utilise le même provider que web
         ],
+        'client' => [                    
+        'driver'   => 'session',
+        'provider' => 'clients',
+    ],
     ],
 
     /*
@@ -78,6 +88,10 @@ return [
         //     'driver' => 'eloquent',
         //     'model' => App\Models\Manager::class,
         // ],
+         'clients' => [                   // ✅ زيد
+        'driver' => 'eloquent',
+        'model'  => App\Models\Client::class,
+    ],
     ],
 
     /*

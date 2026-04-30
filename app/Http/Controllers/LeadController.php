@@ -79,16 +79,21 @@ class LeadController extends Controller
         return redirect()->back()->with('msg', 'Lead ajouté avec succès !');
     }
 
-    public function show($id)
-    {
-        Gate::authorize('lead.view');
+   public function show($id)
+{
+    Gate::authorize('lead.view');
 
-        $lead        = Lead::with(['user', 'client', 'departements'])->findOrFail($id);
-        $users       = User::all();
-        $departements = Departement::all();
+    $lead = Lead::with([
+        'user',
+        'client.dossiers',  // ✅ client مع dossiers ديالو
+        'departements',
+    ])->findOrFail($id);
 
-        return view('leads.show', compact('lead', 'users', 'departements'));
-    }
+    $users        = User::all();
+    $departements = Departement::all();
+
+    return view('leads.show', compact('lead', 'users', 'departements'));
+}
 
     public function edit($id)
     {
@@ -126,19 +131,31 @@ class LeadController extends Controller
         return redirect()->route('leads.index', $id)->with('msg', 'Lead mis à jour avec succès !');
     }
 
-    public function updateStatut(Request $request, $id)
+  public function updateStatut(Request $request, $id)
 {
     Gate::authorize('lead.edit');
 
     $lead = Lead::findOrFail($id);
 
     $request->validate([
-        'statut'        => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
-        'idDepartement' => 'nullable|exists:departements,idDepartement',
-        'password'      => 'required_if:statut,ok|min:8',
+        'statut'       => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
+        'note'         => 'nullable|string',
+        'duree'        => 'required_if:statut,1er_appel,2eme_appel',
+        'contentAppel' => 'required_if:statut,1er_appel,2eme_appel',
+        'idDepartement'=> 'nullable|exists:departements,idDepartement',
     ]);
 
     $statut = $request->statut;
+
+    // زيد duree و contentAppel إلا كانو موجودين
+    if (in_array($statut, ['1er_appel', '2eme_appel'])) {
+        $lead->duree        = $request->duree;
+        $lead->contentAppel = $request->contentAppel;
+    }
+
+    if ($request->filled('note')) {
+        $lead->note = $request->note;
+    }
 
     if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
         $lead->statut = '1er_appel';
@@ -153,43 +170,57 @@ class LeadController extends Controller
         $lead->statut = 'promis';
 
     } elseif ($statut === 'ok') {
-
         $lead->statut = 'ok';
 
         if ($request->filled('idDepartement')) {
             $lead->idDepartement = $request->idDepartement;
         }
+
+        // ✅ generate password تلقائي
+        $plainPassword = Str::random(10);
+
         $client = Client::where('email', $lead->email)->first();
 
         if (!$client) {
             $client = Client::create([
-                'firstName'     => $lead->firstName,
-                'lastName'      => $lead->lastName,
-                'email'         => $lead->email,
-                'phoneNumber'   => $lead->phoneNumber,
-                'address'       => $lead->address,
-                'CNE'           => $lead->CNE,
-                'nationalite'   => $lead->nationalite,
-                'dateCreation'  => now()->toDateString(),
-                'password' => Hash::make($request->password ?? '12345678'),
+                'firstName'   => $lead->firstName,
+                'lastName'    => $lead->lastName,
+                'email'       => $lead->email,
+                'phoneNumber' => $lead->phoneNumber,
+                'address'     => $lead->address,
+                'CNE'         => $lead->CNE,
+                'nationalite' => $lead->nationalite,
+                'dateCreation'=> now()->toDateString(),
+                'password'    => Hash::make($plainPassword),
+                'status'      => 'actif',
             ]);
             $lead->idClient = $client->idClient;
+        } else {
+            // reset password إلا كان موجود
+            $client->password = Hash::make($plainPassword);
+            $client->save();
         }
+
+        // ✅ إرسال email
+        \Mail::to($client->email)->send(
+            new \App\Mail\ClientCreatedMail($client, $plainPassword)
+        );
 
         $dossierExiste = Dossier::where('idClient', $client->idClient)->exists();
 
         if (!$dossierExiste) {
             Dossier::create([
-                'idClient'        => $client->idClient,
-                'idDepartement'   => $request->idDepartement ?? $lead->idDepartement,
-                'reference'       => 'DOS-' . strtoupper(Str::random(8)),
-                'dateCreation'    => now(),
-                'nombrePersonnes' => 1,
-                'montant'         => 0,
-                'nombreJours'     => 0,
-                'status'          => 'ouvert',
-                'commentaire'     => 'Dossier créé automatiquement depuis la conversion du lead #' . $lead->idLead . '.',
-            ]);}
+                'idClient'      => $client->idClient,
+                'idDepartement' => $request->idDepartement ?? $lead->idDepartement,
+                'reference'     => 'DOS-' . strtoupper(Str::random(8)),
+                'dateCreation'  => now(),
+                'nombre_personne'=> 1,
+                'montant'       => 0,
+                'nombre_jours'  => 0,
+                'status'        => 'ouvert',
+                'commentaire'   => 'Dossier créé depuis le lead #' . $lead->idLead,
+            ]);
+        }
 
     } else {
         return redirect()->back()->with('error', 'Transition de statut non autorisée.');
@@ -205,9 +236,7 @@ class LeadController extends Controller
         'ok'         => 'Lead converti en client avec succès !',
     ];
 
-    return redirect()
-        ->route('leads.show', $id)
-        ->with('msg', $messages[$statut]);
+    return redirect()->route('leads.index', $id)->with('msg', $messages[$statut]);
 }
 
     public function destroy($id)

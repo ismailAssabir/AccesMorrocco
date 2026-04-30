@@ -10,12 +10,36 @@ class ObjectifController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         Gate::authorize('objectif.view');
-        $objs = Objectif::with(['taches', 'departement.manager'])->get();
-        // Fetch departements for the add modal if we implement it
+        
+        $query = Objectif::with(['taches', 'departement.manager']);
+
+        // Filtering logic
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function($q) use ($s) {
+                $q->where('titre', 'LIKE', "%$s%")
+                  ->orWhere('description', 'LIKE', "%$s%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('idDepartement')) {
+            $query->where('idDepartement', $request->idDepartement);
+        }
+
+        $objs = $query->latest()->get();
         $departements = \App\Models\Departement::all();
+
+        if ($request->ajax()) {
+            return view('objectifs.partials.cards', compact('objs'))->render();
+        }
+
         return view('objectifs.index', compact('objs', 'departements'));
     }
 
@@ -45,7 +69,7 @@ class ObjectifController extends Controller
             'description' => 'nullable|string|max:255',
             'dateFin' => 'nullable|date',
             'status' => 'nullable|string',
-            'avancement' => 'required|integer|min:0|max:100',
+            'avancement' => 'nullable|integer|min:0|max:100',
             'dateDebut' => 'nullable|date',
             'idDepartement'=> 'nullable|exists:departements,idDepartement'
         ]);
@@ -110,14 +134,14 @@ class ObjectifController extends Controller
             'dateFin'       => 'nullable|date',
             'dateDebut'     => 'nullable|date',
             'status'        => 'required|string|in:en_cours,atteint,echoue',
-            'avancement'    => 'required|integer|min:0|max:100',
+            'avancement'    => 'nullable|integer|min:0|max:100',
             'idDepartement' => 'nullable|exists:departements,idDepartement'
         ]);
 
         $obj = Objectif::findOrFail($id);
         $obj->update($data);
 
-        return redirect()->route('goals.index')->with('msg', "L'objectif stratégique a été mis à jour avec succès.");
+        return redirect()->route('objectifs.index')->with('msg', "L'objectif stratégique a été mis à jour avec succès.");
     }
 
     /**
@@ -128,6 +152,6 @@ class ObjectifController extends Controller
         Gate::authorize('objectif.delete');
         $obj = Objectif::findOrFail($id);
         $obj->delete();
-        return redirect()->route('goals.index')->with('msg', "L'objectif a été supprimé");
+        return redirect()->route('objectifs.index')->with('msg', "L'objectif a été supprimé");
     }
 }

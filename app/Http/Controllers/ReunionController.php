@@ -10,26 +10,47 @@ use Illuminate\Support\Facades\Gate;
 
 class ReunionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         Gate::authorize('reunion.view');
-        $user = auth()->user();
         
-        if ($user->type === 'employee') {
-            // Employees see meetings for "All" (idDepartement null), their department, or where they are specifically invited
-            $reunions = Reunion::with(['departement', 'participants'])
-                ->where(function($q) use ($user) {
-                    $q->whereNull('idDepartement')
-                      ->orWhere('idDepartement', $user->idDepartement)
-                      ->orWhereHas('participants', function($sq) use ($user) {
-                          $sq->where('reunion_participants.idUser', $user->idUser);
-                      });
-                })
-                ->latest()
-                ->get();
-        } else {
-            // Admins/Managers see everything
-            $reunions = Reunion::with(['departement', 'participants'])->latest()->get();
+        $search = $request->input('search');
+        $type = $request->input('type');
+        $idDept = $request->input('idDepartement');
+
+        $query = Reunion::with(['departement', 'participants']);
+
+        if (auth()->user()->type === 'employee') {
+            $user = auth()->user();
+            $query->where(function($q) use ($user) {
+                $q->whereNull('idDepartement')
+                  ->orWhere('idDepartement', $user->idDepartement)
+                  ->orWhereHas('participants', function($sq) use ($user) {
+                      $sq->where('reunion_participants.idUser', $user->idUser);
+                  });
+            });
+        }
+
+        // Filters
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('titre', 'like', "%{$search}%")
+                  ->orWhere('lieu', 'like', "%{$search}%");
+            });
+        }
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        if ($idDept) {
+            $query->where('idDepartement', $idDept);
+        }
+
+        $reunions = $query->latest()->get();
+
+        if ($request->ajax()) {
+            return view('reunions.partials.cards', compact('reunions'))->render();
         }
 
         $departements = Departement::all();

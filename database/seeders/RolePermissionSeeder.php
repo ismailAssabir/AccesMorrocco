@@ -15,7 +15,7 @@ class RolePermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create Roles
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin','guard_name' => 'web']);
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
         $employeeRole = Role::firstOrCreate(['name' => 'employee']);
 
@@ -153,12 +153,8 @@ class RolePermissionSeeder extends Seeder
             $adminRole->givePermissionTo($viewAll);
         }
         // Keep existing admin permission.edit / permission.view
-        if (!$adminRole->hasPermissionTo('permission.edit')) {
-            $adminRole->givePermissionTo('permission.edit');
-        }
-        if (!$adminRole->hasPermissionTo('permission.view')) {
-            $adminRole->givePermissionTo('permission.view');
-        }
+        $adminRole->syncPermissions(['permission.edit', 'permission.view']);
+        
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
