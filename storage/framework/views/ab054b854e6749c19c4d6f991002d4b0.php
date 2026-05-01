@@ -150,9 +150,12 @@
                             'en_cours' => '⚙️ En cours',
                             'ferme' => '✅ Fermé'
                         ];
-                        // Vérifier si l'utilisateur connecté est l'employé assigné à ce dossier
-                        $canEditStatus = ($dossier->idUser == auth()->user()->idUser && auth()->user()->hasRole('employee'));
-                    ?>
+                        $canEditStatus = (
+                            $dossier->idUser == auth()->user()->idUser 
+                            && auth()->user()->hasRole('employee')
+                            && $dossier->status !== 'ferme' // 🔥 IMPORTANT
+                        );                    
+                        ?>
                     
                     <?php if($canEditStatus): ?>
                         <select onchange="updateStatus(<?php echo e($dossier->idDossier); ?>, this.value)"

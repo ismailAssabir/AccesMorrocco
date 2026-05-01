@@ -134,20 +134,43 @@
                 </div>
 
                 <div class="p-8">
-                    <form action="#" class="space-y-6">
+                    <form method="POST" action="<?php echo e(route('client.updatePassword')); ?>" class="space-y-6">
+                        <?php echo csrf_field(); ?>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nouveau Mot de Passe</label>
-                                <input type="password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm outline-none transition-all focus:border-red-500/50 focus:ring-4 focus:ring-red-500/5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+                                    Mot de Passe Actuel
+                                </label>
+                                <input type="password" name="current_password"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm">
                             </div>
+
+                            
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Confirmer le Mot de Passe</label>
-                                <input type="password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm outline-none transition-all focus:border-red-500/50 focus:ring-4 focus:ring-red-500/5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+                                    Nouveau Mot de Passe
+                                </label>
+                                <input type="password" name="password"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm">
                             </div>
+
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+                                    Confirmer le Mot de Passe
+                                </label>
+                                <input type="password" name="password_confirmation"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm">
+                            </div>
+
                         </div>
 
-                        <div class="pt-4 flex items-center justify-between gap-4">
-                            <button type="submit" class="w-full md:w-auto px-8 py-3.5 border-2 border-red-500 text-red-500 font-black text-xs rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest">
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="px-8 py-3.5 border-2 border-red-500 text-red-500 font-black text-xs rounded-xl hover:bg-red-500 hover:text-white">
                                 Mettre à jour le mot de passe
                             </button>
                         </div>

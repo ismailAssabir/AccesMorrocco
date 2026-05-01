@@ -208,7 +208,7 @@ unset($__errorArgs, $__bag); ?>
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label for="password" class="auth-label mb-0">Password</label>
-                            <a href="#"
+                            <a href="<?php echo e(route('client.password.forgot')); ?>"
                                class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors duration-150">
                                 Forgot password?
                             </a>

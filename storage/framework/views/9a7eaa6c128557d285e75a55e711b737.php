@@ -336,17 +336,6 @@
                     </div>
                 </div>
 
-                
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#b11d40] to-[#7c1233] flex items-center justify-center text-[11px] font-black text-white">
-                        <?php echo e(strtoupper(mb_substr($client->firstName ?? 'C', 0, 1))); ?>
-
-                    </div>
-                    <div class="hidden sm:block">
-                        <p class="text-xs font-bold text-slate-700"><?php echo e($client->firstName); ?></p>
-                        <p class="text-[10px] text-slate-400">Client</p>
-                    </div>
-                </div>
             </div>
         </div>
     </header>

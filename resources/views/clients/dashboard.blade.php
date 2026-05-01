@@ -5,194 +5,271 @@
 @section('page-subtitle', 'Suivez vos dossiers et paiements')
 
 @section('content')
+{{-- ApexCharts CDN --}}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+{{-- Welcome Header --}}
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="animate-fade-in">
+        <h1 class="text-3xl font-black text-gray-900 tracking-tight">Mon Espace <span class="text-[#b11d40]">Client</span></h1>
+        <div class="flex items-center gap-4 mt-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#b11d40]/10 text-[#b11d40] uppercase tracking-widest border border-[#b11d40]/20">
+                Client
+            </span>
+            <span class="text-xs text-gray-400 font-medium tracking-wide italic">
+                Bonjour {{ auth()->user()->firstName ?? 'Client' }}
+            </span>
+        </div>
+    </div>
+    
+</div>
+
 @php
     $totalDossiers   = $dossiers->total();
     $enCours         = $dossiers->getCollection()->where('status', 'en_cours')->count();
     $termines        = $dossiers->getCollection()->where('status', 'ferme')->count();
     $totalPaiements  = $dossiers->getCollection()->sum(fn($d) => $d->montant ?? 0);
+    
+    // Données pour les graphiques
+    $monthlyDossiers = [];
+    $monthlyPayments = [];
+    
+    // Regrouper par mois
+    foreach($dossiers->getCollection() as $dossier) {
+        if($dossier->created_at) {
+            $month = $dossier->created_at->format('M Y');
+            $monthlyDossiers[$month] = ($monthlyDossiers[$month] ?? 0) + 1;
+            $monthlyPayments[$month] = ($monthlyPayments[$month] ?? 0) + ($dossier->montant ?? 0);
+        }
+    }
+    
+    // Obtenir les 6 derniers mois
+    $last6Months = [];
+    for($i = 5; $i >= 0; $i--) {
+        $last6Months[] = now()->subMonths($i)->format('M Y');
+    }
+    
+    // Remplir les données manquantes
+    $dossierData = [];
+    $paymentData = [];
+    foreach($last6Months as $month) {
+        $dossierData[] = $monthlyDossiers[$month] ?? 0;
+        $paymentData[] = $monthlyPayments[$month] ?? 0;
+    }
 @endphp
 
-
-
-{{-- ═══ KPI CARDS ═══ --}}
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-
-    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-        <span class="p-2.5 rounded-xl bg-[#b11d40]/10 text-[#b11d40] shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-            </svg>
-        </span>
-        <div>
-            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Dossiers</p>
-            <p class="text-2xl font-extrabold text-slate-800">{{ $totalDossiers }}</p>
+{{-- SECTION PRINCIPALE: GRAPHIQUES --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    {{-- Graphique d'évolution des dossiers --}}
+    <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50 relative overflow-hidden hover:shadow-[#b11d40]/10 hover:-translate-y-1 hover:border-[#b11d40]/20 transition-all duration-300">
+        <div class="absolute top-0 right-0 p-8">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Évolution Directe</span>
+            </div>
         </div>
+        <h2 class="text-xl font-black text-gray-900 mb-2">Activité des Dossiers</h2>
+        <p class="text-xs text-gray-400 mb-8 font-medium">Évolution sur les 6 derniers mois</p>
+        <div id="dossiersChart" class="min-h-[250px]"></div>
     </div>
 
-    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-        <span class="p-2.5 rounded-xl bg-amber-50 text-amber-500 shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </span>
-        <div>
-            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">En cours</p>
-            <p class="text-2xl font-extrabold text-slate-800">{{ $enCours }}</p>
+    {{-- Statistiques rapides --}}
+    <div class="flex flex-col gap-6">
+        <div class="bg-gradient-to-br from-[#b11d40] to-rose-700 p-8 rounded-[2rem] text-white shadow-xl shadow-rose-900/20 relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+            <p class="text-[10px] font-bold text-rose-100 uppercase tracking-widest mb-1 opacity-80">Total Investi</p>
+            <h3 class="text-4xl font-black">{{ number_format($totalPaiements, 0, ',', ' ') }} <span class="text-lg">MAD</span></h3>
+            <div class="mt-6 flex items-center text-xs font-bold text-rose-100/70">
+                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                {{ $totalDossiers }} dossier(s) au total
+            </div>
         </div>
-    </div>
-
-    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-        <span class="p-2.5 rounded-xl bg-emerald-50 text-emerald-500 shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </span>
-        <div>
-            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Terminés</p>
-            <p class="text-2xl font-extrabold text-slate-800">{{ $termines }}</p>
-        </div>
-    </div>
-
-    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-        <span class="p-2.5 rounded-xl bg-blue-50 text-blue-500 shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-            </svg>
-        </span>
-        <div>
-            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total</p>
-            <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalPaiements, 0, ',', ' ') }} <span class="text-sm text-slate-400">MAD</span></p>
+        
+        @php
+            $perc = $totalDossiers > 0 ? round(($termines / $totalDossiers) * 100) : 0;
+            $colorTheme = $perc >= 80 ? 'green' : ($perc >= 40 ? 'amber' : 'red');
+            $themes = [
+                'green' => [
+                    'bg' => 'bg-emerald-50', 
+                    'text' => 'text-emerald-600', 
+                    'bar' => 'bg-emerald-500', 
+                    'hoverBg' => 'group-hover/item:bg-emerald-500',
+                    'glow' => 'group-hover/item:shadow-emerald-500/20'
+                ],
+                'amber' => [
+                    'bg' => 'bg-amber-50', 
+                    'text' => 'text-amber-600', 
+                    'bar' => 'bg-amber-500', 
+                    'hoverBg' => 'group-hover/item:bg-amber-500',
+                    'glow' => 'group-hover/item:shadow-amber-500/20'
+                ],
+                'red' => [
+                    'bg' => 'bg-rose-50', 
+                    'text' => 'text-rose-600', 
+                    'bar' => 'bg-rose-500', 
+                    'hoverBg' => 'group-hover/item:bg-rose-500',
+                    'glow' => 'group-hover/item:shadow-rose-500/20'
+                ],
+            ];
+            $theme = $themes[$colorTheme];
+        @endphp
+        
+        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/40 cursor-pointer group/item hover:shadow-2xl hover:shadow-[#b11d40]/20 hover:-translate-y-1 hover:border-[#b11d40]/20 transition-all duration-300"
+            onclick="window.location='{{ route('clients.dossiers') }}'">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 {{ $theme['bg'] }} {{ $theme['text'] }} rounded-2xl {{ $theme['hoverBg'] }} group-hover/item:text-white transition-all duration-300 group-hover/item:scale-110 shadow-sm {{ $theme['glow'] }}">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Taux d'achèvement</p>
+                    <h3 class="text-2xl font-black text-gray-900 group-hover/item:{{ $theme['text'] }} transition-colors duration-300">{{ $termines }} / {{ $totalDossiers }}</h3>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                <div class="{{ $theme['bar'] }} h-full rounded-full transition-all duration-1000" style="width: {{ $perc }}%"></div>
+            </div>
         </div>
     </div>
 </div>
 
-{{-- ═══ DOSSIERS TABLE ═══ --}}
-<div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-    <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
-
-    {{-- Header --}}
-    <div class="p-6 flex items-center justify-between border-b border-slate-100">
-        <div>
-            <h2 class="text-base font-extrabold text-slate-800">Mes dossiers de voyage</h2>
-            <p class="text-xs text-slate-400 mt-0.5">{{ $totalDossiers }} dossier{{ $totalDossiers > 1 ? 's' : '' }} au total</p>
+{{-- GRAPHIQUES SECONDAIRES --}}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+    {{-- Graphique des montants par dossier --}}
+    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Répartition financière</p>
+            <div class="p-2 bg-[#b11d40]/10 rounded-xl">
+                <svg class="w-4 h-4 text-[#b11d40]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
         </div>
-        <a href="{{ route('clients.dossiers') }}"
-           class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200">
-            Voir tout
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-            </svg>
-        </a>
+        <div id="paymentsChart" class="min-h-[200px]"></div>
     </div>
 
-    @if($dossiers->count() > 0)
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b border-slate-100 bg-slate-50/60">
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Référence</th>
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Destination</th>
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Date voyage</th>
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Personnes</th>
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Montant</th>
-                    <th class="text-left px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Statut</th>
-                    <th class="text-right px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @foreach($dossiers as $dossier)
-                @php
-                    $statusConfig = match($dossier->status) {
-                        'ouvert'   => ['label' => 'Ouvert',    'class' => 'bg-blue-50 text-blue-600'],
-                        'en_cours' => ['label' => 'En cours',  'class' => 'bg-amber-50 text-amber-600'],
-                        'ferme'    => ['label' => 'Terminé',   'class' => 'bg-emerald-50 text-emerald-600'],
-                        default    => ['label' => $dossier->status, 'class' => 'bg-slate-100 text-slate-500'],
-                    };
-                @endphp
-                <tr class="hover:bg-slate-50/60 transition-colors">
-
-                    {{-- Référence --}}
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-[#b11d40]/10 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-[#b11d40]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-                                </svg>
-                            </div>
-                            <span class="font-black text-slate-800 text-xs">{{ $dossier->reference }}</span>
-                        </div>
-                    </td>
-
-                    {{-- Destination --}}
-                    <td class="px-6 py-4">
-                        <p class="font-semibold text-slate-700">{{ $dossier->distination ?? '—' }}</p>
-                    </td>
-
-                    {{-- Date --}}
-                    <td class="px-6 py-4">
-                        <p class="text-slate-600">
-                            {{ $dossier->date_voyage ? \Carbon\Carbon::parse($dossier->date_voyage)->format('d/m/Y') : '—' }}
-                        </p>
-                    </td>
-
-                    {{-- Personnes --}}
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            <span class="text-slate-600 font-medium">{{ $dossier->nombre_personne }}</span>
-                        </div>
-                    </td>
-
-                    {{-- Montant --}}
-                    <td class="px-6 py-4">
-                        <span class="font-black text-slate-800">{{ number_format($dossier->montant ?? 0, 0, ',', ' ') }}</span>
-                        <span class="text-xs text-slate-400 ml-1">MAD</span>
-                    </td>
-
-                    {{-- Statut --}}
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black {{ $statusConfig['class'] }}">
-                            {{ $statusConfig['label'] }}
-                        </span>
-                    </td>
-
-                    {{-- Action --}}
-                    <td class="px-6 py-4 text-right">
-                        <a href="{{ route('clients.dossiers.show', $dossier->idDossier) }}"
-                           class="inline-flex items-center gap-1.5 text-xs font-bold text-[#b11d40] border border-[#b11d40]/30 hover:bg-[#b11d40] hover:text-white px-4 py-2 rounded-xl transition-all duration-200 active:scale-95">
-                            Détails
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    {{-- Pagination --}}
-    @if($dossiers->hasPages())
-    <div class="px-6 py-4 border-t border-slate-100">
-        {{ $dossiers->links() }}
-    </div>
-    @endif
-
-    @else
-    {{-- Empty state --}}
-    <div class="flex flex-col items-center justify-center py-20 px-8 text-center">
-        <div class="w-20 h-20 rounded-3xl bg-[#b11d40]/10 flex items-center justify-center mb-5">
-            <svg class="w-10 h-10 text-[#b11d40]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-            </svg>
+    {{-- Distribution des statuts --}}
+    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300 lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Distribution</p>
+            <div class="p-2 bg-purple-50 rounded-xl">
+                <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
         </div>
-        <h3 class="text-xl font-extrabold text-slate-800">Aucun dossier</h3>
-        <p class="text-slate-500 mt-2 max-w-sm text-sm">Vous n'avez pas encore de dossier de voyage.</p>
+        <div id="statusChart" class="min-h-[200px]"></div>
     </div>
-    @endif
+
+    {{-- Évolution des paiements --}}
+    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Évolution des paiements</p>
+            <div class="p-2 bg-emerald-50 rounded-xl">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+        </div>
+        <div id="paymentTrendChart" class="min-h-[200px]"></div>
+    </div>
 </div>
 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique d'évolution des dossiers
+        var dossierOptions = {
+            series: [{
+                name: 'Dossiers créés',
+                data: @json($dossierData),
+                color: '#b11d40'
+            }],
+            chart: {
+                type: 'area',
+                height: 250,
+                toolbar: { show: false },
+                background: 'transparent',
+                sparkline: { enabled: false }
+            },
+            stroke: { curve: 'smooth', width: 3 },
+            fill: { 
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05 }
+            },
+            xaxis: { 
+                categories: @json($last6Months),
+                labels: { style: { fontSize: '10px', colors: '#9ca3af' } }
+            },
+            yaxis: { 
+                title: { text: 'Nombre de dossiers', style: { fontSize: '10px' } },
+                labels: { style: { fontSize: '10px', colors: '#9ca3af' } }
+            },
+            grid: { borderColor: '#f3f4f6', strokeDashArray: 4 }
+        };
+        
+        var dossierChart = new ApexCharts(document.querySelector("#dossiersChart"), dossierOptions);
+        dossierChart.render();
+        
+        // Graphique des montants par dossier (donut)
+        var paymentOptions = {
+            series: @json(array_values($monthlyPayments)),
+            chart: { type: 'donut', height: 200, toolbar: { show: false } },
+            labels: @json(array_keys($monthlyPayments)),
+            colors: ['#b11d40', '#dc2626', '#f97316', '#f59e0b', '#eab308', '#84cc16'],
+            legend: { position: 'bottom', fontSize: '10px' },
+            dataLabels: { enabled: true, formatter: function(val) { return Math.round(val) + '%'; } },
+            plotOptions: { pie: { donut: { size: '60%', labels: { show: true, total: { show: true, label: 'Total', formatter: function() { return '{{ number_format($totalPaiements, 0, ',', ' ') }} MAD'; } } } } } }
+        };
+        
+        var paymentChart = new ApexCharts(document.querySelector("#paymentsChart"), paymentOptions);
+        paymentChart.render();
+        
+        // Graphique de distribution des statuts
+        var otherStatus = {{ $totalDossiers - $enCours - $termines }};
+        var statusOptions = {
+            series: [{{ $enCours }}, {{ $termines }}, otherStatus],
+            chart: { type: 'pie', height: 200, toolbar: { show: false } },
+            labels: ['En cours', 'Terminés', 'Autres'],
+            colors: ['#f59e0b', '#10b981', '#6b7280'],
+            legend: { position: 'bottom', fontSize: '10px' },
+            dataLabels: { enabled: true, formatter: function(val) { return Math.round(val) + '%'; } }
+        };
+        
+        var statusChart = new ApexCharts(document.querySelector("#statusChart"), statusOptions);
+        statusChart.render();
+        
+        // Graphique d'évolution des paiements
+        var paymentTrendOptions = {
+            series: [{
+                name: 'Montants (MAD)',
+                data: @json($paymentData),
+                color: '#10b981'
+            }],
+            chart: { type: 'line', height: 200, toolbar: { show: false }, sparkline: { enabled: false } },
+            stroke: { curve: 'smooth', width: 3 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.3 } },
+            xaxis: { categories: @json($last6Months), labels: { style: { fontSize: '10px', colors: '#9ca3af' } } },
+            yaxis: { title: { text: 'Montant (MAD)', style: { fontSize: '10px' } }, labels: { style: { fontSize: '10px', colors: '#9ca3af' }, formatter: function(val) { return val.toLocaleString(); } } },
+            tooltip: { y: { formatter: function(val) { return val.toLocaleString() + ' MAD'; } } },
+            grid: { borderColor: '#f3f4f6', strokeDashArray: 4 }
+        };
+        
+        var paymentTrendChart = new ApexCharts(document.querySelector("#paymentTrendChart"), paymentTrendOptions);
+        paymentTrendChart.render();
+    });
+</script>
+
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 @endsection

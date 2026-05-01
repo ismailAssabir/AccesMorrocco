@@ -19,6 +19,7 @@ use App\Http\Controllers\PaimentController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\Client\ClientDossierController;
+use App\Http\Controllers\Client\ClientPasswordResetController;
 use App\Http\Controllers\Client\ClientPaiementController;
 use App\Http\Controllers\Client\ClientPresentationController;
 use App\Http\Controllers\Client\ClientProfileController;
@@ -49,9 +50,7 @@ Route::prefix('clients')->name('clients.')->group(function () {
     Route::middleware(['auth.client'])->group(function () {
 
         Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
-
         Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
-
         Route::get('/dossiers', [ClientDossierController::class, 'index'])->name('dossiers');
         Route::get('/dossiers/{idDossier}', [ClientDossierController::class, 'show'])->name('dossiers.show');
 
@@ -62,12 +61,26 @@ Route::prefix('clients')->name('clients.')->group(function () {
 });
 //dashboard de client 
 Route::middleware('auth.client')->group(function () {
+    Route::post('/client/update-password', [ClientController::class, 'updatePassword'])->name('client.updatePassword');
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
     Route::get('/dossiers', [ClientDossierController::class, 'index'])->name('client.dossiers');
     Route::get('/presentations', [ClientPresentationController::class, 'index'])->name('client.presentations');
     Route::get('/paiements', [ClientPaiementController::class, 'index'])->name('client.paiements');
     Route::get('/profile', [ClientProfileController::class, 'index'])->name('client.profile');
 });
+
+
+Route::prefix('client')->name('client.')->group(function () {
+    Route::get('/forgot-password', [ClientPasswordResetController::class, 'showForgotForm'])
+         ->name('password.forgot');
+    Route::post('/forgot-password', [ClientPasswordResetController::class, 'sendResetLink'])
+         ->name('password.forgot.send');
+    Route::get('/reset-password/{token}', [ClientPasswordResetController::class, 'showResetForm'])
+         ->name('password.reset.form');
+    Route::post('/reset-password', [ClientPasswordResetController::class, 'resetPassword'])
+         ->name('password.reset');
+});
+
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
