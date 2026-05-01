@@ -9,11 +9,42 @@ use Illuminate\Support\Facades\Gate;
 
 class CongeController extends Controller
 {
-    public function index()
-    {   
-                Gate::authorize('conge.view');
+    public function index(Request $request)
+    {
+        Gate::authorize('conge.view');
 
-        $conges = Conge::with('user')->get();
+        $query = Conge::with('user');
+
+        // Role-based filtering: employees only see their own requests
+        if (auth()->user()->type === 'employee') {
+            $query->where('idUser', auth()->user()->idUser);
+        }
+
+        // Search logic
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->whereHas('user', function($q) use ($s) {
+                $q->where('firstName', 'LIKE', "%$s%")
+                  ->orWhere('lastName', 'LIKE', "%$s%");
+            });
+        }
+
+        // Status logic
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Type logic
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $conges = $query->latest()->get();
+
+        if ($request->ajax()) {
+            return view('conges.partials.table', compact('conges'))->render();
+        }
+
         return view('conges.index', compact('conges'));
     }
 
@@ -26,20 +57,26 @@ public function store(Request $request)
         $request->merge(['idUser' => auth()->user()->idUser ?? auth()->id()]);
     }
 
-    $newConge = $request->validate([
-        'idUser'        => 'required|exists:users,idUser',
-        'sold'          => 'nullable|integer',
-        'type'          => 'required|in:annuel,maladie,sans_solde',
-        'justification' => 'nullable|string',
-        'motif'         => 'nullable|string|max:255',
-        'dateDebut'     => 'nullable|date',
-        'dateFin'       => 'nullable|date',
-    ]);
+        $request->validate([
+            'idUser'        => 'required|exists:users,idUser',
+            'sold'          => 'nullable|integer',
+            'type'          => 'required|in:annuel,maladie,sans_solde',
+            'justification' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
+            'motif'         => 'nullable|string|max:255',
+            'dateDebut'     => 'nullable|date',
+            'dateFin'       => 'nullable|date',
+        ]);
 
-    $newConge['dateDemande'] = now()->toDateString(); 
-    $newConge['status'] = "en_attente"; 
+        $data = $request->only(['idUser', 'sold', 'type', 'motif', 'dateDebut', 'dateFin']);
 
-    Conge::create($newConge);
+        if ($request->hasFile('justification')) {
+            $data['justification'] = $request->file('justification')->store('conges', 'public');
+        }
+
+        $data['dateDemande'] = now()->toDateString(); 
+        $data['status'] = "en_attente"; 
+
+        Conge::create($data);
 
     return redirect()->back()->with('msg', 'La demande de congé a été ajoutée avec succès');
 }
@@ -83,9 +120,20 @@ public function store(Request $request)
             'motif'         => 'nullable|string|max:255',
             'dateDebut'     => 'required|date',
             'dateFin'       => 'required|date',
+            'justification' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120',
         ]);
 
-        $conge->update($validated);
+        $data = $request->only(['type', 'motif', 'dateDebut', 'dateFin']);
+
+        if ($request->hasFile('justification')) {
+            // Optional: delete old file if it exists
+            if ($conge->justification && \Illuminate\Support\Facades\Storage::disk('public')->exists($conge->justification)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($conge->justification);
+            }
+            $data['justification'] = $request->file('justification')->store('conges', 'public');
+        }
+
+        $conge->update($data);
 
         return redirect()->back()->with('msg', 'La demande a été modifiée avec succès.');
     }

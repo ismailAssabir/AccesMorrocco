@@ -142,7 +142,7 @@ class DossierController extends Controller
     {
         Gate::authorize('dossier.view');
 
-        $dossier = Dossier::with(['client', 'departement', 'presentations', 'paiements'])
+        $dossier = Dossier::with(['client', 'departement', 'presentations.presentationItems', 'paiements'])
                           ->findOrFail($id);
 
         return view('dossiers.show', compact('dossier'));

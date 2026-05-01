@@ -166,11 +166,25 @@
                             <span class="ml-2 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500 text-xs">{{ $dossier->presentations->count() }}</span>
                         </h3>
                         @forelse($dossier->presentations as $presentation)
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl mb-2">
-                            <div>
-                                <p class="text-xs font-black text-slate-700">{{ $presentation->titre ?? '—' }}</p>
-                                <p class="text-xs text-slate-400">{{ $presentation->created_at?->format('d/m/Y') }}</p>
+                        <div class="p-4 bg-slate-50 rounded-2xl mb-3 border border-slate-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <p class="text-sm font-black text-slate-700">{{ $presentation->titre ?? '—' }}</p>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold">{{ $presentation->created_at?->format('d/m/Y') }}</p>
+                                </div>
+                                <span class="text-sm font-black text-[#b11d40]">{{ number_format($presentation->total, 2) }} MAD</span>
                             </div>
+                            
+                            @if($presentation->presentationItems->count() > 0)
+                            <div class="mt-3 space-y-1 pl-2 border-l-2 border-slate-200">
+                                @foreach($presentation->presentationItems as $item)
+                                <div class="flex justify-between text-[11px] text-slate-500">
+                                    <span>{{ $item->quantity }}x {{ $item->category->title ?? 'Article' }}</span>
+                                    <span class="font-bold">{{ number_format($item->totale, 2) }} MAD</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
                         @empty
                         <p class="text-sm text-slate-400 italic">Aucune présentation enregistrée.</p>

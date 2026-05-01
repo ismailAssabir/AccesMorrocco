@@ -44,7 +44,13 @@ class PaimentController extends Controller
             'note'         => 'nullable|string',
         ]);
 
+        $dossier = Dossier::findOrFail($validatedData['idDossier']);
         
+        if (!isset($validatedData['montantReste']) || is_null($validatedData['montantReste'])) {
+            $totalDejaPaye = Paiement::where('idDossier', $dossier->idDossier)->sum('montantPaye');
+            $validatedData['montantReste'] = max(0, $dossier->montant - ($totalDejaPaye + $validatedData['montantPaye']));
+        }
+
         if (empty($validatedData['date'])) {
             $validatedData['date'] = now()->toDateString();
         }
@@ -69,6 +75,14 @@ class PaimentController extends Controller
             'status'       => 'nullable|in:partiel,complet,annule',
             'note'         => 'nullable|string',
         ]);
+
+        if (!isset($validatedData['montantReste']) || is_null($validatedData['montantReste'])) {
+            $dossier = Dossier::findOrFail($validatedData['idDossier']);
+            $totalDejaPaye = Paiement::where('idDossier', $dossier->idDossier)
+                ->where('idPaiement', '!=', $id)
+                ->sum('montantPaye');
+            $validatedData['montantReste'] = max(0, $dossier->montant - ($totalDejaPaye + $validatedData['montantPaye']));
+        }
 
         $paiement->update($validatedData);
 

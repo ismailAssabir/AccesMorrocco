@@ -150,37 +150,82 @@
                             {{ $statusLabels[$dossier->status] ?? $dossier->status }}
                         </span>
                     @endif
-                </td>
-
-                    <td class="px-4 py-4 flex gap-2">
+                <td class="px-4 py-4">
+                    <div class="flex items-center gap-2">
 
                         @can('dossier.view')
-                        <a href="{{ route('dossiers.show',$dossier->idDossier) }}">👁</a>
+                        <a href="{{ route('dossiers.show',$dossier->idDossier) }}"
+                        class="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                        title="Voir">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5
+                                    c4.478 0 8.268 2.943 9.542 7
+                                    -1.274 4.057-5.064 7-9.542 7
+                                    -4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
                         @endcan
 
                         @can('dossier.edit')
-                        <a href="{{ route('dossiers.edit',$dossier->idDossier) }}">✏</a>
+                        <a href="{{ route('dossiers.edit',$dossier->idDossier) }}"
+                        class="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                        title="Modifier">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5h2m-1-1v2m4.293 1.293l1.414 1.414
+                                    a1 1 0 010 1.414l-9.9 9.9
+                                    a2 2 0 01-.878.514l-3.182.795
+                                    .795-3.182a2 2 0 01.514-.878l9.9-9.9
+                                    a1 1 0 011.414 0z" />
+                            </svg>
+                        </a>
                         @endcan
 
                         @can('dossier.delete')
                         <form method="POST" action="{{ route('dossiers.destroy',$dossier->idDossier) }}">
                             @csrf @method('DELETE')
-                            <button>🗑</button>
+
+                            <button type="submit"
+                                onclick="return confirm('Voulez-vous supprimer ce dossier ?')"
+                                class="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                                title="Supprimer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                        a2 2 0 01-1.995-1.858L5 7m5-4h4
+                                        m-4 0a2 2 0 00-2 2v1h8V5a2 2 0 00-2-2
+                                        m-4 0h4" />
+                                </svg>
+                            </button>
                         </form>
                         @endcan
 
                         {{-- ASSIGN --}}
                         @role('manager')
                         @if(auth()->user()->idDepartement == $dossier->idDepartement)
-                        <button onclick="openAssignModal({{ $dossier->idDossier }}, {{ $dossier->idDepartement }})">
-                            👤
+                        <button onclick="openAssignModal({{ $dossier->idDossier }}, {{ $dossier->idDepartement }})"
+                            class="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                            title="Assigner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a4 4 0 00-3-3.87
+                                    M9 20H4v-2a4 4 0 013-3.87
+                                    m13-3a4 4 0 10-8 0
+                                    4 4 0 008 0z" />
+                            </svg>
                         </button>
                         @endif
                         @endrole
 
-                    </td>
-
-                </tr>
+                    </div>
+                </td>
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-16 text-slate-400">

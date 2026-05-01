@@ -24,4 +24,14 @@ class Presentation extends Model
     function presentationItems(){
         return $this->hasMany(PresentationItem::class, 'idPresentation', 'idPresentation');
     }
+
+    /**
+     * Calculate the total amount of the presentation based on its items.
+     */
+    public function getTotalAttribute()
+    {
+        return $this->presentationItems->sum('totale');
+    }
+
+    protected $appends = ['total'];
 }

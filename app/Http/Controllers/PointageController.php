@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+use App\Models\Departement;
+use Illuminate\Support\Facades\Artisan;
 
 class PointageController extends Controller
 {
@@ -21,9 +24,9 @@ class PointageController extends Controller
         return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
-    private function getMergedPointageList(Request $request)
+    private function getMergedPointageList(Request $request, string $sort = 'desc')
     {
-        $period = $request->get('period');
+        $period = $request->input('period');
         $start = null;
         $end = null;
 
@@ -57,32 +60,32 @@ class PointageController extends Controller
         // 2. User Relationship Filters (Search, Role, Department)
         if ($request->filled('search') || $request->filled('role') || $request->filled('departement') || $request->filled('user_id')) {
             $query->whereHas('user', function ($q) use ($request) {
-                if ($search = $request->get('search')) {
+                if ($search = $request->input('search')) {
                     $q->where(function($sq) use ($search) {
                         $sq->where('firstName', 'like', "%{$search}%")
                            ->orWhere('lastName', 'like', "%{$search}%");
                     });
                 }
-                if ($role = $request->get('role')) {
+                if ($role = $request->input('role')) {
                     $q->where('type', $role);
                 }
-                if ($dept = $request->get('departement')) {
+                if ($dept = $request->input('departement')) {
                     $q->whereHas('departement', fn($sq) => $sq->where('title', 'like', "%{$dept}%"));
                 }
-                if ($idUser = $request->get('user_id')) {
+                if ($idUser = $request->input('user_id')) {
                     $q->where('idUser', $idUser);
                 }
             });
         }
 
         // 3. Status Filter (Applied directly to Pointage)
-        if ($status = $request->get('status')) {
+        if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
 
         // 4. Justification Filter (Applied directly to Pointage)
         if ($request->filled('has_justification')) {
-            $justifFilter = $request->get('has_justification');
+            $justifFilter = $request->input('has_justification');
             $wantsJustif = in_array($justifFilter, ['1', 'yes']);
             if ($wantsJustif) {
                 $query->whereNotNull('justification')->where('justification', '!=', '');
@@ -94,8 +97,8 @@ class PointageController extends Controller
         }
 
         // 5. Ordering (Chronological order)
-        return $query->orderBy('date', 'asc')
-                     ->orderBy('heureEntree', 'asc')
+        return $query->orderBy('date', $sort)
+                     ->orderBy('heureEntree', $sort)
                      ->get();
     }
 
@@ -108,7 +111,7 @@ class PointageController extends Controller
 
         try {
             \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            \App\Models\Pointage::truncate();
+            Pointage::truncate();
             \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             
             return redirect()->back()->with('success', 'Historique de pointage vidé avec succès.');
@@ -142,9 +145,9 @@ class PointageController extends Controller
         ];
             
         $settings = Company::first();
-        $users = \App\Models\User::orderBy('firstName')->get();
-        $departements = \App\Models\Departement::orderBy('title')->get();
-        $roles = \App\Models\User::distinct()->pluck('type');
+        $users = User::orderBy('firstName')->get();
+        $departements = Departement::orderBy('title')->get();
+        $roles = User::distinct()->pluck('type');
 
         return view('Adminpointage', compact('pointages', 'settings', 'stats', 'users', 'departements', 'roles'));
     }
@@ -165,18 +168,18 @@ class PointageController extends Controller
             ->first();
 
         // ── Departments and unique Posts for filter dropdowns ────────────────
-        $departements = \App\Models\Departement::orderBy('title')->get();
-        $uniquePosts  = \App\Models\User::whereNotNull('post')->distinct()->pluck('post');
+        $departements = Departement::orderBy('title')->get();
+        $uniquePosts  = User::whereNotNull('post')->distinct()->pluck('post');
 
         $isRealAdmin = ($user->type === 'admin');
 
         // ── AUTO-MARK ABSENCES (Lazy Cron) ──────────────────────────────
         if ($settings && $settings->absenceTime) {
             $now = now()->format('H:i');
-            $deadline = \Carbon\Carbon::parse($settings->absenceTime)->format('H:i');
+            $deadline = Carbon::parse($settings->absenceTime)->format('H:i');
             
             if ($now >= $deadline) {
-                \Illuminate\Support\Facades\Artisan::call('pointage:mark-absents');
+                Artisan::call('pointage:mark-absents');
             }
         }
 
@@ -265,10 +268,10 @@ class PointageController extends Controller
             'checked_in'  => (bool) $pointage?->heureEntree,
             'checked_out' => (bool) $pointage?->heureSortie,
             'heureEntree' => $pointage?->heureEntree
-                ? \Carbon\Carbon::parse($pointage->heureEntree)->format('H:i')
+                ? Carbon::parse($pointage->heureEntree)->format('H:i')
                 : null,
             'heureSortie' => $pointage?->heureSortie
-                ? \Carbon\Carbon::parse($pointage->heureSortie)->format('H:i')
+                ? Carbon::parse($pointage->heureSortie)->format('H:i')
                 : null,
             'status'      => $pointage?->status,
             'idPointage'  => $pointage?->idPointage,
@@ -508,7 +511,7 @@ class PointageController extends Controller
     {
         Gate::authorize('view_all_attendance');
 
-        $pointages = $this->getMergedPointageList($request);
+        $pointages = $this->getMergedPointageList($request, 'asc');
 
         $stats = [
             'total' => $pointages->count(),
@@ -533,16 +536,16 @@ class PointageController extends Controller
             'last_month' => 'Mois dernier',
             'custom' => 'Personnalisé'
         ];
-        $periodValue = strtolower($request->get('period', ''));
+        $periodValue = strtolower($request->input('period', ''));
         
         // Reverse mapping to handle case where label might be passed instead of value
         $reverseTrans = array_flip($periodTrans);
-        $normalizedPeriod = $reverseTrans[$request->get('period')] ?? $periodValue;
+        $normalizedPeriod = $reverseTrans[$request->input('period')] ?? $periodValue;
 
         if (!$normalizedPeriod && ($request->filled('start_date') || $request->filled('end_date'))) {
             $displayPeriod = 'Personnalisé';
         } else {
-            $displayPeriod = $periodTrans[$normalizedPeriod] ?? ($request->filled('period') ? $request->get('period') : 'Toutes les dates');
+            $displayPeriod = $periodTrans[$normalizedPeriod] ?? ($request->filled('period') ? $request->input('period') : 'Toutes les dates');
         }
 
         $data = [
@@ -551,16 +554,16 @@ class PointageController extends Controller
             'company' => $company,
             'filters' => [
                 'period' => $displayPeriod,
-                'start' => $request->get('start_date') 
-                    ? \Carbon\Carbon::parse($request->get('start_date'))->format('d/m/Y') 
-                    : ($minDate ? \Carbon\Carbon::parse($minDate)->format('d/m/Y') : null),
-                'end' => $request->get('end_date') 
-                    ? \Carbon\Carbon::parse($request->get('end_date'))->format('d/m/Y') 
-                    : ($maxDate ? \Carbon\Carbon::parse($maxDate)->format('d/m/Y') : null),
-                'role' => $request->filled('role') ? $request->get('role') : 'Tous',
-                'status' => $request->filled('status') ? $request->get('status') : 'Tous',
-                'employee' => $request->filled('user_id') ? (\App\Models\User::find($request->user_id)?->firstName . ' ' . \App\Models\User::find($request->user_id)?->lastName) : 'Tous',
-                'justified' => $request->has('has_justification') && $request->get('has_justification') !== '' ? ($request->get('has_justification') === 'yes' || $request->get('has_justification') === '1' ? 'Oui' : 'Non') : 'Tous',
+                'start' => $request->input('start_date') 
+                    ? Carbon::parse($request->input('start_date'))->format('d/m/Y') 
+                    : ($minDate ? Carbon::parse($minDate)->format('d/m/Y') : null),
+                'end' => $request->input('end_date') 
+                    ? Carbon::parse($request->input('end_date'))->format('d/m/Y') 
+                    : ($maxDate ? Carbon::parse($maxDate)->format('d/m/Y') : null),
+                'role' => $request->filled('role') ? $request->input('role') : 'Tous',
+                'status' => $request->filled('status') ? $request->input('status') : 'Tous',
+                'employee' => $request->filled('user_id') ? (User::find($request->user_id)?->firstName . ' ' . User::find($request->user_id)?->lastName) : 'Tous',
+                'justified' => $request->has('has_justification') && $request->input('has_justification') !== '' ? ($request->input('has_justification') === 'yes' || $request->input('has_justification') === '1' ? 'Oui' : 'Non') : 'Tous',
             ],
             'logo' => public_path('images/logo.png'),
             'date' => now()->format('d/m/Y H:i')
@@ -572,5 +575,18 @@ class PointageController extends Controller
         
         $filename = 'Rapport_Pointage_' . now()->format('Ymd_His') . '.pdf';
         return $pdf->download($filename);
+    }
+
+    /**
+     * Clear all pointage history (admin only).
+     */
+    public function clearHistory(Request $request)
+    {
+        Gate::authorize('pointage.delete');
+
+        Pointage::query()->delete();
+
+        return redirect()->route('admin.pointages.index')
+            ->with('msg', 'Tout l\'historique de pointage a été supprimé.');
     }
 }

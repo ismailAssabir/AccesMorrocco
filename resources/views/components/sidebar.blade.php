@@ -109,11 +109,11 @@
             @endcan
 
             @can('reunion.view')
-                <a href="{{ Route::has('meetings.index') ? route('meetings.index') : '#' }}" 
+                <a href="{{ Route::has('reunions.index') ? route('reunions.index') : '#' }}" 
                    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-                   {{ request()->routeIs('meetings.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                    <div class="transition-transform duration-300 {{ request()->routeIs('meetings.index') ? '' : 'group-hover:rotate-12' }}">
-                        <svg class="w-5 h-5 {{ request()->routeIs('meetings.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   {{ request()->routeIs('reunions.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->routeIs('reunions.*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('reunions.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
@@ -122,11 +122,11 @@
             @endcan
 
             @can('objectif.view')
-                <a href="{{ Route::has('goals.index') ? route('goals.index') : '#' }}" 
+                <a href="{{ Route::has('objectifs.index') ? route('objectifs.index') : '#' }}" 
                    class="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 active:scale-95
-                   {{ request()->routeIs('goals.index') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
-                    <div class="transition-transform duration-300 {{ request()->routeIs('goals.index') ? '' : 'group-hover:rotate-12' }}">
-                        <svg class="w-5 h-5 {{ request()->routeIs('goals.index') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   {{ request()->routeIs('objectifs.*') ? 'bg-[#be2346] text-white shadow-lg shadow-[#be2346]/20' : 'text-white/50 hover:bg-white/5 hover:text-white hover:translate-x-1' }}">
+                    <div class="transition-transform duration-300 {{ request()->routeIs('objectifs.*') ? '' : 'group-hover:rotate-12' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('objectifs.*') ? 'text-white' : 'group-hover:text-[#be2346]' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>

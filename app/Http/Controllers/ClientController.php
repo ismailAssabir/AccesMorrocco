@@ -10,6 +10,8 @@ use App\Models\Dossier;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ClientWelcomeMail;
 
 class ClientController extends Controller
 {
@@ -31,44 +33,52 @@ class ClientController extends Controller
         return view('AllClients' , compact("clients", 'departements'));
     }
 
-public function store(Request $request) {
+public function store(Request $request)
+{
     Gate::authorize('client.create');
 
-    $newClient = $request->validate([
+    $validated = $request->validate([
         'firstName'     => 'required|string|max:50',
         'lastName'      => 'required|string|max:50',
-        'email'         => 'required|email',
-        'password'      => 'string|required|min:8',
+        'email'         => 'required|email|unique:clients,email',
         'CNE'           => 'required|string',
         'dateNaissance' => "required|date",
-        'address'       => 'nullable|string|max:100',
         'phoneNumber'   => 'nullable|min:10|max:15',
-        'idLead'        => 'nullable|exists:leads,idLead',
         'status'        => 'in:actif,inactif',
-        'type_select' => 'nullable|string',
-        'type'        => 'nullable|string|max:50',
-        'nationalite'   => 'max:40|string|nullable',
-        'note'          => 'string|nullable',
+        'type_select'   => 'nullable|string',
+        'type'          => 'nullable|string|max:50',
+        'nationalite'   => 'nullable|string|max:40',
     ]);
-    $newClient['type'] = $request->type_select === 'autre' ? $request->type : $request->type_select;
-    $newClient['password'] = Hash::make($request->password);
 
-    $client = Client::create($newClient);
+    // 🔥 générer password
+    $plainPassword = Str::random(10);
 
-    // Créer le dossier par défaut
+    $validated['password'] = Hash::make($plainPassword);
+
+    $validated['type'] = $request->type_select === 'autre'
+        ? $request->type
+        : $request->type_select;
+
+    $client = Client::create($validated);
+
+    // dossier auto
     Dossier::create([
-        'idClient'        => $client->idClient,
-        'idDepartement'   => null,
-        'reference'       => 'DOS-' . strtoupper(Str::random(8)),
-        'dateCreation'    => now(),
+        'idClient' => $client->idClient,
+        'reference' => 'DOS-' . strtoupper(Str::random(8)),
+        'dateCreation' => now(),
         'nombrePersonnes' => 1,
-        'montant'         => 0,
-        'nombreJours'     => 0,
-        'status'          => 'ouvert',
-        'commentaire'     => 'Dossier créé automatiquement à l\'inscription du client.',
+        'montant' => 0,
+        'nombreJours' => 0,
+        'status' => 'ouvert',
     ]);
 
-    return redirect()->route('clients.index')->with('msg', 'Le client a été ajouté avec succès!');
+    // 📧 envoi email
+    Mail::to($client->email)->send(
+        new ClientWelcomeMail($client, $plainPassword)
+    );
+
+    return redirect()->route('clients.index')
+        ->with('msg', 'Client créé + email envoyé avec succès');
 }
 public function show(Request $request, $id)
 {
