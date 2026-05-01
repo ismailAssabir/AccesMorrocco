@@ -29,6 +29,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\ClientAuthController;        
 use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\Admin\ClientPermissionController;
+use App\Http\Controllers\PresentationItemController;
+use App\Http\Controllers\PresentationsController;
+
+
 
 
 /*
@@ -298,6 +302,19 @@ Route::get('/dossiers/{id}', [DossierController::class, 'show'])->name('dossiers
 Route::get('/dossiers/{id}/edit',[DossierController::class, 'edit'])->name('dossiers.edit');
 Route::put('/dossiers/{id}', [DossierController::class, 'update'])->name('dossiers.update');
 Route::delete('/dossiers/{id}',[DossierController::class, 'destroy'])->name('dossiers.destroy');
+
+
+Route::get('/presentation-items', [PresentationItemController::class, 'index']);
+Route::post('/presentation-items', [PresentationItemController::class, 'store']);
+Route::get('/presentation-items/{id}', [PresentationItemController::class, 'show']);
+Route::put('/presentation-items/{id}', [PresentationItemController::class, 'update']);
+Route::delete('/presentation-items/{id}', [PresentationItemController::class, 'destroy']);
+
+Route::get('/presentations', [PresentationsController::class, 'index']);
+Route::post('/presentations', [PresentationsController::class, 'store']);
+Route::get('/presentations/{id}', [PresentationsController::class, 'show']);
+Route::put('/presentations/{id}', [PresentationsController::class, 'update']);
+Route::delete('/presentations/{id}', [PresentationsController::class, 'destroy']);
 
 
 require __DIR__.'/auth.php';
