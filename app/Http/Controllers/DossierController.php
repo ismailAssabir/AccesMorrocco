@@ -12,7 +12,27 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class DossierController extends Controller
-{
+{        
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:ouvert,en_cours,ferme',
+        ]);
+
+        $dossier = Dossier::findOrFail($id);
+
+        // Sécurité : seulement l'employé assigné peut changer le statut
+        if ($dossier->idUser !== auth()->user()->idUser) {
+            return response()->json(['success' => false, 'message' => 'Non autorisé.'], 403);
+        }
+
+        $dossier->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut mis à jour avec succès !',
+        ]);
+    }
     public function assign(Request $request, $id)
     {
         $request->validate([
@@ -75,7 +95,7 @@ class DossierController extends Controller
         return response()->json($employes);
     }
     public function index(Request $request)
-    {
+    {   
         Gate::authorize('dossier.view');
 
         $user = auth()->user();
