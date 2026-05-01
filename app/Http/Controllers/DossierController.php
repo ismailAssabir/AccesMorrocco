@@ -162,10 +162,12 @@ class DossierController extends Controller
     {
         Gate::authorize('dossier.view');
 
-        $dossier = Dossier::with(['client', 'departement', 'presentations.presentationItems', 'paiements'])
+        $dossier = Dossier::with(['client', 'departement', 'presentations.presentationItems.category', 'paiements'])
                           ->findOrFail($id);
 
-        return view('dossiers.show', compact('dossier'));
+        $categories = \App\Models\Category::all();
+
+        return view('dossiers.show', compact('dossier', 'categories'));
     }
 
     public function edit($id)

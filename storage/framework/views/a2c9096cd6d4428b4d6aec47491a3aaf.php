@@ -47,7 +47,7 @@
 
     
     <form method="GET" class="mb-6 flex flex-col md:flex-row gap-3">
-
+        
         <input type="text" name="search" value="<?php echo e(request('search')); ?>"
             placeholder="Recherche..."
             class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">

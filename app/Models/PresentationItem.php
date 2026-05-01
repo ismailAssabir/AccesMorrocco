@@ -14,9 +14,11 @@ class PresentationItem extends Model
     protected $fillable = [
         'idPresentation',
         'idCategory',
+        'nom',
         'prixUnitaire',
         'quantity',
-        'totale'
+        'totale',
+        'status'
     ];
     function category(){
         return $this->belongsTo(Category::class, 'idCategory', 'idCategory');

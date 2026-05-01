@@ -1,10 +1,8 @@
-@extends('layouts.client')
+<?php $__env->startSection('title', 'Mes Présentations — Espace Client'); ?>
+<?php $__env->startSection('page-title', 'Mes Présentations'); ?>
+<?php $__env->startSection('page-subtitle', 'Consultez vos dossiers de présentation'); ?>
 
-@section('title', 'Mes Présentations — Espace Client')
-@section('page-title', 'Mes Présentations')
-@section('page-subtitle', 'Consultez vos dossiers de présentation')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden">
     <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
 
@@ -15,7 +13,7 @@
         </div>
     </div>
 
-    @if($presentations->count() > 0)
+    <?php if($presentations->count() > 0): ?>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
@@ -27,36 +25,37 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                @foreach($presentations as $pres)
+                <?php $__currentLoopData = $presentations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pres): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr class="hover:bg-slate-50/50 transition-colors">
                     <td class="px-8 py-6">
-                        <span class="font-bold text-slate-700">{{ $pres->titre }}</span>
+                        <span class="font-bold text-slate-700"><?php echo e($pres->titre); ?></span>
                     </td>
                     <td class="px-8 py-6">
-                        <span class="text-xs font-black text-[#b11d40]">{{ $pres->dossier->reference ?? '—' }}</span>
+                        <span class="text-xs font-black text-[#b11d40]"><?php echo e($pres->dossier->reference ?? '—'); ?></span>
                     </td>
                     <td class="px-8 py-6">
-                        <span class="text-slate-500">{{ $pres->created_at->format('d/m/Y') }}</span>
+                        <span class="text-slate-500"><?php echo e($pres->created_at->format('d/m/Y')); ?></span>
                     </td>
                     <td class="px-8 py-6 text-right">
                         <div class="flex items-center justify-end gap-3">
-                            <a href="{{ route('clients.presentations.show', $pres->idPresentation) }}" class="text-slate-600 font-bold hover:text-[#b11d40] transition-colors">Consulter</a>
-                            @if($pres->fichier)
-                            <a href="{{ asset('storage/'.$pres->fichier) }}" target="_blank" class="px-4 py-1.5 bg-[#b11d40] text-white rounded-xl font-bold text-xs hover:bg-[#7c1233] transition-all">Télécharger PDF</a>
-                            @endif
+                            <a href="<?php echo e(route('clients.presentations.show', $pres->idPresentation)); ?>" class="text-slate-600 font-bold hover:text-[#b11d40] transition-colors">Consulter</a>
+                            <?php if($pres->fichier): ?>
+                            <a href="<?php echo e(asset('storage/'.$pres->fichier)); ?>" target="_blank" class="px-4 py-1.5 bg-[#b11d40] text-white rounded-xl font-bold text-xs hover:bg-[#7c1233] transition-all">Télécharger PDF</a>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
     </div>
-    @if($presentations->hasPages())
+    <?php if($presentations->hasPages()): ?>
     <div class="px-8 py-6 border-t border-slate-100">
-        {{ $presentations->links() }}
+        <?php echo e($presentations->links()); ?>
+
     </div>
-    @endif
-    @else
+    <?php endif; ?>
+    <?php else: ?>
     <div class="flex flex-col items-center justify-center py-24 px-8 text-center">
         <div class="w-24 h-24 rounded-[2rem] bg-slate-50 flex items-center justify-center mb-6">
             <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,6 +65,8 @@
         <h3 class="text-2xl font-black text-slate-800">Aucune présentation</h3>
         <p class="text-slate-400 mt-2 max-w-xs text-sm">Vos documents de présentation apparaîtront ici.</p>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.client', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\dell\Desktop\PROJECTS\AccesMorrocco\resources\views/clients/presentations/index.blade.php ENDPATH**/ ?>
