@@ -112,9 +112,8 @@
     <div class="flex-shrink-0">
         <div class="flex items-center gap-4 px-6 py-10">
             <div class="bg-gradient-to-br from-[#7c1233] to-[#be2346] p-2 rounded-xl shadow-lg flex-shrink-0 border border-white/10">
-                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
-                </svg>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain filter brightness-0 invert"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDggMjJoNGwyLTNoMTJsNC00aC00TDQgMnptNiAxNUg5bDMtNiAzIDZ6Ii8+PC9zdmc+'">
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-tight">ACCESS</span>
@@ -206,30 +205,29 @@
         </nav>
     </div>
 
-    {{-- ═══════════════ BOTTOM SECTION (Profile & Logout) ═══════════════ --}}
+    {{-- ═══════════════ BOTTOM SECTION (fixed) ═══════════════ --}}
     <div class="flex-shrink-0 px-6 py-8 border-t border-white/5 bg-[#0F1115]">
-        <div class="flex items-center justify-between mb-6">
-            <div class="group/profile flex items-center gap-3 min-w-0 p-2 -ml-2 rounded-xl transition-all duration-300">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0">
+        <div class="flex items-center justify-between">
+            <a href="{{ route('clients.profile') }}" class="group/profile flex items-center gap-3 min-w-0 p-2 -ml-2 rounded-xl hover:bg-white/5 transition-all duration-300 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7c1233] to-[#be2346] flex items-center justify-center font-black text-xs shadow-lg text-white shrink-0 group-hover/profile:scale-110 group-hover/profile:rotate-3 transition-transform">
                     {{ strtoupper(mb_substr($client->firstName ?? 'C', 0, 1) . mb_substr($client->lastName ?? '', 0, 1)) }}
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <p class="text-white font-bold text-sm truncate">{{ $client->firstName ." ".$client->lastName}}</p>
-                    <p class="text-white/30 text-[10px] font-medium uppercase tracking-wider">Espace Client</p>
+                    <p class="text-sm font-bold tracking-tight text-white leading-tight truncate group-hover/profile:text-[#be2346] transition-colors">
+                        {{ $client->firstName ." ".$client->lastName}}
+                    </p>
+                    <p class="text-[10px] text-[#be2346] uppercase font-black tracking-widest mt-0.5 opacity-80 group-hover/profile:opacity-100 transition-opacity">
+                        Espace Client
+                    </p>
                 </div>
-            </div>
-        </div>
+            </a>
 
-        <form method="POST" action="{{ route('clients.logout') }}">
-            @csrf
-            <button type="submit" 
-                    class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 text-white/50 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 text-sm font-semibold border border-white/5">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            <button type="button" onclick="confirmClientLogout()" class="group p-2.5 rounded-lg bg-white/5 hover:bg-red-600/20 border border-white/5 hover:border-red-600/40 transition-all duration-300 active:scale-90" title="Déconnexion">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/40 group-hover:text-[#be2346] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                Déconnexion
             </button>
-        </form>
+        </div>
     </div>
 </aside>
 
@@ -375,12 +373,42 @@
     </main>
 </div>
 
+<x-delete-confirmation-modal />
+
 <script>
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     sidebar.classList.toggle('open');
     overlay.classList.toggle('open');
+}
+
+function confirmClientLogout() {
+    if (typeof openGlobalDeleteModal === 'function') {
+        openGlobalDeleteModal(
+            "{{ route('clients.logout') }}", 
+            "Quitter la session ?", 
+            "Êtes-vous sûr de vouloir vous déconnecter de votre compte Access Morocco ?", 
+            "Se déconnecter", 
+            "danger", 
+            "logout", 
+            "POST"
+        );
+    } else {
+        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ route('clients.logout') }}";
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
 }
 </script>
 

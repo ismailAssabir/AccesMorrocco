@@ -318,8 +318,11 @@ class PointageController extends Controller
                 : redirect()->route('pointages.index')->with('error', $msg);
         }
 
-        $already = Pointage::where('idUser', $idUser)->where('date', $today)->whereNotNull('heureEntree')->exists();
-        if ($already) {
+        // 1. Check for any existing record for today (including automated absences)
+        $pointage = Pointage::where('idUser', $idUser)->where('date', $today)->first();
+
+        // 2. If already checked in (has heureEntree), prevent duplicate
+        if ($pointage && $pointage->heureEntree) {
             $msg = "Vous avez déjà pointé votre arrivée aujourd'hui.";
             return $request->expectsJson() 
                 ? response()->json(['success' => false, 'message' => $msg], 422) 
@@ -331,13 +334,20 @@ class PointageController extends Controller
         $graceMinutes = $settings->maxDelay ?? 15;
         $status = $currentTime->gt($officialTime->addMinutes($graceMinutes)) ? 'retard' : 'present';
 
-        Pointage::create([
+        $pointageData = [
             'idUser'      => $idUser,
             'date'        => $today,
             'heureEntree' => $currentTime->toTimeString(),
             'status'      => $status,
             'gps'         => $request->gps,
-        ]);
+        ];
+
+        // 3. Update existing record (e.g. 'absent' placeholder) or create new one
+        if ($pointage) {
+            $pointage->update($pointageData);
+        } else {
+            Pointage::create($pointageData);
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

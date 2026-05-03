@@ -1,5 +1,50 @@
 <x-app-layout>
-<div class="p-8 bg-[#F8FAFC] min-h-screen" x-data="leadsKanban()">
+<div class="p-8 min-h-screen" x-data="leadsKanban()">
+
+    {{-- TOAST NOTIFICATIONS --}}
+    <div class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none">
+        @if(session('msg'))
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-4"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-4"
+             class="bg-white border-l-4 border-emerald-500 text-slate-700 shadow-lg rounded-xl p-4 flex items-center gap-3 w-80 pointer-events-auto">
+            <div class="bg-emerald-100 p-2 rounded-full">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <p class="font-medium text-sm flex-1">{{ session('msg') }}</p>
+            <button @click="show = false" class="text-slate-400 hover:text-slate-600">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-4"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-4"
+             class="bg-white border-l-4 border-red-500 text-slate-700 shadow-lg rounded-xl p-4 flex items-center gap-3 w-80 pointer-events-auto">
+            <div class="bg-red-100 p-2 rounded-full">
+                <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+            <p class="font-medium text-sm flex-1">{{ session('error') }}</p>
+            <button @click="show = false" class="text-slate-400 hover:text-slate-600">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @endif
+    </div>
 
     {{-- TOP BAR --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -10,7 +55,7 @@
         <div class="flex gap-3">
             @can('lead.view')
             <a href="{{ route('leads.export-pdf', request()->query()) }}"
-               class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-[#b11d40] hover:text-white hover:border-[#b11d40] transition-all text-sm">
+               class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all text-sm">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
@@ -20,7 +65,7 @@
 
             @can('lead.create')
             <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
-                    class="flex items-center gap-2 px-4 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow-md shadow-[#b11d40]/20">
+                    class="flex items-center gap-2 px-4 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow-sm shadow-[#b11d40]/20">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -30,61 +75,72 @@
         </div>
     </div>
 
-    {{-- FLASH --}}
-    @if(session('msg'))
-    <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-semibold">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        {{ session('msg') }}
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div class="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm font-semibold">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        {{ session('error') }}
-    </div>
-    @endif
-
     {{-- FILTERS --}}
-    <form method="GET" action="{{ route('leads.index') }}"
-          class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-end">
-
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Recherche</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    <form method="GET" action="{{ route('leads.index') }}" x-data
+          class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+        <div class="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+            
+            {{-- Search --}}
+            <div class="flex-1 min-w-[200px] shrink-0 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                </span>
+                </div>
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Nom, email, téléphone..."
-                       class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
+                       @input.debounce.500ms="$el.closest('form').submit()"
+                       placeholder="Rechercher nom, email, téléphone..."
+                       class="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 outline-none">
             </div>
-        </div>
 
-        <div class="min-w-[140px]">
-            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Type</label>
-            <select name="type" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#b11d40]">
-                <option value="">Tous les types</option>
-                @foreach($types as $type)
-                    <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>{{ $type }}</option>
-                @endforeach
-            </select>
-        </div>
+            {{-- Type Filter --}}
+            <div class="relative shrink-0">
+                <select name="type" onchange="this.form.submit()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                    <option value="">Type (Tous)</option>
+                    @foreach($types as $type)
+                        <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+            </div>
 
-        <div class="flex gap-2">
-            <button type="submit" class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm">
-                Filtrer
-            </button>
-            @if(request('search') || request('type'))
-            <a href="{{ route('leads.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
-                Réinitialiser
-            </a>
+            {{-- Source Filter --}}
+            <div class="relative shrink-0">
+                <select name="source" onchange="this.form.submit()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                    <option value="">Source (Toutes)</option>
+                    @foreach($sources as $source)
+                        <option value="{{ $source }}" {{ request('source') === $source ? 'selected' : '' }}>{{ $source }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+            </div>
+
+            {{-- Nationalité Filter --}}
+            <div class="relative shrink-0">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <input type="text" name="nationalite" value="{{ request('nationalite') }}"
+                       @input.debounce.500ms="$el.closest('form').submit()"
+                       placeholder="Nationalité..."
+                       class="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 w-36">
+            </div>
+
+            {{-- Reset --}}
+            @if(request('search') || request('type') || request('source') || request('nationalite'))
+            <div class="flex shrink-0">
+                <a href="{{ route('leads.index') }}" title="Réinitialiser" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </a>
+            </div>
             @endif
         </div>
     </form>
@@ -92,12 +148,12 @@
     {{-- KANBAN BOARD --}}
     @php
         $columns = [
-            'nouveau'    => ['label' => 'Nouveau',    'dot' => 'bg-slate-400',   'badge' => 'bg-slate-100 text-slate-500',   'border' => 'border-slate-300',  'icon' => '🌱'],
-            '1er_appel'  => ['label' => '1er Appel',  'dot' => 'bg-blue-400',    'badge' => 'bg-blue-50 text-blue-600',      'border' => 'border-blue-300',   'icon' => '📞'],
-            '2eme_appel' => ['label' => '2ème Appel', 'dot' => 'bg-orange-400',  'badge' => 'bg-orange-50 text-orange-600',  'border' => 'border-orange-300', 'icon' => '📲'],
-            'promis'     => ['label' => 'Promis',     'dot' => 'bg-yellow-400',  'badge' => 'bg-yellow-50 text-yellow-700',  'border' => 'border-yellow-300', 'icon' => '🤝'],
-            'ok'         => ['label' => 'Converti',   'dot' => 'bg-emerald-400', 'badge' => 'bg-emerald-50 text-emerald-600','border' => 'border-emerald-300','icon' => '✅'],
-            'lost'       => ['label' => 'Perdu',      'dot' => 'bg-red-400',     'badge' => 'bg-red-50 text-red-600',        'border' => 'border-red-300',    'icon' => '❌'],
+            'nouveau'    => ['label' => 'Nouveau',    'dot' => 'bg-slate-400',   'badge' => 'bg-slate-100 text-slate-500',   'border' => 'border-slate-300',  'svgPath' => 'M12 4v16m8-8H4'],
+            '1er_appel'  => ['label' => '1er Appel',  'dot' => 'bg-blue-400',    'badge' => 'bg-blue-50 text-blue-600',      'border' => 'border-blue-300',   'svgPath' => 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'],
+            '2eme_appel' => ['label' => '2ème Appel', 'dot' => 'bg-orange-400',  'badge' => 'bg-orange-50 text-orange-600',  'border' => 'border-orange-300', 'svgPath' => 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'],
+            'promis'     => ['label' => 'Promis',     'dot' => 'bg-yellow-400',  'badge' => 'bg-yellow-50 text-yellow-700',  'border' => 'border-yellow-300', 'svgPath' => 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z'],
+            'ok'         => ['label' => 'Converti',   'dot' => 'bg-emerald-400', 'badge' => 'bg-emerald-50 text-emerald-600','border' => 'border-emerald-300','svgPath' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+            'lost'       => ['label' => 'Perdu',      'dot' => 'bg-red-400',     'badge' => 'bg-red-50 text-red-600',        'border' => 'border-red-300',    'svgPath' => 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'],
         ];
         $grouped = $leads->groupBy('statut');
         $avatarColors = ['bg-[#b11d40]','bg-blue-500','bg-emerald-500','bg-amber-500','bg-violet-500','bg-cyan-500'];
@@ -109,26 +165,27 @@
         <div class="flex flex-col gap-3 min-w-0">
 
             {{-- Column Header --}}
-            <div class="flex items-center justify-between px-1">
-                <h2 class="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $col['dot'] }} shrink-0"></span>
+            <div class="flex items-center justify-between px-2">
+                <h2 class="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2 whitespace-nowrap truncate">
+                    <span class="w-2 h-2 rounded-full shrink-0 {{ $col['dot'] }}"></span>
                     <span class="truncate">{{ $col['label'] }}</span>
                 </h2>
-                <span class="{{ $col['badge'] }} text-[10px] font-black px-2 py-0.5 rounded-full shrink-0">
+                <span class="{{ $col['badge'] }} text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ml-2">
                     {{ $colLeads->count() }}
                 </span>
             </div>
 
             {{-- Cards --}}
-            <div class="flex flex-col gap-3 min-h-[200px]"
+            <div class="flex flex-col gap-4 min-h-[300px]"
                  x-data="{ page: 1, perPage: 5 }">
 
                 @forelse($colLeads->values() as $i => $lead)
                 <div x-show="{{ $i }} >= (page-1)*perPage && {{ $i }} < page*perPage"
-                     class="relative bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group cursor-default">
+                     class="relative bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-default overflow-hidden flex flex-col h-full">
 
-                    {{-- Left accent --}}
-                    <div class="absolute left-0 top-4 bottom-4 w-1 {{ $col['border'] }} border-l-2 rounded-r-full"></div>
+                    {{-- Vertical Accent --}}
+                    <div class="absolute left-0 top-6 bottom-6 w-1.5 {{ str_replace('bg-', '', $col['dot']) }} bg-opacity-70 bg-gradient-to-b from-{{ str_replace('bg-', '', $col['dot']) }} to-slate-200 rounded-r-full shadow-[0_0_10px_rgba(0,0,0,0.1)]" style="background-color: var(--fallback, currentColor); border-left: 4px solid inherit;"></div>
+                    <div class="absolute left-0 top-6 bottom-6 w-1.5 {{ $col['dot'] }} rounded-r-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"></div>
 
                     {{-- Avatar + Name --}}
                     <div class="flex items-start justify-between gap-2 mb-3 pl-2">
@@ -139,11 +196,11 @@
                                 </span>
                             </div>
                             <div class="min-w-0">
-                                <p class="font-extrabold text-slate-800 text-xs leading-tight truncate group-hover:text-[#b11d40] transition-colors">
+                                <p class="font-extrabold text-slate-800 text-base leading-tight truncate group-hover:text-[#b11d40] transition-colors">
                                     {{ $lead->firstName }} {{ $lead->lastName }}
                                 </p>
                                 @if($lead->nationalite)
-                                <p class="text-[10px] text-slate-400 truncate">{{ $lead->nationalite }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium truncate">{{ $lead->nationalite }}</p>
                                 @endif
                             </div>
                         </div>
@@ -202,9 +259,9 @@
                     </div>
 
                     {{-- Footer: Date + Actions --}}
-                    <div class="pl-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[9px] text-slate-400 font-medium">
-                            {{ $lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d/m/Y') : '—' }}
+                    <div class="pl-2 pt-4 border-t border-slate-100/60 flex items-center justify-between">
+                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                            {{ $lead->dateCreation ? \Carbon\Carbon::parse($lead->dateCreation)->format('d M, Y') : '—' }}
                         </span>
 
                         <div class="flex gap-1">
@@ -253,10 +310,17 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Subtle Branding --}}
+                    <div class="absolute bottom-1 right-1 opacity-[0.03] group-hover:opacity-10 transition-opacity pointer-events-none">
+                        <img src="{{ asset('images/logo.png') }}" class="w-12 h-12 grayscale" alt="Branding">
+                    </div>
                 </div>
                 @empty
-                <div class="p-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400">
-                    <span class="text-2xl mb-1">{{ $col['icon'] }}</span>
+                <div class="p-8 border-2 border-dashed border-slate-200 rounded-[24px] flex flex-col items-center justify-center text-slate-400 min-h-[150px]">
+                    <svg class="w-8 h-8 mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $col['svgPath'] }}"/>
+                    </svg>
                     <p class="text-[10px] font-bold uppercase tracking-widest text-center">Aucun lead</p>
                 </div>
                 @endforelse
@@ -316,11 +380,11 @@
                     <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Statut *</label>
                     <select name="statut" id="statutSelect" onchange="handleStatutChange(this.value)"
                             class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
-                        <option value="1er_appel">📞 1er Appel</option>
-                        <option value="2eme_appel">📞 2ème Appel</option>
-                        <option value="promis">🤝 Promis</option>
-                        <option value="lost">❌ Perdu</option>
-                        <option value="ok">✅ Converti en client</option>
+                        <option value="1er_appel">1er Appel</option>
+                        <option value="2eme_appel">2ème Appel</option>
+                        <option value="promis">Promis</option>
+                        <option value="lost">Perdu</option>
+                        <option value="ok">Converti en client</option>
                     </select>
                 </div>
 

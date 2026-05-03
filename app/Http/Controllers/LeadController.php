@@ -43,11 +43,20 @@ class LeadController extends Controller
             $query->where('statut', $request->statut);
         }
 
-        $leads  = $query->latest()->paginate(10)->withQueryString();
-        $types  = Lead::select('type')->distinct()->pluck('type');
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+
+        if ($request->filled('nationalite')) {
+            $query->where('nationalite', 'like', "%{$request->nationalite}%");
+        }
+
+        $leads  = $query->latest()->get(); // Changed to get() to properly display Kanban columns
+        $types  = Lead::select('type')->whereNotNull('type')->where('type', '!=', '')->distinct()->pluck('type');
+        $sources = Lead::select('source')->whereNotNull('source')->where('source', '!=', '')->distinct()->pluck('source');
         $departements = Departement::all();
 
-        return view('leads.index', compact('leads', 'types', 'departements'));
+        return view('leads.index', compact('leads', 'types', 'sources', 'departements'));
     }
 
     public function store(Request $request)
