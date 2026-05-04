@@ -28,7 +28,8 @@ class Lead extends Model
         'idDepartement',
         'statut',
         "contentAppel",
-        "duree"
+        "duree",
+        "pas_de_reponse"
     ];
     function client(){
         return $this->belongsTo(Client::class, 'idClient', 'idClient');

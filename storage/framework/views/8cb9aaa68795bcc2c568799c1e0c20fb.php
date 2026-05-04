@@ -404,12 +404,36 @@
             <?php endif; ?>
 
             
-            <?php if($lead->duree || $lead->contentAppel): ?>
+            <?php if($lead->duree || $lead->contentAppel || $lead->pas_de_reponse): ?>
             <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                 <div class="h-1.5 w-full bg-gradient-to-r from-blue-400 to-blue-600"></div>
                 <div class="p-6">
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Détails de l'appel</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Détails de l'appel</p>
+                        <?php if($lead->pas_de_reponse): ?>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-amber-50 text-amber-600 border border-amber-200">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                            Pas de réponse
+                        </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if($lead->pas_de_reponse): ?>
+                    <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                        <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-black text-amber-700">Le client n'a pas répondu à l'appel</p>
+                            <p class="text-xs text-amber-500 mt-0.5">Aucune communication établie lors de cet appel.</p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if($lead->duree || $lead->contentAppel): ?>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 <?php echo e($lead->pas_de_reponse ? 'mt-4' : ''); ?>">
                         <?php if($lead->duree): ?>
                         <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
                             <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-1">Durée</p>
@@ -423,6 +447,7 @@
                         </div>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endif; ?>

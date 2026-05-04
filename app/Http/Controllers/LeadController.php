@@ -147,38 +147,39 @@ class LeadController extends Controller
     $lead = Lead::findOrFail($id);
 
     $request->validate([
-        'statut'       => 'required|in:1er_appel,2eme_appel,lost,promis,ok',
-        'note'         => 'nullable|string',
-        'duree'        => 'required_if:statut,1er_appel,2eme_appel',
-        'contentAppel' => 'required_if:statut,1er_appel,2eme_appel',
-        'idDepartement'=> 'nullable|exists:departements,idDepartement',
+        'statut'          => 'required|in:nouveau,1er_appel,2eme_appel,lost,promis,ok',
+        'note'            => 'nullable|string',
+        'pas_de_reponse'  => 'nullable|boolean',
+        'duree'           => 'nullable|string',
+        'contentAppel'    => 'nullable|string',
+        'idDepartement'   => 'nullable|exists:departements,idDepartement',
     ]);
 
     $statut = $request->statut;
 
-    // زيد duree و contentAppel إلا كانو موجودين
+    // Appels : gérer pas_de_reponse + duree/contentAppel
     if (in_array($statut, ['1er_appel', '2eme_appel'])) {
-        $lead->duree        = $request->duree;
-        $lead->contentAppel = $request->contentAppel;
+        $pasDeReponse = $request->boolean('pas_de_reponse');
+        $lead->pas_de_reponse = $pasDeReponse;
+
+        if ($pasDeReponse) {
+            // Client n'a pas répondu — on vide les champs d'appel
+            $lead->duree        = null;
+            $lead->contentAppel = null;
+        } else {
+            // Client a répondu — on enregistre durée et contenu
+            $lead->duree        = $request->duree;
+            $lead->contentAppel = $request->contentAppel;
+        }
+    } else {
+        $lead->pas_de_reponse = false;
     }
 
     if ($request->filled('note')) {
         $lead->note = $request->note;
     }
 
-    if ($statut === '1er_appel' && $lead->statut === 'nouveau') {
-        $lead->statut = '1er_appel';
-
-    } elseif ($statut === '2eme_appel' && $lead->statut === '1er_appel') {
-        $lead->statut = '2eme_appel';
-
-    } elseif ($statut === 'lost') {
-        $lead->statut = 'lost';
-
-    } elseif ($statut === 'promis') {
-        $lead->statut = 'promis';
-
-    } elseif ($statut === 'ok') {
+    if ($statut === 'ok') {
         $lead->statut = 'ok';
 
         if ($request->filled('idDepartement')) {
@@ -232,12 +233,13 @@ class LeadController extends Controller
         }
 
     } else {
-        return redirect()->back()->with('error', 'Transition de statut non autorisée.');
+        $lead->statut = $statut;
     }
 
     $lead->save();
 
     $messages = [
+        'nouveau'    => 'Lead déplacé vers Nouveau.',
         '1er_appel'  => '1er appel enregistré.',
         '2eme_appel' => '2ème appel enregistré.',
         'lost'       => 'Lead marqué comme perdu.',
@@ -245,7 +247,7 @@ class LeadController extends Controller
         'ok'         => 'Lead converti en client avec succès !',
     ];
 
-    return redirect()->route('leads.index', $id)->with('msg', $messages[$statut]);
+    return redirect()->route('leads.index', $id)->with('msg', $messages[$statut] ?? 'Statut mis à jour.');
 }
 
     public function destroy($id)

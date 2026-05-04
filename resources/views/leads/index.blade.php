@@ -356,10 +356,11 @@
 {{-- ===== MODAL STATUT ===== --}}
 <div id="statutModal" class="fixed inset-0 z-50 hidden items-center justify-center">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeStatutModal()"></div>
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 flex flex-col overflow-hidden" style="max-height: 90vh;">
+        <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233] shrink-0"></div>
+        <div class="flex flex-col overflow-hidden flex-1">
+            {{-- Header fixe --}}
+            <div class="flex items-center justify-between px-6 pt-6 pb-4 shrink-0 border-b border-slate-100">
                 <div>
                     <h3 class="text-lg font-extrabold text-slate-800">Modifier le statut</h3>
                     <p class="text-sm text-slate-400 mt-0.5">Mettez à jour l'avancement du lead</p>
@@ -372,57 +373,87 @@
                 </button>
             </div>
 
-            <form id="statutForm" method="POST" class="space-y-4">
+            <form id="statutForm" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
                 @method('PATCH')
 
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Statut *</label>
-                    <select name="statut" id="statutSelect" onchange="handleStatutChange(this.value)"
-                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
-                        <option value="1er_appel">1er Appel</option>
-                        <option value="2eme_appel">2ème Appel</option>
-                        <option value="promis">Promis</option>
-                        <option value="lost">Perdu</option>
-                        <option value="ok">Converti en client</option>
-                    </select>
-                </div>
+                {{-- Zone scrollable --}}
+                <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
 
-                <div id="appelFields" class="space-y-4 hidden">
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Durée de l'appel</label>
-                        <input type="time" name="duree" step="1"
-                               class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Statut *</label>
+                        <select name="statut" id="statutSelect" onchange="handleStatutChange(this.value)"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
+                            <option value="1er_appel">1er Appel</option>
+                            <option value="2eme_appel">2ème Appel</option>
+                            <option value="promis">Promis</option>
+                            <option value="lost">Perdu</option>
+                            <option value="ok">Converti en client</option>
+                        </select>
                     </div>
+
+                    <div id="appelFields" class="space-y-4 hidden">
+
+                        {{-- Toggle Pas de réponse --}}
+                        <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-2xl cursor-pointer"
+                             onclick="togglePasDeReponse()">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-amber-700">Le client n'a pas répondu</p>
+                                    <p class="text-[10px] text-amber-500">Cocher si l'appel est resté sans réponse</p>
+                                </div>
+                            </div>
+                            <div id="nrToggleUI" class="w-10 h-6 rounded-full bg-slate-200 relative transition-all duration-200 shrink-0">
+                                <div id="nrToggleDot" class="absolute left-1 top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-200"></div>
+                            </div>
+                            <input type="hidden" name="pas_de_reponse" id="pasDeReponseInput" value="0">
+                        </div>
+
+                        {{-- Champs appel (masqués si NR) --}}
+                        <div id="appelDetailFields" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Durée de l'appel</label>
+                                <input type="time" name="duree" step="1"
+                                       class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Contenu de l'appel</label>
+                                <textarea name="contentAppel" rows="3"
+                                          class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40] resize-none"
+                                          placeholder="Résumé de l'appel..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="deptField" class="hidden">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Département</label>
+                        <select name="idDepartement"
+                                class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
+                            <option value="">— Sélectionner —</option>
+                            @foreach($departements as $dept)
+                                <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Contenu de l'appel</label>
-                        <textarea name="contentAppel" rows="3"
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Note</label>
+                        <textarea name="note" rows="2"
                                   class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40] resize-none"
-                                  placeholder="Résumé de l'appel..."></textarea>
+                                  placeholder="Ajouter une note..."></textarea>
                     </div>
+
                 </div>
 
-                <div id="deptField" class="hidden">
-                    <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Département</label>
-                    <select name="idDepartement"
-                            class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40]">
-                        <option value="">— Sélectionner —</option>
-                        @foreach($departements as $dept)
-                            <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Note</label>
-                    <textarea name="note" rows="2"
-                              class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#b11d40]/30 focus:border-[#b11d40] resize-none"
-                              placeholder="Ajouter une note..."></textarea>
-                </div>
-
-                <div class="flex gap-3 pt-2">
+                {{-- Boutons fixes en bas --}}
+                <div class="px-6 py-4 border-t border-slate-100 flex gap-3 shrink-0 bg-slate-50 rounded-b-3xl">
                     <button type="button" onclick="closeStatutModal()"
-                            class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all">
+                            class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-100 transition-all">
                         Annuler
                     </button>
                     <button type="submit"
@@ -431,6 +462,33 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{{-- ===== MODAL CONFIRM MOVE ===== --}}
+<div id="modal-confirm-move" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-slate-400 to-slate-600 shrink-0"></div>
+        <div class="p-6">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-4 text-slate-500">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-800 mb-1">Déplacer le lead</h3>
+            <p class="text-sm text-slate-500 mb-6">Êtes-vous sûr de vouloir déplacer ce lead vers l'étape <span id="confirm-move-statut-label" class="font-bold text-slate-800"></span> ?</p>
+            
+            <div class="flex gap-3">
+                <button type="button" onclick="closeConfirmMoveModal()"
+                        class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all">
+                    Annuler
+                </button>
+                <button type="button" id="confirm-move-btn"
+                        class="flex-1 px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition-all shadow-md shadow-slate-900/20 active:scale-95">
+                    Confirmer
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -597,6 +655,8 @@ function openStatutModal(leadId, currentStatut) {
     form.action  = `/leads/${leadId}/statut`;
     select.value = currentStatut;
     handleStatutChange(currentStatut);
+    // Réinitialiser le toggle NR
+    resetPasDeReponse();
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 }
@@ -609,24 +669,105 @@ function closeStatutModal() {
 function handleStatutChange(value) {
     document.getElementById('appelFields').classList.toggle('hidden', !['1er_appel', '2eme_appel'].includes(value));
     document.getElementById('deptField').classList.toggle('hidden', value !== 'ok');
+    // Réinitialiser NR à chaque changement de statut
+    if (!['1er_appel', '2eme_appel'].includes(value)) resetPasDeReponse();
+}
+
+function resetPasDeReponse() {
+    document.getElementById('pasDeReponseInput').value = '0';
+    document.getElementById('nrToggleUI').classList.remove('bg-amber-400');
+    document.getElementById('nrToggleUI').classList.add('bg-slate-200');
+    document.getElementById('nrToggleDot').style.transform = 'translateX(0)';
+    document.getElementById('appelDetailFields').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+}
+
+function togglePasDeReponse() {
+    const input   = document.getElementById('pasDeReponseInput');
+    const toggle  = document.getElementById('nrToggleUI');
+    const dot     = document.getElementById('nrToggleDot');
+    const fields  = document.getElementById('appelDetailFields');
+
+    const isNR = input.value === '1';
+
+    if (isNR) {
+        // Désactiver NR
+        input.value = '0';
+        toggle.classList.remove('bg-amber-400');
+        toggle.classList.add('bg-slate-200');
+        dot.style.transform = 'translateX(0)';
+        fields.classList.remove('opacity-50', 'pointer-events-none');
+    } else {
+        // Activer NR
+        input.value = '1';
+        toggle.classList.remove('bg-slate-200');
+        toggle.classList.add('bg-amber-400');
+        dot.style.transform = 'translateX(16px)';
+        fields.classList.add('opacity-50', 'pointer-events-none');
+    }
 }
 
 // ===== MOVE LEAD (quick status change without modal) =====
-function moveLeadStatut(leadId, newStatut) {
-    if (!confirm(`Déplacer ce lead vers "${newStatut}" ?`)) return;
+let currentMoveLeadId = null;
+let currentMoveStatut = null;
 
-    fetch(`/leads/${leadId}/statut`, {
+const statutsLabelsMap = {
+    'nouveau': 'Nouveau',
+    '1er_appel': '1er Appel',
+    '2eme_appel': '2ème Appel',
+    'promis': 'Promis',
+    'ok': 'Converti',
+    'lost': 'Perdu'
+};
+
+function moveLeadStatut(leadId, newStatut) {
+    currentMoveLeadId = leadId;
+    currentMoveStatut = newStatut;
+    
+    document.getElementById('confirm-move-statut-label').textContent = statutsLabelsMap[newStatut] || newStatut;
+    
+    const modal = document.getElementById('modal-confirm-move');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeConfirmMoveModal() {
+    const modal = document.getElementById('modal-confirm-move');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    currentMoveLeadId = null;
+    currentMoveStatut = null;
+}
+
+document.getElementById('confirm-move-btn').addEventListener('click', function() {
+    if (!currentMoveLeadId || !currentMoveStatut) return;
+    
+    // Disable button and show loading state
+    this.disabled = true;
+    this.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Patientez...';
+
+    fetch(`/leads/${currentMoveLeadId}/statut`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-HTTP-Method-Override': 'PATCH',
         },
-        body: JSON.stringify({ statut: newStatut })
-    }).then(r => {
-        if (r.ok || r.redirected) window.location.reload();
+        body: JSON.stringify({ statut: currentMoveStatut })
+    }).then(async r => {
+        if (!r.ok && !r.redirected) {
+            const data = await r.json().catch(() => ({}));
+            throw new Error(data.message || `Erreur HTTP ${r.status}`);
+        }
+        window.location.reload();
+    }).catch(err => {
+        console.error("Move Lead Error:", err);
+        document.getElementById('confirm-move-btn').disabled = false;
+        document.getElementById('confirm-move-btn').textContent = 'Confirmer';
+        closeConfirmMoveModal();
+        alert('Erreur: ' + err.message);
     });
-}
+});
 
 // ===== DOSSIER MODAL =====
 function openDossierModal(clientId, deptId) {
@@ -658,6 +799,7 @@ function confirmDelete(url, type) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeStatutModal();
+        closeConfirmMoveModal();
         const mc = document.getElementById('modal-create');
         if (mc) { mc.classList.add('hidden'); mc.classList.remove('flex'); }
         const md = document.getElementById('modal-dossier');
