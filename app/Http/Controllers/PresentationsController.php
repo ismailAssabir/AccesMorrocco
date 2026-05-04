@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Presentation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewPresentationMail;
 
 class PresentationsController extends Controller
 {
@@ -64,6 +66,17 @@ class PresentationsController extends Controller
                         'totale'       => $itemData['prixUnitaire'] * $itemData['quantity'],
                     ]);
                 }
+            }
+
+            // Send Email to Client
+            try {
+                $presentation->load('dossier.client');
+                if ($presentation->dossier && $presentation->dossier->client && $presentation->dossier->client->email) {
+                    Mail::to($presentation->dossier->client->email)->send(new NewPresentationMail($presentation));
+                }
+            } catch (\Exception $e) {
+                // Log error or ignore if mail fails (don't break the transaction for mail)
+                \Log::error('Failed to send presentation email: ' . $e->getMessage());
             }
 
             return response()->json($presentation->load('presentationItems'), 201);
@@ -163,6 +176,16 @@ class PresentationsController extends Controller
                 $newItem->idPresentation = $new->idPresentation;
                 $newItem->status = 'en_attente'; // Reset status for new version
                 $newItem->save();
+            }
+
+            // Send Email to Client for the new version
+            try {
+                $new->load('dossier.client');
+                if ($new->dossier && $new->dossier->client && $new->dossier->client->email) {
+                    Mail::to($new->dossier->client->email)->send(new NewPresentationMail($new));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send duplicated presentation email: ' . $e->getMessage());
             }
 
             return response()->json($new->load('presentationItems'), 201);

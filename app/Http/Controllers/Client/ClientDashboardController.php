@@ -9,13 +9,15 @@ use Illuminate\Support\Facades\Auth;
 class ClientDashboardController extends Controller
 {
     public function index()
-{
-    $client = Auth::guard('client')->user();
+    {
+        $client = Auth::guard('client')->user();
 
-    $dossiers = $client->dossiers()
-        ->latest()
-        ->paginate(10);
+        $dossiers = $client->dossiers()
+            ->latest()
+            ->paginate(10);
 
-    return view('clients.dashboard', compact('client', 'dossiers'));
-}
+        $souvenirsCount = \App\Models\Souvenir::where('idClient', $client->idClient)->count();
+
+        return view('clients.dashboard', compact('client', 'dossiers', 'souvenirsCount'));
+    }
 }

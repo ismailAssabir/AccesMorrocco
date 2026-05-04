@@ -26,6 +26,12 @@ class ClientDossierController extends Controller
             ->where('idDossier', $id)
             ->firstOrFail();
 
-        return view('clients.dossiers.show', compact('dossier'));
+        // Fetch the last validated presentation
+        $presentation = $dossier->presentations()
+            ->where('status', 'validee')
+            ->latest()
+            ->first();
+
+        return view('clients.dossiers.show', compact('dossier', 'presentation'));
     }
 }

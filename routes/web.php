@@ -65,6 +65,12 @@ Route::prefix('clients')->name('clients.')->group(function () {
         Route::patch('/presentation-items/{id}/status', [ClientPresentationController::class, 'updateItemStatus'])->name('presentations.item.status');
         Route::get('/paiements', [ClientPaiementController::class, 'index'])->name('paiements');
         Route::get('/profile', [ClientProfileController::class, 'index'])->name('profile');
+
+        // Travel Journal (Souvenirs)
+        Route::get('/journal', [\App\Http\Controllers\Client\ClientSouvenirController::class, 'index'])->name('souvenirs.index');
+        Route::post('/journal', [\App\Http\Controllers\Client\ClientSouvenirController::class, 'store'])->name('souvenirs.store');
+        Route::put('/journal/{id}', [\App\Http\Controllers\Client\ClientSouvenirController::class, 'update'])->name('souvenirs.update');
+        Route::delete('/journal/{id}', [\App\Http\Controllers\Client\ClientSouvenirController::class, 'destroy'])->name('souvenirs.destroy');
     });
 });
 //dashboard de client 
