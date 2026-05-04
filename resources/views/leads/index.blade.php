@@ -64,7 +64,7 @@
             @endcan
 
             @can('lead.create')
-            <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+            <button onclick="document.getElementById('modal-create').classList.remove('hidden'); document.getElementById('modal-create').classList.add('flex');"
                     class="flex items-center gap-2 px-4 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow-sm shadow-[#b11d40]/20">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -177,7 +177,7 @@
 
             {{-- Cards --}}
             <div class="flex flex-col gap-4 min-h-[300px]"
-                 x-data="{ page: 1, perPage: 5 }">
+                 x-data="{ page: 1, perPage: 4 }">
 
                 @forelse($colLeads->values() as $i => $lead)
                 <div x-show="{{ $i }} >= (page-1)*perPage && {{ $i }} < page*perPage"
@@ -326,21 +326,21 @@
                 @endforelse
 
                 {{-- Column Pagination --}}
-                @if($colLeads->count() > 5)
-                <div class="flex items-center justify-center gap-2 mt-1">
+                @if($colLeads->count() > 4)
+                <div class="flex items-center justify-center gap-4 mt-2">
                     <button @click="page > 1 ? page-- : null" :disabled="page === 1"
-                            class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 disabled:opacity-30 hover:text-[#b11d40] transition-all">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            class="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 disabled:opacity-30 hover:text-[#b11d40] transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                         </svg>
                     </button>
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                        <span x-text="page"></span>/<span>{{ ceil($colLeads->count() / 5) }}</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        Page <span x-text="page"></span>
                     </span>
                     <button @click="page * perPage < {{ $colLeads->count() }} ? page++ : null"
                             :disabled="page * perPage >= {{ $colLeads->count() }}"
-                            class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 disabled:opacity-30 hover:text-[#b11d40] transition-all">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            class="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 disabled:opacity-30 hover:text-[#b11d40] transition-all">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                         </svg>
                     </button>
@@ -437,12 +437,12 @@
 
 {{-- ===== MODAL CREATE LEAD ===== --}}
 @can('lead.create')
-<div id="modal-create" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+<div id="modal-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233] shrink-0"></div>
         <div class="p-6 pb-0 flex justify-between items-center shrink-0">
             <h2 class="text-lg font-extrabold text-slate-800">Nouveau Lead</h2>
-            <button onclick="document.getElementById('modal-create').classList.add('hidden')"
+            <button onclick="document.getElementById('modal-create').classList.add('hidden'); document.getElementById('modal-create').classList.remove('flex');"
                     class="w-8 h-8 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -509,7 +509,7 @@
                 </div>
             </div>
             <div class="p-6 border-t border-slate-100 flex gap-3 justify-end bg-slate-50 shrink-0">
-                <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
+                <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden'); document.getElementById('modal-create').classList.remove('flex');"
                         class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm">
                     Annuler
                 </button>
@@ -525,12 +525,12 @@
 
 {{-- ===== MODAL DOSSIER ===== --}}
 @can('dossier.create')
-<div id="modal-dossier" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+<div id="modal-dossier" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
         <div class="p-6 flex justify-between items-center">
             <h2 class="text-lg font-extrabold text-slate-800">Créer un Dossier</h2>
-            <button onclick="document.getElementById('modal-dossier').classList.add('hidden')"
+            <button onclick="document.getElementById('modal-dossier').classList.add('hidden'); document.getElementById('modal-dossier').classList.remove('flex');"
                     class="w-8 h-8 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -578,7 +578,7 @@
                 </div>
             </div>
             <div class="px-6 pb-6 flex gap-3 justify-end border-t border-slate-100 pt-4 bg-slate-50">
-                <button type="button" onclick="document.getElementById('modal-dossier').classList.add('hidden')"
+                <button type="button" onclick="document.getElementById('modal-dossier').classList.add('hidden'); document.getElementById('modal-dossier').classList.remove('flex');"
                         class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm">Annuler</button>
                 <button type="submit"
                         class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm shadow-md shadow-[#b11d40]/20">Créer le Dossier</button>
@@ -633,6 +633,7 @@ function openDossierModal(clientId, deptId) {
     document.getElementById('dossier-idClient').value = clientId;
     document.getElementById('dossier-idDepartement').value = deptId ?? '';
     document.getElementById('modal-dossier').classList.remove('hidden');
+    document.getElementById('modal-dossier').classList.add('flex');
 }
 
 // ===== DELETE =====
@@ -657,8 +658,10 @@ function confirmDelete(url, type) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeStatutModal();
-        document.getElementById('modal-create').classList.add('hidden');
-        document.getElementById('modal-dossier').classList.add('hidden');
+        const mc = document.getElementById('modal-create');
+        if (mc) { mc.classList.add('hidden'); mc.classList.remove('flex'); }
+        const md = document.getElementById('modal-dossier');
+        if (md) { md.classList.add('hidden'); md.classList.remove('flex'); }
     }
 });
 

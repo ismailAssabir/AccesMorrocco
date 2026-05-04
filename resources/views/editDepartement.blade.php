@@ -68,7 +68,7 @@
                                 </label>
                                 <input type="text" name="title" id="dept_title" required value="{{ old('title', $departement->title) }}"
                                        placeholder="Ex: Ressources Humaines"
-                                       class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('title') border-red-400 @enderror">
+                                       class="w-full bg-slate-50 border {{ $errors->has('title') ? 'border-red-400' : 'border-slate-200' }} rounded-2xl px-4 py-3.5 text-sm outline-none transition-all focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                 @error('title')
                                     <p class="text-xs text-red-500 font-semibold ml-1 mt-1">{{ $message }}</p>
                                 @enderror
@@ -79,7 +79,7 @@
                                 <label for="dept_description" class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
                                 <textarea name="description" id="dept_description" rows="4"
                                           placeholder="Missions et objectifs de ce département..."
-                                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('description') border-red-400 @enderror">{{ old('description', $departement->description) }}</textarea>
+                                          class="w-full bg-slate-50 border {{ $errors->has('description') ? 'border-red-400' : 'border-slate-200' }} rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">{{ old('description', $departement->description) }}</textarea>
                                 @error('description')
                                     <p class="text-xs text-red-500 font-semibold ml-1 mt-1">{{ $message }}</p>
                                 @enderror
@@ -90,7 +90,7 @@
                                 <label for="dept_manager" class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Manager / Responsable</label>
                                 <div class="relative">
                                     <select name="idUser" id="dept_manager"
-                                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5 @error('idUser') border-red-400 @enderror">
+                                            class="w-full bg-slate-50 border {{ $errors->has('idUser') ? 'border-red-400' : 'border-slate-200' }} rounded-2xl px-4 py-3.5 text-sm outline-none transition-all appearance-none focus:border-[#be2346] focus:ring-4 focus:ring-[#be2346]/5">
                                         <option value="">— Sans manager pour le moment —</option>
                                         @if(isset($users))
                                             @foreach($users as $user)

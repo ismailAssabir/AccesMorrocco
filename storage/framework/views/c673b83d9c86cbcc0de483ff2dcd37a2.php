@@ -1,49 +1,59 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="p-8 bg-[#F8FAFC] min-h-screen">
 
-        {{-- ═══════ HEADER ═══════ --}}
+        
         <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Gestion des Clients</h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Liste de tous vos clients enregistrés.</p>
             </div>
             <div class="flex items-center gap-3">
-                {{-- Stats --}}
+                
                 <div class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ $clients->count() }} Clients</span>
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-widest"><?php echo e($clients->count()); ?> Clients</span>
                 </div>
 
-                @can('client.view')
-                <a href="{{ route('clients.export-pdf') }}"
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.view')): ?>
+                <a href="<?php echo e(route('clients.export-pdf')); ?>"
                     class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-[#be2346] hover:text-white hover:border-transparent transition-all text-sm shadow-sm active:scale-95">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     PDF
                 </a>
-                @endcan
+                <?php endif; ?>
 
-                @can('client.create')
+                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.create')): ?>
                 <button onclick="document.getElementById('modal-create').classList.remove('hidden'); document.getElementById('modal-create').classList.add('flex');"
                         class="flex items-center gap-2 px-5 py-2.5 bg-[#be2346] text-white font-bold rounded-xl hover:bg-[#a01d3a] transition-all text-sm shadow-md shadow-[#be2346]/20 active:scale-95">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     Nouveau Client
                 </button>
-                @endcan
+                <?php endif; ?>
             </div>
         </div>
 
-        {{-- Flash --}}
-        @if(session('msg'))
+        
+        <?php if(session('msg')): ?>
             <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-semibold">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                {{ session('msg') }}
-            </div>
-        @endif
+                <?php echo e(session('msg')); ?>
 
-        {{-- ═══════════ FILTER BAR ═══════════ --}}
+            </div>
+        <?php endif; ?>
+
+        
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-8">
             <div class="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
-                {{-- Search --}}
+                
                 <div class="flex-1 min-w-[200px] shrink-0 relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -55,7 +65,7 @@
                         class="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 outline-none">
                 </div>
 
-                {{-- Type Filter --}}
+                
                 <div class="relative shrink-0">
                     <select id="client-type" onchange="filterClients()"
                         class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
@@ -70,7 +80,7 @@
                     </div>
                 </div>
 
-                {{-- Status Filter --}}
+                
                 <div class="relative shrink-0">
                     <select id="client-status" onchange="filterClients()"
                         class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 cursor-pointer">
@@ -83,7 +93,7 @@
                     </div>
                 </div>
 
-                {{-- Nationalité Filter --}}
+                
                 <div class="relative shrink-0">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -93,7 +103,7 @@
                         class="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#be2346]/40 focus:ring-4 focus:ring-[#be2346]/10 w-36">
                 </div>
 
-                {{-- Reset Button --}}
+                
                 <button type="button" onclick="resetClientFilters()" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center shadow-sm shrink-0">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -105,7 +115,7 @@
             <p class="text-xs font-bold text-[#be2346]"><span id="client-count">0</span> client(s) trouvé(s)</p>
         </div>
 
-        {{-- Table --}}
+        
         <div class="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
             <div class="h-1.5 w-full bg-gradient-to-r from-[#be2346] to-[#7c1233]"></div>
 
@@ -122,66 +132,69 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    @forelse($clients as $client)
+                    <?php $__empty_1 = true; $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="client-row hover:bg-slate-50 transition-colors"
-                        data-name="{{ strtolower($client->firstName . ' ' . $client->lastName) }}"
-                        data-email="{{ strtolower($client->email) }}"
-                        data-cne="{{ strtolower($client->CNE ?? '') }}"
-                        data-type="{{ strtolower($client->type ?? '') }}"
-                        data-status="{{ strtolower($client->status ?? '') }}"
-                        data-nationalite="{{ strtolower($client->nationalite ?? '') }}">
+                        data-name="<?php echo e(strtolower($client->firstName . ' ' . $client->lastName)); ?>"
+                        data-email="<?php echo e(strtolower($client->email)); ?>"
+                        data-cne="<?php echo e(strtolower($client->CNE ?? '')); ?>"
+                        data-type="<?php echo e(strtolower($client->type ?? '')); ?>"
+                        data-status="<?php echo e(strtolower($client->status ?? '')); ?>"
+                        data-nationalite="<?php echo e(strtolower($client->nationalite ?? '')); ?>">
 
-                        {{-- Client --}}
+                        
                         <td class="px-4 py-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-8 h-8 rounded-xl bg-[#b11d40]/10 flex items-center justify-center flex-shrink-0">
                                     <span class="text-[#b11d40] font-black text-xs">
-                                        {{ strtoupper(substr($client->firstName, 0, 1)) }}{{ strtoupper(substr($client->lastName, 0, 1)) }}
+                                        <?php echo e(strtoupper(substr($client->firstName, 0, 1))); ?><?php echo e(strtoupper(substr($client->lastName, 0, 1))); ?>
+
                                     </span>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="font-bold text-slate-800 text-xs truncate">{{ $client->firstName }} {{ $client->lastName }}</p>
-                                    <p class="text-slate-400 text-xs truncate">{{ $client->CNE ?? '—' }}</p>
+                                    <p class="font-bold text-slate-800 text-xs truncate"><?php echo e($client->firstName); ?> <?php echo e($client->lastName); ?></p>
+                                    <p class="text-slate-400 text-xs truncate"><?php echo e($client->CNE ?? '—'); ?></p>
                                 </div>
                             </div>
                         </td>
 
-                        {{-- Contact --}}
+                        
                         <td class="px-4 py-4">
-                            <p class="text-slate-700 text-xs truncate">{{ $client->email }}</p>
-                            <p class="text-slate-400 text-xs">{{ $client->phoneNumber }}</p>
+                            <p class="text-slate-700 text-xs truncate"><?php echo e($client->email); ?></p>
+                            <p class="text-slate-400 text-xs"><?php echo e($client->phoneNumber); ?></p>
                         </td>
 
-                        {{-- Type --}}
+                        
                         <td class="px-4 py-4">
                             <span class="px-2 py-1 rounded-lg text-xs font-black bg-[#b11d40]/10 text-[#b11d40] uppercase">
-                                {{ $client->type ?? '—' }}
+                                <?php echo e($client->type ?? '—'); ?>
+
                             </span>
                         </td>
 
-                        {{-- Statut --}}
+                        
                         <td class="px-4 py-4">
-                            @if($client->status === 'actif')
+                            <?php if($client->status === 'actif'): ?>
                                 <span class="px-2 py-1 rounded-lg text-xs font-black bg-green-100 text-green-600">Actif</span>
-                            @else
+                            <?php else: ?>
                                 <span class="px-2 py-1 rounded-lg text-xs font-black bg-red-100 text-red-500">Inactif</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
 
-                        {{-- Nationalité --}}
-                        <td class="px-4 py-4 text-slate-600 text-xs truncate">{{ $client->nationalite ?? '—' }}</td>
+                        
+                        <td class="px-4 py-4 text-slate-600 text-xs truncate"><?php echo e($client->nationalite ?? '—'); ?></td>
 
-                        {{-- Naissance --}}
+                        
                         <td class="px-4 py-4 text-slate-500 text-xs">
-                            {{ $client->dateNaissance ? \Carbon\Carbon::parse($client->dateNaissance)->format('d/m/Y') : '—' }}
+                            <?php echo e($client->dateNaissance ? \Carbon\Carbon::parse($client->dateNaissance)->format('d/m/Y') : '—'); ?>
+
                         </td>
 
                        
-                        {{-- Actions --}}
+                        
                     <td class="px-4 py-4">
                         <div class="flex items-center gap-1">
-                            @can('client.view')
-                            <a href="{{ route('clients.show', $client->idClient) }}"
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.view')): ?>
+                            <a href="<?php echo e(route('clients.show', $client->idClient)); ?>"
                             class="p-1.5 rounded-lg text-slate-400 hover:text-[#b11d40] hover:bg-[#b11d40]/10 transition-all"
                             title="Voir">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -189,35 +202,35 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
                             </a>
-                            @endcan
+                            <?php endif; ?>
 
-                            @can('client.edit')
-                            <a href="{{ route('clients.edit', $client->idClient) }}"
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.edit')): ?>
+                            <a href="<?php echo e(route('clients.edit', $client->idClient)); ?>"
                             class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
                             title="Modifier">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </a>
-                            @endcan
+                            <?php endif; ?>
 
-                            {{-- 🔥 BOUTON CRÉER DOSSIER --}}
-                            @can('dossier.create')
+                            
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
                             <button type="button"
-                                    onclick="openDossierModal({{ $client->idClient }}, {{ $client->idDepartement ?? 'null' }})"
+                                    onclick="openDossierModal(<?php echo e($client->idClient); ?>, <?php echo e($client->idDepartement ?? 'null'); ?>)"
                                     class="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-all"
                                     title="Créer un dossier">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z"/>
                                 </svg>
                             </button>
-                            @endcan
+                            <?php endif; ?>
                             
                         </div>
                     </td>
 
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7" class="px-6 py-16 text-center text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,14 +239,14 @@
                             <p class="font-bold text-slate-500">Aucun client trouvé</p>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- ===== MODAL CREATE ===== --}}
-    @can('client.create')
+    
+    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.create')): ?>
     <div id="modal-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
         <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
@@ -247,18 +260,18 @@
                         </svg>
                     </button>
                 </div>
-                <form method="POST" action="{{ route('clients.store') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('clients.store')); ?>">
+                    <?php echo csrf_field(); ?>
 
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-xs font-bold">
                             <ul class="list-disc pl-4 space-y-1">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </ul>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -337,9 +350,9 @@
             </div>
         </div>
     </div>
-    @endcan
-    {{-- ===== MODAL CRÉER DOSSIER ===== --}}
-@can('dossier.create')
+    <?php endif; ?>
+    
+<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('dossier.create')): ?>
 <div id="modal-dossier" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
@@ -348,8 +361,8 @@
             <button onclick="document.getElementById('modal-dossier').classList.add('hidden'); document.getElementById('modal-dossier').classList.remove('flex');"
                     class="text-slate-400 hover:text-slate-600">✕</button>
         </div>
-        <form method="POST" action="{{ route('dossiers.store') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('dossiers.store')); ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="idClient" id="dossier-idClient">
             
 
@@ -359,9 +372,9 @@
                 <select name="idDepartement" id="dossier-idDepartement"
                     class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                     <option value="">— Choisir un département —</option>
-                    @foreach($departements as $dept)
-                        <option value="{{ $dept->idDepartement }}">{{ $dept->title }}</option>
-                    @endforeach
+                    <?php $__currentLoopData = $departements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($dept->idDepartement); ?>"><?php echo e($dept->title); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </div>
                 <div>
@@ -428,7 +441,7 @@ window.onclick = function(event) {
     }
 }
 </script>
-@endcan
+<?php endif; ?>
 
 <script>
     function filterClients() {
@@ -464,4 +477,13 @@ window.onclick = function(event) {
     }
 </script>
 
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ABA SOLUTIONS\Desktop\PROJET STAGE Travel Agency\AccesMorrocco\resources\views/AllClients.blade.php ENDPATH**/ ?>

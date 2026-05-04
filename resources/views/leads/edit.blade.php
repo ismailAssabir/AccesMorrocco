@@ -71,14 +71,14 @@
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Prénom *</label>
                             <input name="firstName" required value="{{ old('firstName', $lead->firstName) }}"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('firstName') border-red-400 @enderror">
+                                   class="w-full px-3 py-2.5 bg-slate-50 border {{ $errors->has('firstName') ? 'border-red-400' : 'border-slate-200' }} rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                             @error('firstName')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Nom *</label>
                             <input name="lastName" required value="{{ old('lastName', $lead->lastName) }}"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('lastName') border-red-400 @enderror">
+                                   class="w-full px-3 py-2.5 bg-slate-50 border {{ $errors->has('lastName') ? 'border-red-400' : 'border-slate-200' }} rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                             @error('lastName')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
@@ -98,7 +98,7 @@
                                         document.getElementById('type-other-input').disabled = !isOther;
                                         document.getElementById('type-select').disabled = isOther;
                                     "
-                                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('type') border-red-400 @enderror">
+                                class="w-full px-3 py-2.5 bg-slate-50 border {{ $errors->has('type') ? 'border-red-400' : 'border-slate-200' }} rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                                 <option value="" disabled {{ !$currentType ? 'selected' : '' }}>Sélectionner un type</option>
                                 <option value="particulier" {{ $currentType === 'particulier' ? 'selected' : '' }}>Particulier</option>
                                 <option value="famille"     {{ $currentType === 'famille'     ? 'selected' : '' }}>Famille</option>
@@ -120,7 +120,7 @@
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase mb-1.5">Email</label>
                             <input name="email" type="email" value="{{ old('email', $lead->email) }}"
-                                   class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40] @error('email') border-red-400 @enderror">
+                                   class="w-full px-3 py-2.5 bg-slate-50 border {{ $errors->has('email') ? 'border-red-400' : 'border-slate-200' }} rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#b11d40] focus:ring-1 focus:ring-[#b11d40]">
                             @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
 
