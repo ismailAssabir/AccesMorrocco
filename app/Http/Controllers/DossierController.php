@@ -21,9 +21,25 @@ class DossierController extends Controller
 
         $dossier = Dossier::findOrFail($id);
 
-        // Sécurité : seulement l'employé assigné peut changer le statut
         if ($dossier->idUser !== auth()->user()->idUser) {
-            return response()->json(['success' => false, 'message' => 'Non autorisé.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Non autorisé.'
+            ], 403);
+        }
+
+        if ($dossier->status === 'ferme') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de modifier un dossier déjà fermé.'
+            ], 403);
+        }
+
+        if ($dossier->status === 'en_cours' && $request->status === 'ouvert') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de revenir à "ouvert".'
+            ], 400);
         }
 
         $dossier->update(['status' => $request->status]);

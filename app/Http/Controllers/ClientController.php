@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Lead;
@@ -25,6 +27,22 @@ class ClientController extends Controller
                     ->setPaper('a4', 'landscape');
 
         return $pdf->download('clients-' . now()->format('Y-m-d') . '.pdf');
+    }
+    public function updatePassword(Request $request)
+    {
+       $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $client = Auth::guard('client')->user();
+        if (!Hash::check($request->current_password, $client->password)) {
+            return back()->withErrors(['current_password' => 'Mot de passe incorrect']);
+        }
+        $client->password = Hash::make($request->password);
+        $client->save();
+
+        return back()->with('msg', 'Mot de passe mis à jour avec succès');
     }
     public function index(){
         Gate::authorize('client.view');
