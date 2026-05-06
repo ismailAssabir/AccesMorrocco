@@ -17,8 +17,14 @@
 /public/hot
 /public/storage
 /storage/*.key
-/storage/pail
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/debugbar/*
+/storage/logs/*
 /vendor
+/.phpunit.cache
 Homestead.json
 Homestead.yaml
 Thumbs.db
