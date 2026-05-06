@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 {{-- Welcome Header --}}
-<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
     <div class="animate-fade-in">
         <h1 class="text-3xl font-black text-gray-900 tracking-tight">Mon Espace <span class="text-[#b11d40]">Client</span></h1>
         <div class="flex items-center gap-4 mt-2">
@@ -17,35 +17,97 @@
                 Client
             </span>
             <span class="text-xs text-gray-400 font-medium tracking-wide italic">
-                Bonjour {{ auth()->user()->firstName ?? 'Client' }}
+                Bonjour {{ $client->firstName ?? 'Client' }}
             </span>
         </div>
     </div>
     
 </div>
 
+{{-- ═══ TRAVEL JOURNAL BANNER ═══ --}}
+<div class="mb-8 relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 md:p-10 text-white shadow-2xl">
+    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div class="max-w-lg">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#be2346]/20 border border-[#be2346]/30 text-[#be2346] text-[10px] font-black uppercase tracking-widest mb-4">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
+                </span>
+                Nouveau : Journal de Voyage
+            </div>
+            <h2 class="text-3xl md:text-4xl font-black mb-4 leading-tight">Capturez vos plus beaux <span class="text-[#be2346]">souvenirs</span> au Maroc.</h2>
+            <p class="text-slate-400 text-sm font-medium leading-relaxed">Racontez vos histoires, téléchargez vos photos et gardez une trace indélébile de chaque moment spécial de votre voyage avec nous.</p>
+            
+            <div class="mt-8 flex flex-wrap gap-8">
+                <div class="flex items-center gap-4 group">
+                    <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#be2346] group-hover:scale-110 transition-transform duration-500 shadow-xl">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Moments sauvés</p>
+                        <p class="text-xl font-black text-white">{{ $souvenirsCount ?? 0 }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 group">
+                    <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#be2346] group-hover:scale-110 transition-transform duration-500 shadow-xl">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Photos partagées</p>
+                        <p class="text-xl font-black text-white">{{ $photosCount ?? 0 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <a href="{{ route('clients.souvenirs.index') }}" class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#be2346] text-white rounded-2xl font-black text-sm shadow-xl shadow-[#be2346]/40 hover:scale-[1.05] active:scale-95 transition-all">
+                Ouvrir mon journal
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 5l7 7-7 7" stroke-width="3" /></svg>
+            </a>
+            <p class="text-center text-[10px] text-slate-500 font-bold uppercase tracking-tighter italic">"Le voyage est la seule chose qu'on achète qui nous rend plus riche."</p>
+        </div>
+    </div>
+
+    {{-- Decor --}}
+    <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#be2346]/10 rounded-full blur-[100px]"></div>
+    <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-blue-500/5 rounded-full blur-[80px]"></div>
+</div>
+
 @php
-    $totalDossiers   = $dossiers->total();
-    $enCours         = $dossiers->getCollection()->where('status', 'en_cours')->count();
-    $termines        = $dossiers->getCollection()->where('status', 'ferme')->count();
-    $totalPaiements  = $dossiers->getCollection()->sum(fn($d) => $d->montant ?? 0);
-    
-    // Données pour les graphiques
+    // ── Tous les dossiers du client ──
+    $allDossiers   = $client->dossiers()->get();
+    $totalDossiers = $dossiers->total();
+    $enCours       = $allDossiers->where('status', 'en_cours')->count();
+    $termines      = $allDossiers->where('status', 'ferme')->count();
+    $totalPaiements = $allDossiers->sum(fn($d) => $d->montant ?? 0); // Budget total des dossiers
+
+    // ── Calcul des montants payés et restants réels ──
+    $dossierIds = $allDossiers->pluck('idDossier');
+    $montantPayeGlobal = \App\Models\Paiement::whereIn('idDossier', $dossierIds)->sum('montantPaye');
+    $montantResteGlobal = $totalPaiements - $montantPayeGlobal;
+    if ($montantResteGlobal < 0) $montantResteGlobal = 0;
+
+    // ── Données pour les graphiques (from ALL dossiers) ──
     $monthlyDossiers = [];
     $monthlyPayments = [];
-    
-    // Regrouper par mois
-    foreach($dossiers->getCollection() as $dossier) {
-        if($dossier->created_at) {
+
+    foreach ($allDossiers as $dossier) {
+        if ($dossier->created_at) {
             $month = $dossier->created_at->format('M Y');
             $monthlyDossiers[$month] = ($monthlyDossiers[$month] ?? 0) + 1;
             $monthlyPayments[$month] = ($monthlyPayments[$month] ?? 0) + ($dossier->montant ?? 0);
         }
     }
-    
-    // Obtenir les 6 derniers mois
+
+    // ── 6 derniers mois ──
     $last6Months = [];
-    for($i = 5; $i >= 0; $i--) {
+    for ($i = 5; $i >= 0; $i--) {
         $last6Months[] = now()->subMonths($i)->format('M Y');
     }
     
@@ -56,6 +118,15 @@
         $dossierData[] = $monthlyDossiers[$month] ?? 0;
         $paymentData[] = $monthlyPayments[$month] ?? 0;
     }
+
+
+    // ── Présentations par statut ──
+    $dossierIds = $allDossiers->pluck('idDossier');
+    $presentationStats = [
+        'en_attente' => \App\Models\Presentation::whereIn('idDossier', $dossierIds)->where('status', 'en_attente')->count(),
+        'validee'    => \App\Models\Presentation::whereIn('idDossier', $dossierIds)->where('status', 'validee')->count(),
+        'refusee'    => \App\Models\Presentation::whereIn('idDossier', $dossierIds)->where('status', 'refusee')->count(),
+    ];
 @endphp
 
 {{-- SECTION PRINCIPALE: GRAPHIQUES --}}
@@ -135,60 +206,7 @@
     </div>
 </div>
 
-{{-- ═══ TRAVEL JOURNAL BANNER ═══ --}}
-<div class="mb-8 relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 md:p-10 text-white shadow-2xl">
-    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div class="max-w-lg">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#be2346]/20 border border-[#be2346]/30 text-[#be2346] text-[10px] font-black uppercase tracking-widest mb-4">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
-                </span>
-                Nouveau : Journal de Voyage
-            </div>
-            <h2 class="text-3xl md:text-4xl font-black mb-4 leading-tight">Capturez vos plus beaux <span class="text-[#be2346]">souvenirs</span> au Maroc.</h2>
-            <p class="text-slate-400 text-sm font-medium leading-relaxed">Racontez vos histoires, téléchargez vos photos et gardez une trace indélébile de chaque moment spécial de votre voyage avec nous.</p>
-            
-            <div class="mt-8 flex flex-wrap gap-8">
-                <div class="flex items-center gap-4 group">
-                    <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#be2346] group-hover:scale-110 transition-transform duration-500 shadow-xl">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Moments sauvés</p>
-                        <p class="text-xl font-black text-white">{{ $souvenirsCount ?? 0 }}</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 group">
-                    <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#be2346] group-hover:scale-110 transition-transform duration-500 shadow-xl">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Photos partagées</p>
-                        <p class="text-xl font-black text-white">{{ $souvenirsCount ?? 0 }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="flex flex-col gap-4">
-            <a href="{{ route('clients.souvenirs.index') }}" class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#be2346] text-white rounded-2xl font-black text-sm shadow-xl shadow-[#be2346]/40 hover:scale-[1.05] active:scale-95 transition-all">
-                Ouvrir mon journal
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M14 5l7 7-7 7" stroke-width="3" /></svg>
-            </a>
-            <p class="text-center text-[10px] text-slate-500 font-bold uppercase tracking-tighter italic">"Le voyage est la seule chose qu'on achète qui nous rend plus riche."</p>
-        </div>
-    </div>
-
-    {{-- Decor --}}
-    <div class="absolute -right-20 -top-20 w-80 h-80 bg-[#be2346]/10 rounded-full blur-[100px]"></div>
-    <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-blue-500/5 rounded-full blur-[80px]"></div>
-</div>
 
 {{-- GRAPHIQUES SECONDAIRES --}}
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
@@ -230,6 +248,44 @@
         </div>
         <div id="paymentTrendChart" class="min-h-[200px]"></div>
     </div>
+
+    {{-- État des Présentations --}}
+    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300 lg:col-span-4">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mes Présentations</p>
+                <p class="text-xs text-gray-500 mt-0.5">Répartition par état</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('clients.presentations') }}" class="text-[10px] font-black text-[#b11d40] hover:underline uppercase tracking-wider">
+                    Voir tout &rarr;
+                </a>
+                <div class="p-2 bg-blue-50 rounded-xl">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Quick badge summary --}}
+        <div class="flex items-center gap-3 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-100">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                En attente : {{ $presentationStats['en_attente'] }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                Validées : {{ $presentationStats['validee'] }}
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-100">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                Refusées : {{ $presentationStats['refusee'] }}
+            </span>
+        </div>
+
+        <div id="presentationChart" class="min-h-[160px]"></div>
+    </div>
 </div>
 
 
@@ -268,15 +324,16 @@
         var dossierChart = new ApexCharts(document.querySelector("#dossiersChart"), dossierOptions);
         dossierChart.render();
         
-        // Graphique des montants par dossier (donut)
+        // Graphique des montants par dossier (donut) - Répartition Payé vs Reste
         var paymentOptions = {
-            series: @json(array_values($monthlyPayments)),
+            series: [{{ $montantPayeGlobal }}, {{ $montantResteGlobal }}],
             chart: { type: 'donut', height: 200, toolbar: { show: false } },
-            labels: @json(array_keys($monthlyPayments)),
-            colors: ['#b11d40', '#dc2626', '#f97316', '#f59e0b', '#eab308', '#84cc16'],
+            labels: ['Payé', 'Reste à payer'],
+            colors: ['#10b981', '#f43f5e'],
             legend: { position: 'bottom', fontSize: '10px' },
             dataLabels: { enabled: true, formatter: function(val) { return Math.round(val) + '%'; } },
-            plotOptions: { pie: { donut: { size: '60%', labels: { show: true, total: { show: true, label: 'Total', formatter: function() { return '{{ number_format($totalPaiements, 0, ',', ' ') }} MAD'; } } } } } }
+            plotOptions: { pie: { donut: { size: '60%', labels: { show: true, name: { show: true, fontSize: '11px', fontWeight: 700, color: '#6b7280' }, value: { show: true, fontSize: '11px', fontWeight: 700, color: '#111827', formatter: function(val) { return parseFloat(val).toLocaleString() + ' MAD'; } }, total: { show: true, label: 'Total', fontSize: '11px', fontWeight: 700, color: '#6b7280', formatter: function(w) { return '{{ number_format($totalPaiements, 0) }} MAD'; } } } } } },
+            noData: { text: 'Aucune donnée', style: { fontSize: '12px', color: '#9ca3af' } }
         };
         
         var paymentChart = new ApexCharts(document.querySelector("#paymentsChart"), paymentOptions);
@@ -290,7 +347,8 @@
             labels: ['En cours', 'Terminés', 'Autres'],
             colors: ['#f59e0b', '#10b981', '#6b7280'],
             legend: { position: 'bottom', fontSize: '10px' },
-            dataLabels: { enabled: true, formatter: function(val) { return Math.round(val) + '%'; } }
+            dataLabels: { enabled: true, formatter: function(val) { return Math.round(val) + '%'; } },
+            noData: { text: 'Aucune donnée', style: { fontSize: '12px', color: '#9ca3af' } }
         };
         
         var statusChart = new ApexCharts(document.querySelector("#statusChart"), statusOptions);
@@ -314,6 +372,56 @@
         
         var paymentTrendChart = new ApexCharts(document.querySelector("#paymentTrendChart"), paymentTrendOptions);
         paymentTrendChart.render();
+
+        // Graphique état des présentations
+        var presentationOptions = {
+            series: [{
+                name: 'Présentations',
+                data: [
+                    {{ $presentationStats['en_attente'] }},
+                    {{ $presentationStats['validee'] }},
+                    {{ $presentationStats['refusee'] }}
+                ]
+            }],
+            chart: {
+                type: 'bar',
+                height: 180,
+                toolbar: { show: false },
+                background: 'transparent'
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 6,
+                    distributed: true,
+                    barHeight: '55%',
+                    dataLabels: { position: 'top' }
+                }
+            },
+            colors: ['#f59e0b', '#10b981', '#ef4444'],
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return val > 0 ? val : ''; },
+                style: { fontSize: '11px', fontWeight: 700, colors: ['#374151'] },
+                offsetX: 8
+            },
+            xaxis: {
+                categories: ['En attente', 'Validées', 'Refusées'],
+                labels: { style: { fontSize: '10px', colors: '#9ca3af' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: { style: { fontSize: '11px', fontWeight: 700, colors: ['#f59e0b', '#10b981', '#ef4444'] } }
+            },
+            grid: { borderColor: '#f3f4f6', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
+            legend: { show: false },
+            tooltip: { y: { formatter: function(val) { return val + ' présentation(s)'; } } },
+            noData: { text: 'Aucune présentation', style: { fontSize: '12px', color: '#9ca3af' } }
+        };
+
+        var presentationChart = new ApexCharts(document.querySelector("#presentationChart"), presentationOptions);
+        presentationChart.render();
     });
 </script>
 

@@ -17,7 +17,8 @@ class ClientDashboardController extends Controller
             ->paginate(10);
 
         $souvenirsCount = \App\Models\Souvenir::where('idClient', $client->idClient)->count();
+        $photosCount = \App\Models\Souvenir::where('idClient', $client->idClient)->whereNotNull('image')->count();
 
-        return view('clients.dashboard', compact('client', 'dossiers', 'souvenirsCount'));
+        return view('clients.dashboard', compact('client', 'dossiers', 'souvenirsCount', 'photosCount'));
     }
 }

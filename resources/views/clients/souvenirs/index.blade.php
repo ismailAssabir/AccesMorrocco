@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Gardez une trace de vos plus beaux moments au Maroc')
 
 @section('content')
-<div class="space-y-8 animate-fadeIn" x-data="{ 
+<div x-data="{ 
     openAddModal: false, 
     openViewModal: false,
     openEditModal: false,
@@ -21,6 +21,7 @@
         this.openViewModal = false;
     }
 }">
+    <div class="space-y-8 animate-fadeIn">
     {{-- Header with Action --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -131,20 +132,16 @@
     </div>
     @endif
 
+    </div>
+
     {{-- VIEW MODAL --}}
     <div x-show="openViewModal" 
          x-cloak
-         class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100">
+         class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8 bg-slate-900/40 backdrop-blur-sm">
         
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" @click="openViewModal = false"></div>
+        <div class="absolute inset-0" @click="openViewModal = false"></div>
 
-        <div class="relative w-full max-w-5xl bg-white rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col md:flex-row h-full max-h-[85vh] border-none"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100">
+        <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-full max-h-[85vh] border-none">
             
             {{-- Image View --}}
             <div class="flex-1 bg-slate-50 relative flex items-center justify-center group overflow-hidden">
@@ -230,23 +227,17 @@
     {{-- EDIT MODAL --}}
     <div x-show="openEditModal" 
          x-cloak
-         class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100">
+         class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
         
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" @click="openEditModal = false"></div>
+        <div class="absolute inset-0" @click="openEditModal = false"></div>
 
-        <div class="relative w-full max-w-2xl bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col z-10 border-none"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+        <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col z-10 border-none">
             
             {{-- Top Accent Bar --}}
             <div class="absolute top-0 left-0 w-full h-1.5 bg-[#b11d40] z-20"></div>
 
             {{-- Header --}}
-            <div class="px-10 pt-10 pb-8 flex items-center justify-between border-b border-slate-50 bg-white shrink-0 relative">
+            <div class="px-10 pt-10 pb-0 flex items-center justify-between border-b border-slate-50 bg-white shrink-0 relative">
                 <div>
                     <h3 class="text-2xl font-black text-slate-800 leading-tight">Modifier le Souvenir</h3>
                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Mettez à jour votre moment spécial</p>
@@ -257,7 +248,7 @@
             </div>
 
             <div class="flex-1 max-h-[75vh] overflow-y-auto custom-scrollbar bg-white">
-                <form :action="'/clients/journal/' + selectedEditSouvenir?.idSouvenir" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+                <form :action="'/clients/journal/' + selectedEditSouvenir?.idSouvenir" method="POST" enctype="multipart/form-data" class="px-8 pb-8 pt-0 space-y-8">
                     @csrf
                     @method('PUT')
                     
@@ -372,25 +363,19 @@
     {{-- ADD MODAL --}}
     <div x-show="openAddModal" 
          x-cloak
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100">
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
         
         {{-- Backdrop --}}
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" @click="openAddModal = false"></div>
+        <div class="absolute inset-0" @click="openAddModal = false"></div>
 
         {{-- Modal Content --}}
-        <div class="relative w-full max-w-2xl bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col z-10 border-none"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+        <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col z-10 border-none">
             
             {{-- Top Accent Bar --}}
             <div class="absolute top-0 left-0 w-full h-1.5 bg-[#b11d40] z-20"></div>
 
             {{-- Header --}}
-            <div class="px-10 pt-10 pb-8 flex items-center justify-between border-b border-slate-50 bg-white shrink-0 relative">
+            <div class="px-10 pt-10 pb-0 flex items-center justify-between border-b border-slate-50 bg-white shrink-0 relative">
                 <div>
                     <h3 class="text-2xl font-black text-slate-800 leading-tight">Nouveau Souvenir</h3>
                     <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Créez un moment inoubliable au Maroc</p>
@@ -401,7 +386,7 @@
             </div>
 
             <div class="flex-1 max-h-[75vh] overflow-y-auto custom-scrollbar bg-white">
-                <form action="{{ route('clients.souvenirs.store') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+                <form action="{{ route('clients.souvenirs.store') }}" method="POST" enctype="multipart/form-data" class="px-8 pb-8 pt-0 space-y-8">
                     @csrf
                     
                     {{-- Section 1: L'essentiel --}}
