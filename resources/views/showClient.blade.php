@@ -157,32 +157,34 @@
 
             </div>
         </div>
-        {{-- ===== DOSSIERS ===== --}}
 
-<form method="GET" class="flex gap-3 items-center mb-4">
-    <select name="status"
-        onchange="this.form.submit()"
-        class="px-3 py-2 border rounded-xl text-sm">
-
-        <option value="">Tous les statuts</option>
-        <option value="ouvert" {{ request('status')=='ouvert' ? 'selected' : '' }}>Ouvert</option>
-        <option value="en_cours" {{ request('status')=='en_cours' ? 'selected' : '' }}>En cours</option>
-        <option value="valide" {{ request('status')=='valide' ? 'selected' : '' }}>Validé</option>
-        <option value="refuse" {{ request('status')=='refuse' ? 'selected' : '' }}>Refusé</option>
-    </select>
-</form>
-
-    <div class="mt-4 bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+    <div class="mt-8 bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
 
-        <div class="p-6 flex items-center justify-between">
+        <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h3 class="text-lg font-extrabold text-slate-800">
                 Dossiers du client
             </h3>
 
-            <span class="text-sm font-bold text-slate-400">
-                Total : {{ $dossiers->total() }}
-            </span>
+            <div class="flex items-center gap-4">
+                <form method="GET" class="relative shrink-0">
+                    <select name="status" onchange="this.form.submit()"
+                        class="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                        <option value="">Tous les statuts</option>
+                        <option value="ouvert" {{ request('status')=='ouvert' ? 'selected' : '' }}>Ouvert</option>
+                        <option value="en_cours" {{ request('status')=='en_cours' ? 'selected' : '' }}>En cours</option>
+                        <option value="valide" {{ request('status')=='valide' ? 'selected' : '' }}>Validé</option>
+                        <option value="refuse" {{ request('status')=='refuse' ? 'selected' : '' }}>Refusé</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </form>
+
+                <span class="text-sm font-bold text-slate-400">
+                    Total : {{ $dossiers->total() }}
+                </span>
+            </div>
         </div>
 
         <div class="overflow-x-auto">

@@ -31,49 +31,70 @@
 
     {{-- FLASH --}}
     @if(session('msg'))
-    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold">
+    <div id="flash-message" class="js-flash-message mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl text-sm font-semibold transition-all duration-500">
         {{ session('msg') }}
     </div>
     @endif
 
-    {{-- FILTER --}}
-    <form method="GET" class="mb-6 flex flex-col md:flex-row gap-3">
-        
-        <input type="text" name="search" value="{{ request('search') }}"
-            placeholder="Recherche..."
-            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+    {{-- FILTERS --}}
+    <form method="GET" action="{{ route('dossiers.index') }}" x-data
+          class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6">
+        <div class="flex flex-nowrap items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+            
+            {{-- Search --}}
+            <div class="flex-1 min-w-[200px] shrink-0 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       @input.debounce.500ms="$el.closest('form').submit()"
+                       placeholder="Rechercher référence, destination..."
+                       class="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 outline-none">
+            </div>
 
-        @unless(auth()->user()->hasRole('manager'))
-        <select name="idDepartement"
-            class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
-            <option value="">Tous les départements</option>
-            @foreach($departements as $dept)
-                <option value="{{ $dept->idDepartement }}"
-                    {{ request('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>
-                    {{ $dept->title }}
-                </option>
-            @endforeach
-        </select>
-        @endunless
+            {{-- Departement Filter --}}
+            @unless(auth()->user()->hasRole('manager'))
+            <div class="relative shrink-0">
+                <select name="idDepartement" onchange="this.form.submit()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                    <option value="">Département (Tous)</option>
+                    @foreach($departements as $dept)
+                        <option value="{{ $dept->idDepartement }}" {{ request('idDepartement') == $dept->idDepartement ? 'selected' : '' }}>{{ $dept->title }}</option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+            </div>
+            @endunless
 
-        <select name="status"
-            class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
-            <option value="">Tous les statuts</option>
-            <option value="ouvert" {{ request('status')=='ouvert'?'selected':'' }}>Ouvert</option>
-            <option value="en_cours" {{ request('status')=='en_cours'?'selected':'' }}>En cours</option>
-            <option value="ferme" {{ request('status')=='ferme'?'selected':'' }}>Fermé</option>
-        </select>
+            {{-- Status Filter --}}
+            <div class="relative shrink-0">
+                <select name="status" onchange="this.form.submit()"
+                        class="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#b11d40]/40 focus:ring-4 focus:ring-[#b11d40]/10 cursor-pointer">
+                    <option value="">Statut (Tous)</option>
+                    <option value="ouvert" {{ request('status') == 'ouvert' ? 'selected' : '' }}>Ouvert</option>
+                    <option value="en_cours" {{ request('status') == 'en_cours' ? 'selected' : '' }}>En cours</option>
+                    <option value="ferme" {{ request('status') == 'ferme' ? 'selected' : '' }}>Fermé</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+            </div>
 
-        <button class="px-5 py-2.5 bg-[#b11d40] text-white font-bold rounded-xl text-sm">
-            Filtrer
-        </button>
-
-        @if(request()->hasAny(['search','status','idDepartement']))
-        <a href="{{ route('dossiers.index') }}"
-            class="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-sm">
-            Reset
-        </a>
-        @endif
+            {{-- Reset --}}
+            @if((request()->has('search') && request('search') != '') || (request()->has('status') && request('status') != '') || (request()->has('idDepartement') && request('idDepartement') != ''))
+            <div class="flex shrink-0">
+                <a href="{{ route('dossiers.index') }}" title="Réinitialiser" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-all flex items-center justify-center shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </a>
+            </div>
+            @endif
+        </div>
     </form>
 
     {{-- TABLE --}}

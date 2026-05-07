@@ -31,5 +31,21 @@
     <!-- Global Components -->
     <x-delete-confirmation-modal />
     <x-pointage-modal />
+
+    <script>
+        // Auto-hide flash messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.js-flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateY(-10px)';
+                    setTimeout(function() {
+                        message.style.display = 'none';
+                    }, 500); // Wait for transition to finish
+                }, 3000); // 3 seconds
+            });
+        });
+    </script>
     </body>
 </html>

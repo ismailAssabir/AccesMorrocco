@@ -98,48 +98,104 @@
         return $items;
     });
 
-    $recentNotifications = \Illuminate\Support\Facades\Cache::remember('recent_notifications_' . $userType . '_' . auth()->id(), 60, function() use ($userType) {
+    $recentNotifications = \Illuminate\Support\Facades\Cache::remember('recent_notifications_' . ($userType ?? 'guest') . '_' . auth()->id(), 60, function() use ($userType, $user) {
         $notifications = collect();
+        if (!$user) return $notifications;
+
         try {
-            if (Gate::allows('tache.view')) {
-                $tasks = \App\Models\Tache::latest()->limit(2)->get()->map(function($item) {
-                    return [
-                        'title' => 'Nouvelle Tâche',
-                        'desc' => $item->titre,
-                        'time' => $item->created_at,
-                        'url' => '/tasks'
-                    ];
-                });
-                $notifications = $notifications->concat($tasks);
+            // 1. Tâches
+            $tacheQuery = \App\Models\Tache::latest()->limit(15);
+            if ($userType === 'employee') {
+                $tacheQuery->whereHas('users', function($q) use ($user) { $q->where('user_taches.idUser', $user->idUser); });
+            } elseif ($userType === 'manager') {
+                $tacheQuery->where('idDepartement', $user->idDepartement);
             }
-            if (Gate::allows('reunion.view')) {
-                $reunions = \App\Models\Reunion::latest()->limit(2)->get()->map(function($item) {
-                    return [
-                        'title' => 'Nouvelle Réunion',
-                        'desc' => $item->titre,
-                        'time' => $item->created_at,
-                        'url' => '/meetings'
-                    ];
+            $tasks = $tacheQuery->get()->map(fn($item) => [
+                'title' => 'Nouvelle Tâche',
+                'desc' => $item->titre,
+                'time' => $item->created_at,
+                'url' => '/tasks'
+            ]);
+            $notifications = $notifications->concat($tasks);
+
+            // 2. Réunions
+            $reunionQuery = \App\Models\Reunion::latest()->limit(15);
+            if ($userType === 'employee') {
+                $reunionQuery->where(function($q) use ($user) {
+                    $q->whereNull('idDepartement')
+                      ->orWhere('idDepartement', $user->idDepartement)
+                      ->orWhereHas('participants', function($sq) use ($user) {
+                          $sq->where('reunion_participants.idUser', $user->idUser);
+                      });
                 });
-                $notifications = $notifications->concat($reunions);
+            } elseif ($userType === 'manager') {
+                $reunionQuery->where('idDepartement', $user->idDepartement);
             }
-            if (Gate::allows('reclamation.view')) {
-                $recs = \App\Models\Reclamation::latest()->limit(2);
-                if ($userType === 'employee') {
-                    $recs->where('idUser', auth()->id());
+            $reunions = $reunionQuery->get()->map(fn($item) => [
+                'title' => 'Nouvelle Réunion',
+                'desc' => $item->titre,
+                'time' => $item->created_at,
+                'url' => '/meetings'
+            ]);
+            $notifications = $notifications->concat($reunions);
+
+            // 3. Reclamations
+            $recQuery = \App\Models\Reclamation::latest()->limit(15);
+            if ($userType === 'employee') {
+                $recQuery->where('idUser', $user->idUser);
+            } elseif ($userType === 'manager') {
+                $recQuery->whereHas('user', function($q) use ($user) { $q->where('idDepartement', $user->idDepartement); });
+            }
+            $recs = $recQuery->get()->map(fn($item) => [
+                'title' => 'Réclamation',
+                'desc' => $item->titre,
+                'time' => $item->updated_at,
+                'url' => '/reclamations'
+            ]);
+            $notifications = $notifications->concat($recs);
+
+            // 4. Dossiers (Pour Admin & Manager)
+            if ($userType === 'admin' || $userType === 'manager') {
+                $dossierQuery = \App\Models\Dossier::latest()->limit(15);
+                if ($userType === 'manager') {
+                    $dossierQuery->where('idDepartement', $user->idDepartement);
                 }
-                $recs = $recs->get()->map(function($item) {
-                    return [
-                        'title' => 'Nouvelle Réclamation',
-                        'desc' => $item->titre,
-                        'time' => $item->created_at,
-                        'url' => '/reclamations'
-                    ];
-                });
-                $notifications = $notifications->concat($recs);
+                $dossiers = $dossierQuery->get()->map(fn($item) => [
+                    'title' => 'Nouveau Dossier',
+                    'desc' => $item->reference . ' - ' . ($item->distination ?? 'Pas de destination'),
+                    'time' => $item->created_at,
+                    'url' => '/dossiers'
+                ]);
+                $notifications = $notifications->concat($dossiers);
             }
+
+            // 5. Leads (Pour Admin seulement)
+            if ($userType === 'admin') {
+                $leads = \App\Models\Lead::latest()->limit(15)->get()->map(fn($item) => [
+                    'title' => 'Nouveau Lead',
+                    'desc' => $item->firstName . ' ' . $item->lastName,
+                    'time' => $item->created_at,
+                    'url' => '/leads'
+                ]);
+                $notifications = $notifications->concat($leads);
+            }
+
+            // 6. Congés
+            $congeQuery = \App\Models\Conge::latest()->limit(15);
+            if ($userType === 'employee') {
+                $congeQuery->where('idUser', $user->idUser);
+            } elseif ($userType === 'manager') {
+                $congeQuery->whereHas('user', function($q) use ($user) { $q->where('idDepartement', $user->idDepartement); });
+            }
+            $conges = $congeQuery->get()->map(fn($item) => [
+                'title' => 'Demande de Congé',
+                'desc' => $item->user->firstName . ' ' . $item->user->lastName . ' (' . $item->status . ')',
+                'time' => $item->updated_at,
+                'url' => '/conge'
+            ]);
+            $notifications = $notifications->concat($conges);
             
-            return $notifications->sortByDesc('time')->take(5)->values();
+            return $notifications->sortByDesc('time')->take(30)->values();
         } catch (\Exception $e) {
             return collect();
         }
@@ -224,40 +280,44 @@
 
             <div x-data="{ 
                 open: false,
-                lastChecked: parseInt(localStorage.getItem('notifications_last_checked_{{ auth()->id() }}') || '0'),
-                displayLastChecked: parseInt(localStorage.getItem('notifications_last_checked_{{ auth()->id() }}') || '0'),
+                readNotifs: JSON.parse(localStorage.getItem('read_notifications_{{ auth()->id() }}') || '[]'),
                 notifications: {{ json_encode($recentNotifications->map(function($n) {
                     $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
                     $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
+                    $n['id'] = md5(($n['url'] ?? '') . $n['title'] . $n['timestamp']);
                     return $n;
                 })) }},
                 get unreadNotifications() {
-                    return this.notifications.filter(n => n.timestamp > this.displayLastChecked);
+                    return this.notifications.filter(n => !this.readNotifs.includes(n.id));
                 },
-                get hasNew() {
-                    return this.notifications.some(n => n.timestamp > this.lastChecked);
+                markAsRead(id) {
+                    if (!this.readNotifs.includes(id)) {
+                        this.readNotifs.push(id);
+                        if (this.readNotifs.length > 100) this.readNotifs.shift(); 
+                        localStorage.setItem('read_notifications_{{ auth()->id() }}', JSON.stringify(this.readNotifs));
+                    }
+                },
+                markAllAsRead() {
+                    this.notifications.forEach(n => {
+                        if (!this.readNotifs.includes(n.id)) {
+                            this.readNotifs.push(n.id);
+                        }
+                    });
+                    localStorage.setItem('read_notifications_{{ auth()->id() }}', JSON.stringify(this.readNotifs));
                 },
                 toggle() {
-                    if (!this.open) {
-                        this.open = true;
-                        this.lastChecked = Date.now();
-                        localStorage.setItem('notifications_last_checked_{{ auth()->id() }}', this.lastChecked);
-                    } else {
-                        this.close();
-                    }
+                    this.open = !this.open;
                 },
                 close() {
                     this.open = false;
-                    setTimeout(() => { this.displayLastChecked = this.lastChecked; }, 300);
                 }
             }" @click.away="close()" class="relative">
                 <button @click="toggle()" 
                     class="relative p-2 rounded-xl hover:bg-[#be2346]/5 transition-all duration-300 group">
                     
-                    <template x-if="hasNew">
-                        <span class="absolute top-2 right-2 flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
+                    <template x-if="unreadNotifications.length > 0">
+                        <span class="absolute -top-1 -right-1 flex min-w-[16px] h-4 px-1 items-center justify-center bg-[#be2346] text-[9px] font-black text-white rounded-full border-2 border-white shadow-sm ring-1 ring-[#be2346]/20">
+                            <span x-text="unreadNotifications.length"></span>
                         </span>
                     </template>
                     
@@ -266,31 +326,38 @@
                     </svg>
                 </button>
 
-                    <div x-show="open" 
+                <div x-show="open" 
                     x-cloak
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                    class="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50">
+                    class="absolute right-0 mt-4 w-80 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100]">
                     
-                    <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-[#be2346]">Notifications</p>
+                    <div class="px-6 py-5 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                        <p class="text-[11px] font-black uppercase tracking-[0.2em] text-[#be2346]">Notifications</p>
+                        <button @click="markAllAsRead()" x-show="unreadNotifications.length > 0" class="text-[10px] font-bold text-gray-400 hover:text-[#be2346] transition-colors uppercase tracking-wider">Tout marquer comme lu</button>
                     </div>
 
-                    <div class="max-h-64 overflow-y-auto">
-                        <template x-for="notif in unreadNotifications" :key="notif.url + notif.timestamp">
-                            <a :href="notif.url" class="block p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
-                                <div class="flex justify-between items-start mb-1">
-                                    <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]" x-text="notif.title"></p>
-                                    <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2" x-text="notif.time_human"></span>
+                    <div class="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                        <template x-for="notif in unreadNotifications" :key="notif.id">
+                            <a :href="notif.url" @click="markAsRead(notif.id)" class="block px-6 py-5 border-b border-gray-50 hover:bg-gray-50 transition-all cursor-pointer group relative">
+                                <div class="flex justify-between items-start mb-1.5">
+                                    <p class="text-[13px] font-bold text-gray-800 group-hover:text-[#be2346] transition-colors pr-4" x-text="notif.title"></p>
+                                    <span class="text-[10px] text-gray-400 font-bold whitespace-nowrap" x-text="notif.time_human"></span>
                                 </div>
-                                <p class="text-xs text-gray-500 line-clamp-2 mt-1" x-text="notif.desc"></p>
+                                <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed" x-text="notif.desc"></p>
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#be2346] scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
                             </a>
                         </template>
 
-                        <div x-show="unreadNotifications.length === 0" class="p-5 border-b border-gray-50 hover:bg-red-50/30 transition-colors cursor-pointer group">
-                            <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346]">Mise à jour système</p>
-                            <p class="text-xs text-gray-500 mt-1">Nouveaux objectifs ajoutés pour le projet Access Morocco.</p>
+                        <div x-show="unreadNotifications.length === 0" class="py-16 text-center">
+                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-bold text-gray-400">Aucune nouvelle notification</p>
+                            <p class="text-[10px] text-gray-300 font-medium mt-1">Vous êtes à jour !</p>
                         </div>
                     </div>
                 </div>

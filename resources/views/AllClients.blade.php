@@ -34,7 +34,7 @@
 
         {{-- Flash --}}
         @if(session('msg'))
-            <div class="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-semibold">
+            <div id="flash-message" class="js-flash-message mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-semibold transition-all duration-500">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ session('msg') }}
             </div>
@@ -182,52 +182,47 @@
                         <div class="flex items-center gap-1">
                             @can('client.view')
                             <a href="{{ route('clients.show', $client->idClient) }}"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-[#b11d40] hover:bg-[#b11d40]/10 transition-all"
-                            title="Voir">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                               class="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-all"
+                               title="Voir">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
                             </a>
                             @endcan
 
                             @can('client.edit')
                             <a href="{{ route('clients.edit', $client->idClient) }}"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                            title="Modifier">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                               class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                               title="Modifier">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </a>
                             @endcan
 
-                            {{-- 🔥 BOUTON CRÉER DOSSIER --}}
+                            {{-- BOUTON CRÉER DOSSIER --}}
                             @can('dossier.create')
                             <button type="button"
-                                    onclick="openDossierModal({{ $client->idClient }}, {{ $client->idDepartement ?? 'null' }})"
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-all"
+                                    onclick="quickCreateDossier({{ $client->idClient }}, {{ $client->idDepartement ?? 'null' }})"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
                                     title="Créer un dossier">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                                 </svg>
                             </button>
                             @endcan
-                            @can('client.delete')
-                                <form action="{{ route('clients.destroy', $client->idClient) }}" method="POST"
-                                    onsubmit="return confirm('Voulez-vous vraiment supprimer ce client ?')">
-                                    @csrf
-                                    @method('DELETE')
 
-                                    <button type="submit"
-                                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                                        title="Supprimer">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0h8l-1 12a2 2 0 01-2 2H9a2 2 0 01-2-2L6 7z" />
-                                        </svg>
-                                    </button>
-                                </form>
-                                @endcan
+                            @can('client.delete')
+                            <button type="button"
+                                    onclick="window.confirmDelete('{{ route('clients.destroy', $client->idClient) }}', 'client')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                                    title="Supprimer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                            @endcan
                         </div>
                     </td>
 
@@ -246,6 +241,16 @@
             </table>
         </div>
     </div>
+
+    {{-- Hidden form for quick dossier creation --}}
+    <form id="quick-dossier-form" action="{{ route('dossiers.store') }}" method="POST" class="hidden">
+        @csrf
+        <input type="hidden" name="idClient" id="quick-idClient">
+        <input type="hidden" name="idDepartement" id="quick-idDepartement">
+        <input type="hidden" name="nombrePersonnes" value="1">
+        <input type="hidden" name="montant" value="0">
+        <input type="hidden" name="nombreJours" value="0">
+    </form>
 
     {{-- ===== MODAL CREATE ===== --}}
     @can('client.create')
@@ -428,6 +433,14 @@
 </div>
 
 <script>
+function quickCreateDossier(clientId, deptId) {
+    window.confirmDossierCreation(() => {
+        document.getElementById('quick-idClient').value = clientId;
+        document.getElementById('quick-idDepartement').value = deptId ?? '';
+        document.getElementById('quick-dossier-form').submit();
+    });
+}
+
 function openDossierModal(clientId, deptId) {
     document.getElementById('dossier-idClient').value = clientId;
     document.getElementById('dossier-idDepartement').value = deptId ?? '';

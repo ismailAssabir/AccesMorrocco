@@ -38,7 +38,9 @@
 </div>
 
 <script>
-    function openGlobalDeleteModal(url, title, description, confirmBtnText = 'Supprimer', theme = 'danger', iconType = 'trash', method = 'DELETE') {
+    let pendingGlobalCallback = null;
+
+    function openGlobalDeleteModal(url, title, description, confirmBtnText = 'Supprimer', theme = 'danger', iconType = 'trash', method = 'DELETE', callback = null) {
         const modal = document.getElementById('globalDeleteModal');
         const content = document.getElementById('globalDeleteModalContent');
         const form = document.getElementById('globalDeleteForm');
@@ -53,6 +55,8 @@
         if (title) titleEl.innerText = title;
         if (description) descEl.innerText = description;
         if (confirmBtnText) confirmBtnEl.innerText = confirmBtnText;
+
+        pendingGlobalCallback = callback;
 
         // Method handling
         methodPlaceholder.innerHTML = method === 'DELETE' ? '<input type="hidden" name="_method" value="DELETE">' : '';
@@ -90,6 +94,19 @@
         document.body.style.overflow = 'hidden';
     }
 
+    // Handle form submission for callbacks
+    document.getElementById('globalDeleteForm').onsubmit = function(e) {
+        if (pendingGlobalCallback) {
+            e.preventDefault();
+            const callback = pendingGlobalCallback;
+            pendingGlobalCallback = null;
+            closeGlobalDeleteModal();
+            callback();
+            return false;
+        }
+        return true;
+    };
+
     function closeGlobalDeleteModal() {
         const modal = document.getElementById('globalDeleteModal');
         const content = document.getElementById('globalDeleteModalContent');
@@ -103,6 +120,7 @@
         setTimeout(() => {
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
+            pendingGlobalCallback = null;
             
             // Reset to default (Red/Trash)
             document.getElementById('deleteModalConfirmBtn').innerText = 'Supprimer';
@@ -165,6 +183,19 @@
             "danger", 
             "logout", 
             "POST"
+        );
+    };
+
+    window.confirmDossierCreation = function(callback) {
+        openGlobalDeleteModal(
+            "#", 
+            "Créer un dossier ?", 
+            "Voulez-vous vraiment créer un nouveau dossier pour ce client ?", 
+            "Confirmer", 
+            "info", 
+            "switch",
+            "GET",
+            callback
         );
     };
 </script>
