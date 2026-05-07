@@ -142,6 +142,9 @@
         } else if (entityType === 'lead') {
             title = "Supprimer le lead ?";
             description = "Toutes les données de ce prospect seront définitivement supprimées.";
+        } else if (entityType === 'dossier') {
+            title = "Supprimer ce dossier ?";
+            description = "Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible et supprimera toutes les données associées.";
         } else if (entityType === 'historique' || entityType === 'pointage') {
             title = "Vider l'historique ?";
             description = "TOUS les enregistrements de pointage seront définitivement supprimés. Cette action est irréversible.";

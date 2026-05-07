@@ -12,6 +12,9 @@ class ClientPaiementController extends Controller
     {
         /** @var \App\Models\Client $client */
         $client = Auth::guard('client')->user();
+        
+        // Eager load dossiers with presentations for total calculation
+        $client->load('dossiers.presentations.presentationItems');
 
         // Get all payments associated with the client's dossiers
         $paiements = Paiement::whereIn('idDossier', $client->dossiers()->pluck('idDossier'))

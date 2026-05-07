@@ -52,6 +52,7 @@ class PresentationItemController extends Controller
         $validated = $request->validate([
             'idPresentation' => 'required|exists:presentations,idPresentation',
             'idCategory'     => 'nullable|exists:categories,idCategory',
+            'nom'            => 'nullable|string|max:255',
             'prixUnitaire'   => 'required|numeric',
             'quantity'       => 'required|integer|min:1',
         ]);
@@ -83,6 +84,7 @@ class PresentationItemController extends Controller
         $validated = $request->validate([
             'idPresentation' => 'sometimes|required|exists:presentations,idPresentation',
             'idCategory'     => 'nullable|exists:categories,idCategory',
+            'nom'            => 'nullable|string|max:255',
             'prixUnitaire'   => 'sometimes|required|numeric',
             'quantity'       => 'sometimes|required|integer|min:1',
         ]);

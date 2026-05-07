@@ -81,11 +81,11 @@
 
 @php
     // ── Tous les dossiers du client ──
-    $allDossiers   = $client->dossiers()->get();
+    $allDossiers   = $client->dossiers()->with(['presentations.presentationItems'])->get();
     $totalDossiers = $dossiers->total();
     $enCours       = $allDossiers->where('status', 'en_cours')->count();
     $termines      = $allDossiers->where('status', 'ferme')->count();
-    $totalPaiements = $allDossiers->sum(fn($d) => $d->montant ?? 0); // Budget total des dossiers
+    $totalPaiements = $allDossiers->sum(fn($d) => $d->total_montant ?? 0); // Budget total des dossiers
 
     // ── Calcul des montants payés et restants réels ──
     $dossierIds = $allDossiers->pluck('idDossier');
@@ -101,7 +101,7 @@
         if ($dossier->created_at) {
             $month = $dossier->created_at->format('M Y');
             $monthlyDossiers[$month] = ($monthlyDossiers[$month] ?? 0) + 1;
-            $monthlyPayments[$month] = ($monthlyPayments[$month] ?? 0) + ($dossier->montant ?? 0);
+            $monthlyPayments[$month] = ($monthlyPayments[$month] ?? 0) + ($dossier->total_montant ?? 0);
         }
     }
 
@@ -249,43 +249,44 @@
         <div id="paymentTrendChart" class="min-h-[200px]"></div>
     </div>
 
-    {{-- État des Présentations --}}
-    <div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300 lg:col-span-4">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mes Présentations</p>
-                <p class="text-xs text-gray-500 mt-0.5">Répartition par état</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('clients.presentations') }}" class="text-[10px] font-black text-[#b11d40] hover:underline uppercase tracking-wider">
-                    Voir tout &rarr;
-                </a>
-                <div class="p-2 bg-blue-50 rounded-xl">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
+</div>
+
+{{-- État des Présentations (Full Width) --}}
+<div class="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-2xl hover:shadow-[#b11d40]/15 transition-all duration-300 mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mes Présentations</p>
+            <p class="text-xs text-gray-500 mt-0.5">Répartition par état</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('clients.presentations') }}" class="text-[10px] font-black text-[#b11d40] hover:underline uppercase tracking-wider">
+                Voir tout &rarr;
+            </a>
+            <div class="p-2 bg-blue-50 rounded-xl">
+                <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
             </div>
         </div>
-
-        {{-- Quick badge summary --}}
-        <div class="flex items-center gap-3 mb-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-100">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                En attente : {{ $presentationStats['en_attente'] }}
-            </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                Validées : {{ $presentationStats['validee'] }}
-            </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-100">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
-                Refusées : {{ $presentationStats['refusee'] }}
-            </span>
-        </div>
-
-        <div id="presentationChart" class="min-h-[160px]"></div>
     </div>
+
+    {{-- Quick badge summary --}}
+    <div class="flex items-center gap-3 mb-4">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-100">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            En attente : {{ $presentationStats['en_attente'] }}
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Validées : {{ $presentationStats['validee'] }}
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-100">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+            Refusées : {{ $presentationStats['refusee'] }}
+        </span>
+    </div>
+
+    <div id="presentationChart" class="min-h-[160px]"></div>
 </div>
 
 
@@ -395,15 +396,15 @@
                     borderRadius: 6,
                     distributed: true,
                     barHeight: '55%',
-                    dataLabels: { position: 'top' }
+                    dataLabels: { position: 'center' }
                 }
             },
             colors: ['#f59e0b', '#10b981', '#ef4444'],
             dataLabels: {
                 enabled: true,
                 formatter: function(val) { return val > 0 ? val : ''; },
-                style: { fontSize: '11px', fontWeight: 700, colors: ['#374151'] },
-                offsetX: 8
+                style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'] },
+                offsetX: 0
             },
             xaxis: {
                 categories: ['En attente', 'Validées', 'Refusées'],

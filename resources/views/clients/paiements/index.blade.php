@@ -7,7 +7,8 @@
 @section('content')
 @php
     $totalPaye = $paiements->getCollection()->sum('montantPaye');
-    $totalReste = $paiements->getCollection()->sum('montantReste');
+    $totalDossierMontant = $client->dossiers->sum('total_montant');
+    $totalReste = max(0, $totalDossierMontant - $totalPaye);
     $countComplet = $paiements->getCollection()->where('status', 'complet')->count();
 @endphp
 
@@ -137,8 +138,15 @@
 
                     {{-- Reste --}}
                     <td class="px-8 py-6">
-                        <span class="font-bold {{ $p->montantReste > 0 ? 'text-rose-500' : 'text-slate-400' }}">
-                            {{ number_format($p->montantReste, 2, ',', ' ') }}
+                        @php
+                            // Calculate cumulative paid for this dossier up to this payment date
+                            $cumulativePaid = $p->dossier->paiements()
+                                ->where('date', '<=', $p->date)
+                                ->sum('montantPaye');
+                            $resteDossier = max(0, $p->dossier->total_montant - $cumulativePaid);
+                        @endphp
+                        <span class="font-bold {{ $resteDossier > 0 ? 'text-rose-500' : 'text-slate-400' }}">
+                            {{ number_format($resteDossier, 2, ',', ' ') }}
                         </span>
                         <span class="text-[10px] font-bold text-slate-300 ml-0.5">MAD</span>
                     </td>

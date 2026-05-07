@@ -46,4 +46,16 @@ class Dossier extends Model
     {
         return $this->belongsTo(User::class, 'idUser', 'idUser');
     }
+
+    /**
+     * Get the total amount including validated presentations.
+     */
+    public function getTotalMontantAttribute()
+    {
+        $extra = $this->presentations
+            ->where('status', 'validee')
+            ->sum('total');
+            
+        return ($this->montant ?? 0) + $extra;
+    }
 }

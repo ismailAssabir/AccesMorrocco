@@ -13,6 +13,7 @@ class ClientDashboardController extends Controller
         $client = Auth::guard('client')->user();
 
         $dossiers = $client->dossiers()
+            ->with(['presentations.presentationItems'])
             ->latest()
             ->paginate(10);
 

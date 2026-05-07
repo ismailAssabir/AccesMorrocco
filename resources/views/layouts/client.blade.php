@@ -303,10 +303,9 @@
                     <button @click="toggle()" 
                         class="relative w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors group">
                         
-                        <template x-if="hasNew">
-                            <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#be2346] opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#be2346]"></span>
+                        <template x-if="visibleNotifications.length > 0">
+                            <span class="absolute -top-1 -right-1 flex min-w-[16px] h-4 px-1 items-center justify-center bg-[#be2346] text-[9px] font-black text-white rounded-full border-2 border-white shadow-sm ring-1 ring-[#be2346]/20">
+                                <span x-text="visibleNotifications.length"></span>
                             </span>
                         </template>
                         

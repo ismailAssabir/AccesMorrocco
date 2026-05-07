@@ -114,7 +114,14 @@
                                 <span class="font-black text-emerald-600">+ {{ number_format($p->montantPaye, 2) }}</span>
                             </td>
                             <td class="px-8 py-6 text-right">
-                                <span class="font-bold text-slate-400">{{ number_format($p->montantReste, 2) }}</span>
+                                @php
+                                    // Cumulative calculation to reflect the remaining balance relative to the current total
+                                    $cumulativePaid = $p->dossier->paiements()
+                                        ->where('date', '<=', $p->date)
+                                        ->sum('montantPaye');
+                                    $resteDynamic = max(0, $p->dossier->total_montant - $cumulativePaid);
+                                @endphp
+                                <span class="font-bold {{ $resteDynamic > 0 ? 'text-amber-600' : 'text-slate-400' }}">{{ number_format($resteDynamic, 2) }}</span>
                             </td>
                             <td class="px-8 py-6 text-center">
                                 @if($p->status == 'complet')
@@ -207,8 +214,8 @@
                                 select(d) {
                                     this.selectedId = d.idDossier;
                                     this.selectedRef = d.reference;
-                                    this.totalDossier = d.montant || 0;
-                                    this.alreadyPaid = d.paiements_sum_montant_paye || 0;
+                                    this.totalDossier = d.total_montant_val || 0;
+                                    this.alreadyPaid = d.paiements_sum_montantpaye || 0;
                                     this.open = false;
                                     this.search = '';
                                 }
@@ -238,7 +245,7 @@
                                                 class="px-5 py-3 text-sm hover:bg-[#be2346]/5 cursor-pointer transition-colors flex items-center justify-between group">
                                                 <div class="flex flex-col">
                                                     <span x-text="d.reference" class="font-black text-slate-700 group-hover:text-[#be2346]"></span>
-                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.montant).toFixed(2) + ' MAD'"></span>
+                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.total_montant_val).toFixed(2) + ' MAD'"></span>
                                                 </div>
                                                 <svg x-show="selectedId == d.idDossier" class="w-4 h-4 text-[#be2346]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                                             </div>
@@ -321,8 +328,8 @@
             select(d) {
                 this.selectedId = d.idDossier;
                 this.selectedRef = d.reference;
-                this.totalDossier = d.montant || 0;
-                this.alreadyPaidExcludingCurrent = (d.paiements_sum_montant_paye || 0);
+                this.totalDossier = d.total_montant_val || 0;
+                this.alreadyPaidExcludingCurrent = (d.paiements_sum_montantpaye || 0);
                 // Note: If we select a NEW dossier in edit mode, alreadyPaidExcludingCurrent is just the sum of that dossier's payments
                 this.open = false;
                 this.search = '';
@@ -383,7 +390,7 @@
                                                 class="px-5 py-3 text-sm hover:bg-[#be2346]/5 cursor-pointer transition-colors flex items-center justify-between group">
                                                 <div class="flex flex-col">
                                                     <span x-text="d.reference" class="font-black text-slate-700 group-hover:text-[#be2346]"></span>
-                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.montant).toFixed(2) + ' MAD'"></span>
+                                                    <span class="text-[10px] text-slate-400" x-text="'Total: ' + parseFloat(d.total_montant_val).toFixed(2) + ' MAD'"></span>
                                                 </div>
                                                 <svg x-show="selectedId == d.idDossier" class="w-4 h-4 text-[#be2346]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                                             </div>
@@ -453,8 +460,8 @@
             
             // Dispatch event to Alpine for searchable select and auto-calc
             const dossierRef = p.dossier ? p.dossier.reference : '—';
-            const dossierMontant = p.dossier ? p.dossier.montant : 0;
-            const dossierTotalPaid = p.dossier ? p.dossier.paiements_sum_montant_paye : 0;
+            const dossierMontant = p.dossier ? p.dossier.total_montant : 0;
+            const dossierTotalPaid = p.dossier ? p.dossier.paiements_sum_montantpaye : 0;
             
             window.dispatchEvent(new CustomEvent('set-edit-dossier', { 
                 detail: { 

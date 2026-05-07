@@ -22,7 +22,8 @@
     @can('dossier.create')
     <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
         class="flex items-center gap-2 px-4 py-2 bg-[#b11d40] text-white font-bold rounded-xl hover:bg-[#7c1233] transition-all text-sm shadow">
-        ➕ Nouveau Dossier
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Nouveau Dossier
     </button>
     @endcan
 </div>
@@ -110,8 +111,9 @@
                     <td class="px-4 py-4">
                         @if(!$dossier->idDepartement && auth()->user()->hasRole('admin'))
                             <button onclick="openDeptModal({{ $dossier->idDossier }})"
-                                class="px-2 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
-                                ⚠ Non assigné
+                                class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                Non assigné
                             </button>
                         @else
                             {{ $dossier->departement->title ?? '-' }}
@@ -129,14 +131,18 @@
                             'en_cours' => 'bg-amber-100 text-amber-700',
                             'ferme' => 'bg-green-100 text-green-700'
                         ];
+                        $statusIcons = [
+                            'ouvert' => '<svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+                            'en_cours' => '<svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>',
+                            'ferme' => '<svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+                        ];
                         $statusLabels = [
-                            'ouvert' => '📋 Ouvert',
-                            'en_cours' => '⚙️ En cours',
-                            'ferme' => '✅ Fermé'
+                            'ouvert' => 'Ouvert',
+                            'en_cours' => 'En cours',
+                            'ferme' => 'Fermé'
                         ];
                         $canEditStatus = (
-                            $dossier->idUser == auth()->user()->idUser 
-                            && auth()->user()->hasRole('employee')
+                            (auth()->user()->hasRole('admin') || auth()->user()->hasRole('manager') || $dossier->idUser == auth()->user()->idUser)
                             && $dossier->status !== 'ferme' // 🔥 IMPORTANT
                         );                    
                         @endphp
@@ -144,84 +150,59 @@
                     @if($canEditStatus)
                         <select onchange="updateStatus({{ $dossier->idDossier }}, this.value)"
                                 class="px-2 py-1 rounded-lg text-xs font-bold border-0 focus:ring-2 focus:ring-[#b11d40] cursor-pointer {{ $statusColors[$dossier->status] ?? 'bg-slate-100' }}">
-                            <option value="ouvert" {{ $dossier->status == 'ouvert' ? 'selected' : '' }}>📋 Ouvert</option>
-                            <option value="en_cours" {{ $dossier->status == 'en_cours' ? 'selected' : '' }}>⚙️ En cours</option>
-                            <option value="ferme" {{ $dossier->status == 'ferme' ? 'selected' : '' }}>✅ Fermé</option>
+                            <option value="ouvert" {{ $dossier->status == 'ouvert' ? 'selected' : '' }}>Ouvert</option>
+                            <option value="en_cours" {{ $dossier->status == 'en_cours' ? 'selected' : '' }}>En cours</option>
+                            <option value="ferme" {{ $dossier->status == 'ferme' ? 'selected' : '' }}>Fermé</option>
                         </select>
                     @else
-                        <span class="px-2 py-1 rounded-lg text-xs font-bold {{ $statusColors[$dossier->status] ?? 'bg-slate-100' }}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider {{ $statusColors[$dossier->status] ?? 'bg-slate-100' }}">
+                            {!! $statusIcons[$dossier->status] ?? '' !!}
                             {{ $statusLabels[$dossier->status] ?? $dossier->status }}
                         </span>
                     @endif
+                    </td>
                 <td class="px-4 py-4">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1">
 
                         @can('dossier.view')
                         <a href="{{ route('dossiers.show',$dossier->idDossier) }}"
-                        class="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
-                        title="Voir">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5
-                                    c4.478 0 8.268 2.943 9.542 7
-                                    -1.274 4.057-5.064 7-9.542 7
-                                    -4.477 0-8.268-2.943-9.542-7z" />
+                           class="p-1.5 rounded-lg text-slate-400 hover:text-green-600 hover:bg-green-50 transition-all"
+                           title="Voir les détails">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                         </a>
                         @endcan
 
                         @can('dossier.edit')
                         <a href="{{ route('dossiers.edit',$dossier->idDossier) }}"
-                        class="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
-                        title="Modifier">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5h2m-1-1v2m4.293 1.293l1.414 1.414
-                                    a1 1 0 010 1.414l-9.9 9.9
-                                    a2 2 0 01-.878.514l-3.182.795
-                                    .795-3.182a2 2 0 01.514-.878l9.9-9.9
-                                    a1 1 0 011.414 0z" />
+                           class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                           title="Modifier">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </a>
                         @endcan
 
                         @can('dossier.delete')
-                        <form method="POST" action="{{ route('dossiers.destroy',$dossier->idDossier) }}">
-                            @csrf @method('DELETE')
-
-                            <button type="submit"
-                                onclick="return confirm('Voulez-vous supprimer ce dossier ?')"
-                                class="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                        <button onclick="window.confirmDelete('{{ route('dossiers.destroy', $dossier->idDossier) }}', 'dossier')"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
                                 title="Supprimer">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-                                        a2 2 0 01-1.995-1.858L5 7m5-4h4
-                                        m-4 0a2 2 0 00-2 2v1h8V5a2 2 0 00-2-2
-                                        m-4 0h4" />
-                                </svg>
-                            </button>
-                        </form>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
                         @endcan
 
                         {{-- ASSIGN --}}
                         @role('manager')
                         @if(auth()->user()->idDepartement == $dossier->idDepartement)
                         <button onclick="openAssignModal({{ $dossier->idDossier }}, {{ $dossier->idDepartement }})"
-                            class="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
-                            title="Assigner">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a4 4 0 00-3-3.87
-                                    M9 20H4v-2a4 4 0 013-3.87
-                                    m13-3a4 4 0 10-8 0
-                                    4 4 0 008 0z" />
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+                                title="Assigner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m13-3a4 4 0 10-8 0 4 4 0 008 0z" />
                             </svg>
                         </button>
                         @endif
@@ -506,25 +487,25 @@
                             <div class="flex justify-between items-center mb-2">
                                 <div>
                                     <p class="font-bold text-slate-800 text-sm">${user.firstName} ${user.lastName}</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">📋 ${actifs} actif(s) | ✅ ${fermes} fermé(s)</p>
+                                    <p class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1.5"><svg class="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> ${actifs} actif(s) <span class="mx-1 text-slate-300">|</span> <svg class="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> ${fermes} fermé(s)</p>
                                 </div>
                                 ${isFull
-                                    ? '<span class="text-xs font-bold text-red-500 bg-red-100 px-2 py-1 rounded-lg">🔴 COMPLET (5/5)</span>'
-                                    : '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-lg">🟢 Disponible</span>'
+                                    ? '<span class="inline-flex items-center gap-1 text-[10px] font-black uppercase text-red-500 bg-red-100 px-2 py-1 rounded-md tracking-wider"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>COMPLET</span>'
+                                    : '<span class="inline-flex items-center gap-1 text-[10px] font-black uppercase text-green-600 bg-green-100 px-2 py-1 rounded-md tracking-wider"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>DISPONIBLE</span>'
                                 }
                             </div>
                             <div class="mb-1">
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="text-slate-600">Charge de travail</span>
-                                    <span class="font-bold" style="color: ${chargeColor};">${actifs}/${maxDossiers}</span>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-slate-500">Charge de travail</span>
+                                    <span style="color: ${chargeColor};">${actifs}/${maxDossiers}</span>
                                 </div>
-                                <div class="bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                    <div class="h-2.5 rounded-full transition-all duration-300"
+                                <div class="bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                    <div class="h-1.5 rounded-full transition-all duration-300"
                                         style="width: ${chargePercent}%; background: ${chargeColor};"></div>
                                 </div>
                             </div>
-                            ${actifs === 4 ? `<div class="mt-2 text-xs text-orange-600 bg-orange-50 p-1.5 rounded-lg">⚠️ Capacité proche du maximum (4/5 dossiers)</div>` : ''}
-                            ${isFull ? `<div class="mt-2 text-xs text-red-600 bg-red-50 p-1.5 rounded-lg">🚫 Impossible d'assigner un nouveau dossier</div>` : ''}
+                            ${actifs === 4 ? `<div class="mt-2 text-[10px] font-bold text-orange-600 bg-orange-50/80 px-2 py-1.5 rounded-lg border border-orange-100 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Capacité proche du maximum</div>` : ''}
+                            ${isFull ? `<div class="mt-2 text-[10px] font-bold text-red-600 bg-red-50/80 px-2 py-1.5 rounded-lg border border-red-100 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg> Impossible d'assigner</div>` : ''}
                         </div>
                     `;
                 });
@@ -533,15 +514,18 @@
                 if (availableUsers.length === 0) {
                     listEl.innerHTML += `
                         <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
-                            <p class="text-amber-700 font-medium">⚠️ Aucun employé disponible</p>
-                            <p class="text-amber-600 text-sm mt-1">Tous les employés ont atteint leur capacité maximale (5 dossiers actifs)</p>
+                            <div class="mx-auto w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 mb-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <p class="text-amber-700 font-bold text-sm">Aucun employé disponible</p>
+                            <p class="text-amber-600 text-xs mt-1">Tous les employés ont atteint leur capacité maximale.</p>
                         </div>
                     `;
                 }
             })
             .catch(err => {
                 loadingEl.classList.add('hidden');
-                listEl.innerHTML = '<div class="text-center text-red-500 text-sm py-4">❌ Erreur de chargement</div>';
+                listEl.innerHTML = '<div class="text-center text-red-500 text-sm py-4 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Erreur de chargement</div>';
                 console.error(err);
             });
     }
@@ -554,14 +538,14 @@
         select.setAttribute('data-old', oldValue);
 
         const labels = {
-            'ouvert':   { label: '📋 Ouvert',   bg: '#eff6ff', color: '#1d4ed8', icon: '📋', iconBg: '#dbeafe' },
-            'en_cours': { label: '⚙️ En cours', bg: '#fffbeb', color: '#b45309', icon: '⚙️', iconBg: '#fef3c7' },
-            'ferme':    { label: '✅ Fermé',    bg: '#f0fdf4', color: '#15803d', icon: '✅', iconBg: '#dcfce7' },
+            'ouvert':   { label: 'Ouvert',   bg: '#eff6ff', color: '#1d4ed8', icon: '<svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>', iconBg: '#dbeafe' },
+            'en_cours': { label: 'En cours', bg: '#fffbeb', color: '#b45309', icon: '<svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>', iconBg: '#fef3c7' },
+            'ferme':    { label: 'Fermé',    bg: '#f0fdf4', color: '#15803d', icon: '<svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>', iconBg: '#dcfce7' },
         };
 
-        const info = labels[newStatus] || { label: newStatus, bg: '#f8fafc', color: '#475569', icon: '🔄', iconBg: '#f1f5f9' };
+        const info = labels[newStatus] || { label: newStatus, bg: '#f8fafc', color: '#475569', icon: '<svg class="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>', iconBg: '#f1f5f9' };
 
-        document.getElementById('confirm-icon').textContent = info.icon;
+        document.getElementById('confirm-icon').innerHTML = info.icon;
         document.getElementById('confirm-icon').style.background = info.iconBg;
         document.getElementById('confirm-message').textContent = `Voulez-vous changer le statut vers :`;
 
@@ -645,8 +629,8 @@
         `;
 
         flashDiv.innerHTML = `
-            <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${isSuccess ? '#dcfce7' : '#fee2e2'};font-size:16px;">
-                ${isSuccess ? '✅' : '❌'}
+            <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${isSuccess ? '#dcfce7' : '#fee2e2'};color:${isSuccess ? '#15803d' : '#dc2626'};">
+                ${isSuccess ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
             </div>
             <div style="flex:1;">
                 <p style="font-weight:800;font-size:13px;color:${isSuccess ? '#15803d' : '#dc2626'};margin:0;">

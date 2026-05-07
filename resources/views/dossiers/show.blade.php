@@ -101,8 +101,8 @@
                                 <span class="text-sm font-bold text-slate-700">{{ $dossier->nombreJours }}</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-[#b11d40]/5 rounded-2xl border border-[#b11d40]/10">
-                                <span class="text-xs font-black text-[#b11d40] uppercase">Montant</span>
-                                <span class="text-sm font-black text-[#b11d40]">{{ number_format($dossier->montant, 2) }} MAD</span>
+                                <span class="text-xs font-black text-[#b11d40] uppercase">Montant Total</span>
+                                <span class="text-sm font-black text-[#b11d40]">{{ number_format($dossier->total_montant, 2) }} MAD</span>
                             </div>
                         </div>
                     </div>
@@ -143,17 +143,54 @@
                             Paiements
                             <span class="ml-2 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500 text-xs">{{ $dossier->paiements->count() }}</span>
                         </h3>
-                        @forelse($dossier->paiements as $paiement)
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl mb-2">
-                            <div>
-                                <p class="text-xs font-black text-slate-700">{{ $paiement->reference ?? '—' }}</p>
-                                <p class="text-xs text-slate-400">{{ $paiement->created_at?->format('d/m/Y') }}</p>
+
+                        <div class="space-y-2">
+                            @forelse($dossier->paiements as $paiement)
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl group transition-all hover:bg-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#b11d40] shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black text-slate-700">{{ $paiement->ref ?? '—' }}</p>
+                                        <p class="text-[9px] text-slate-400 font-bold">{{ $paiement->created_at?->format('d/m/Y') }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-sm font-black text-green-600">{{ number_format($paiement->montantPaye ?? 0, 2) }} MAD</span>
+                                    @php
+                                        // Dynamic balance calculation relative to current total
+                                        $cumulativePaid = $dossier->paiements
+                                            ->where('date', '<=', $paiement->date)
+                                            ->sum('montantPaye');
+                                        $dynamicReste = max(0, $dossier->total_montant - $cumulativePaid);
+                                    @endphp
+                                    <span class="text-[9px] font-bold text-slate-400">Reste: {{ number_format($dynamicReste, 2) }} MAD</span>
+                                </div>
                             </div>
-                            <span class="text-sm font-black text-green-600">{{ number_format($paiement->montant ?? 0, 2) }} MAD</span>
+                            @empty
+                            <p class="text-sm text-slate-400 italic py-4">Aucun paiement enregistré.</p>
+                            @endforelse
                         </div>
-                        @empty
-                        <p class="text-sm text-slate-400 italic">Aucun paiement enregistré.</p>
-                        @endforelse
+
+                        @if($dossier->paiements->count() > 0)
+                        <div class="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3">
+                            @php
+                                $totalPaye = $dossier->paiements->sum('montantPaye');
+                                $reste = max(0, $dossier->total_montant - $totalPaye);
+                            @endphp
+                            <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Payé</p>
+                                <p class="text-sm font-black text-emerald-700">{{ number_format($totalPaye, 2) }} <span class="text-[10px]">MAD</span></p>
+                            </div>
+                            <div class="p-3 bg-rose-50 rounded-2xl border border-rose-100">
+                                <p class="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-1">Reste à Payer</p>
+                                <p class="text-sm font-black text-rose-700">{{ number_format($reste, 2) }} <span class="text-[10px]">MAD</span></p>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -195,6 +232,7 @@
                                                     });
                                                     if(res.ok) {
                                                         this.status = newStatus;
+                                                        window.location.reload(); // Refresh to update totals
                                                     }
                                                 } catch(e) { alert('Erreur'); }
                                             }

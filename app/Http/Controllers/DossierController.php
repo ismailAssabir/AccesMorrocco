@@ -21,7 +21,7 @@ class DossierController extends Controller
 
         $dossier = Dossier::findOrFail($id);
 
-        if ($dossier->idUser !== auth()->user()->idUser) {
+        if (!auth()->user()->hasRole('admin') && !auth()->user()->hasRole('manager') && $dossier->idUser !== auth()->user()->idUser) {
             return response()->json([
                 'success' => false,
                 'message' => 'Non autorisé.'
