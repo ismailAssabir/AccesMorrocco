@@ -39,11 +39,12 @@
                         <span class="text-slate-500">{{ $pres->created_at->format('d/m/Y') }}</span>
                     </td>
                     <td class="px-8 py-6 text-right">
-                        @if($pres->fichier)
-                        <a href="{{ asset('storage/'.$pres->fichier) }}" target="_blank" class="text-[#b11d40] font-bold hover:underline">Télécharger</a>
-                        @else
-                        <span class="text-slate-300">Indisponible</span>
-                        @endif
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="{{ route('clients.presentations.show', $pres->idPresentation) }}" class="text-slate-600 font-bold hover:text-[#b11d40] transition-colors">Consulter</a>
+                            @if($pres->fichier)
+                            <a href="{{ asset('storage/'.$pres->fichier) }}" target="_blank" class="px-4 py-1.5 bg-[#b11d40] text-white rounded-xl font-bold text-xs hover:bg-[#7c1233] transition-all">Télécharger PDF</a>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @endforeach

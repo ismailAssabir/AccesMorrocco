@@ -9,7 +9,7 @@ class PresentationsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Presentation::with(['dossier']);
+        $query = Presentation::with(['dossier', 'presentationItems']);
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -44,16 +44,35 @@ class PresentationsController extends Controller
             'status'    => 'nullable|in:en_attente,validee,refusee',
             'comment'   => 'nullable|string',
             'reponse'   => 'nullable|string',
+            'items'     => 'nullable|array',
+            'items.*.idCategory'   => 'nullable|exists:categories,idCategory',
+            'items.*.nom'          => 'required|string|max:255',
+            'items.*.prixUnitaire' => 'required|numeric',
+            'items.*.quantity'     => 'required|integer|min:1',
         ]);
 
-        $presentation = Presentation::create($validated);
+        return \DB::transaction(function() use ($validated) {
+            $presentation = Presentation::create($validated);
 
-        return response()->json($presentation, 201);
+            if (!empty($validated['items'])) {
+                foreach ($validated['items'] as $itemData) {
+                    $presentation->presentationItems()->create([
+                        'idCategory'   => $itemData['idCategory'] ?? null,
+                        'nom'          => $itemData['nom'],
+                        'prixUnitaire' => $itemData['prixUnitaire'],
+                        'quantity'     => $itemData['quantity'],
+                        'totale'       => $itemData['prixUnitaire'] * $itemData['quantity'],
+                    ]);
+                }
+            }
+
+            return response()->json($presentation->load('presentationItems'), 201);
+        });
     }
 
     public function show($id)
     {
-        return response()->json(Presentation::with(['dossier', 'presentationItems'])->findOrFail($id));
+        return response()->json(Presentation::with(['dossier', 'presentationItems.category'])->findOrFail($id));
     }
 
     public function update(Request $request, $id)
@@ -67,16 +86,86 @@ class PresentationsController extends Controller
             'status'    => 'sometimes|required|in:en_attente,validee,refusee',
             'comment'   => 'nullable|string',
             'reponse'   => 'nullable|string',
+            'items'     => 'nullable|array',
+            'items.*.idItems'      => 'nullable|exists:presentation_items,idItems',
+            'items.*.nom'          => 'required|string|max:255',
+            'items.*.idCategory'   => 'nullable|exists:categories,idCategory',
+            'items.*.prixUnitaire' => 'required|numeric',
+            'items.*.quantity'     => 'required|integer|min:1',
         ]);
 
-        $presentation->update($validated);
+        return \DB::transaction(function() use ($presentation, $validated) {
+            $presentation->update($validated);
 
-        return response()->json($presentation);
+            if (isset($validated['items'])) {
+                $sentItemIds = collect($validated['items'])->pluck('idItems')->filter()->toArray();
+                $presentation->presentationItems()->whereNotIn('idItems', $sentItemIds)->delete();
+
+                foreach ($validated['items'] as $itemData) {
+                    if (!empty($itemData['idItems'])) {
+                        $item = $presentation->presentationItems()->where('idItems', $itemData['idItems'])->first();
+                        if ($item) {
+                            $item->update([
+                                'idCategory' => $itemData['idCategory'] ?? null,
+                                'nom' => $itemData['nom'] ?? 'Article',
+                                'prixUnitaire' => $itemData['prixUnitaire'],
+                                'quantity' => $itemData['quantity'],
+                                'totale' => $itemData['prixUnitaire'] * $itemData['quantity'],
+                            ]);
+                        }
+                    } else {
+                        $presentation->presentationItems()->create([
+                            'idCategory' => $itemData['idCategory'] ?? null,
+                            'nom' => $itemData['nom'] ?? 'Article',
+                            'prixUnitaire' => $itemData['prixUnitaire'],
+                            'quantity' => $itemData['quantity'],
+                            'totale' => $itemData['prixUnitaire'] * $itemData['quantity'],
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json($presentation->load('presentationItems'));
+        });
     }
 
     public function destroy($id)
     {
         Presentation::findOrFail($id)->delete();
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Presentation deleted successfully'], 200);
+    }
+
+    public function duplicate($id)
+    {
+        return \DB::transaction(function() use ($id) {
+            $original = Presentation::with('presentationItems')->findOrFail($id);
+            
+            // Clean up title to find base name (remove existing - V followed by numbers)
+            $baseTitle = preg_replace('/ - V\d+$/', '', $original->titre);
+            
+            // Count how many versions already exist for this base title in this dossier
+            $count = Presentation::where('idDossier', $original->idDossier)
+                ->where('titre', 'LIKE', $baseTitle . '%')
+                ->count();
+            
+            $nextVersion = $count + 1;
+
+            // Create the new version
+            $new = $original->replicate();
+            $new->titre = $baseTitle . ' - V' . $nextVersion;
+            $new->status = 'en_attente';
+            $new->reponse = null;
+            $new->save();
+
+            // Replicate items
+            foreach ($original->presentationItems as $item) {
+                $newItem = $item->replicate();
+                $newItem->idPresentation = $new->idPresentation;
+                $newItem->status = 'en_attente'; // Reset status for new version
+                $newItem->save();
+            }
+
+            return response()->json($new->load('presentationItems'), 201);
+        });
     }
 }

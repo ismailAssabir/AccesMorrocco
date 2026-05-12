@@ -59,6 +59,9 @@ Route::prefix('clients')->name('clients.')->group(function () {
         Route::get('/dossiers/{idDossier}', [ClientDossierController::class, 'show'])->name('dossiers.show');
 
         Route::get('/presentations', [ClientPresentationController::class, 'index'])->name('presentations');
+        Route::get('/presentations/{id}', [ClientPresentationController::class, 'show'])->name('presentations.show');
+        Route::put('/presentations/{id}/suggest', [ClientPresentationController::class, 'suggest'])->name('presentations.suggest');
+        Route::patch('/presentation-items/{id}/status', [ClientPresentationController::class, 'updateItemStatus'])->name('presentations.item.status');
         Route::get('/paiements', [ClientPaiementController::class, 'index'])->name('paiements');
         Route::get('/profile', [ClientProfileController::class, 'index'])->name('profile');
     });
@@ -246,6 +249,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     # Primes & Bonus Routes
     Route::resource('primes', \App\Http\Controllers\PrimeController::class);
+
+    # Presentation & Items Routes
+    Route::prefix('admin')->group(function() {
+        Route::post('presentations/{id}/duplicate', [PresentationsController::class, 'duplicate']);
+        Route::apiResource('presentations', PresentationsController::class);
+        Route::apiResource('presentation-items', PresentationItemController::class);
+    });
 });
 
 
@@ -257,7 +267,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pointage/check-out', [PointageController::class, 'checkOut'])->name('pointage.checkout');
     Route::get('/my-infractions', [PointageController::class, 'userPointage'])->name('user.infractions');
     Route::post('/justification/submit', [PointageController::class, 'submitJustification'])->name('justification.submit');
-    
+
     Route::middleware('role:admin')->group(function() {
         Route::get('/admin/pointages', [PointageController::class, 'index'])->name('admin.pointages.index');
         Route::get('/admin/pointages/export', [PointageController::class, 'exportPdf'])->name('admin.pointages.export');
@@ -304,17 +314,7 @@ Route::put('/dossiers/{id}', [DossierController::class, 'update'])->name('dossie
 Route::delete('/dossiers/{id}',[DossierController::class, 'destroy'])->name('dossiers.destroy');
 
 
-Route::get('/presentation-items', [PresentationItemController::class, 'index']);
-Route::post('/presentation-items', [PresentationItemController::class, 'store']);
-Route::get('/presentation-items/{id}', [PresentationItemController::class, 'show']);
-Route::put('/presentation-items/{id}', [PresentationItemController::class, 'update']);
-Route::delete('/presentation-items/{id}', [PresentationItemController::class, 'destroy']);
 
-Route::get('/presentations', [PresentationsController::class, 'index']);
-Route::post('/presentations', [PresentationsController::class, 'store']);
-Route::get('/presentations/{id}', [PresentationsController::class, 'show']);
-Route::put('/presentations/{id}', [PresentationsController::class, 'update']);
-Route::delete('/presentations/{id}', [PresentationsController::class, 'destroy']);
 
 
 require __DIR__.'/auth.php';

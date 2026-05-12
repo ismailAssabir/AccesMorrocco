@@ -37,11 +37,12 @@
                         <span class="text-slate-500"><?php echo e($pres->created_at->format('d/m/Y')); ?></span>
                     </td>
                     <td class="px-8 py-6 text-right">
-                        <?php if($pres->fichier): ?>
-                        <a href="<?php echo e(asset('storage/'.$pres->fichier)); ?>" target="_blank" class="text-[#b11d40] font-bold hover:underline">Télécharger</a>
-                        <?php else: ?>
-                        <span class="text-slate-300">Indisponible</span>
-                        <?php endif; ?>
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="<?php echo e(route('clients.presentations.show', $pres->idPresentation)); ?>" class="text-slate-600 font-bold hover:text-[#b11d40] transition-colors">Consulter</a>
+                            <?php if($pres->fichier): ?>
+                            <a href="<?php echo e(asset('storage/'.$pres->fichier)); ?>" target="_blank" class="px-4 py-1.5 bg-[#b11d40] text-white rounded-xl font-bold text-xs hover:bg-[#7c1233] transition-all">Télécharger PDF</a>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

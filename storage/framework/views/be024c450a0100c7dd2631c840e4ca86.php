@@ -225,7 +225,22 @@
                                 </svg>
                             </button>
                             <?php endif; ?>
-                            
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('client.delete')): ?>
+                                <form action="<?php echo e(route('clients.destroy', $client->idClient)); ?>" method="POST"
+                                    onsubmit="return confirm('Voulez-vous vraiment supprimer ce client ?')">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
+
+                                    <button type="submit"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                                        title="Supprimer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0h8l-1 12a2 2 0 01-2 2H9a2 2 0 01-2-2L6 7z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                <?php endif; ?>
                         </div>
                     </td>
 
