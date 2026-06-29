@@ -135,8 +135,11 @@
     <div class="email-container">
         <div class="header" style="text-align: left;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <img src="https://i.ibb.co/Hfm6DJ2Y/access.png" alt="Access Morocco" style="width: 120px; height: auto; border: none; display: block; margin: 0 auto 15px auto;">
-                <span style="color: #b11d40; font-size: 20px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; display: inline-block; font-family: 'Inter', sans-serif;">
+                @if(isset($message) && file_exists(public_path('images/logo.png')))
+                    <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="Access Morocco" style="width: 120px; height: auto; border: none; display: block; margin: 0 auto 15px auto; background:#fff; padding:8px 15px; border-radius:40px;">
+                @else
+                    <img src="{{ asset('images/logo.png') }}" alt="Access Morocco" style="width: 120px; height: auto; border: none; display: block; margin: 0 auto 15px auto; background:#fff; padding:8px 15px; border-radius:40px;">
+                @endif                <span style="color: #b11d40; font-size: 20px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; display: inline-block; font-family: 'Inter', sans-serif;">
                     ACCESS MOROCCO
                 </span>
             </div>

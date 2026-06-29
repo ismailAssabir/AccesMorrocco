@@ -22,12 +22,8 @@ class ReunionController extends Controller
 
         if (auth()->user()->type === 'employee') {
             $user = auth()->user();
-            $query->where(function($q) use ($user) {
-                $q->whereNull('idDepartement')
-                  ->orWhere('idDepartement', $user->idDepartement)
-                  ->orWhereHas('participants', function($sq) use ($user) {
-                      $sq->where('reunion_participants.idUser', $user->idUser);
-                  });
+            $query->whereHas('participants', function($sq) use ($user) {
+                $sq->where('reunion_participants.idUser', $user->idUser);
             });
         }
 

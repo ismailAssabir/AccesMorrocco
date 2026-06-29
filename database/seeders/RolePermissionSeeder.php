@@ -137,6 +137,20 @@ class RolePermissionSeeder extends Seeder
         $canPoint = Permission::firstOrCreate(['name' => 'can_point']);
         $viewAll  = Permission::firstOrCreate(['name' => 'view_all_attendance']);
 
+        // Give employees basic view permissions so they can see their own data and notifications
+        $employeeViewPermissions = [
+            'tache.view', 
+            'reunion.view', 
+            'reclamation.view', 'reclamation.create', 'reclamation.edit', 'reclamation.delete',
+            'conge.view', 'conge.create', 'conge.edit', 'conge.delete',
+            'document.view'
+        ];
+        foreach ($employeeViewPermissions as $perm) {
+            if (!$employeeRole->hasPermissionTo($perm)) {
+                $employeeRole->givePermissionTo($perm);
+            }
+        }
+
         // Give employees the ability to clock in/out
         if (!$employeeRole->hasPermissionTo('can_point')) {
             $employeeRole->givePermissionTo($canPoint);

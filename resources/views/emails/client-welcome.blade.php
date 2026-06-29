@@ -137,8 +137,11 @@
 <div class="container">
     <!-- EN-TÊTE AVEC LOGO + NOM APP -->
     <div class="header">
-        <img src="https://via.placeholder.com/140x60?text=Access+Morocco+Logo" alt="Access Morocco" class="logo" style="background:#fff; padding:8px 15px; border-radius:40px;">
-        <!-- 
+        @if(isset($message) && file_exists(public_path('images/logo.png')))
+            <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="Access Morocco" class="logo" style="background:#fff; padding:8px 15px; border-radius:40px; max-height: 50px;">
+        @else
+            <img src="{{ asset('images/logo.png') }}" alt="Access Morocco" class="logo" style="background:#fff; padding:8px 15px; border-radius:40px; max-height: 50px;">
+        @endif        <!-- 
             ⚠️ Remplacez l'URL placeholder par votre vrai logo hébergé (PNG/SVG).
             Exemple : https://www.accesmorocco.com/logo.png 
         -->

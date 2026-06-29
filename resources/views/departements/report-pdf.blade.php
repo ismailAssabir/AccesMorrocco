@@ -107,8 +107,22 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">AccesMorocco</div>
-        <div class="report-title">Rapport de Présence</div>
+        <table style="width: 100%; border: none; margin-bottom: 0;">
+            <tr>
+                <td style="text-align: left; vertical-align: middle; padding: 0; border: none;">
+                    <div style="font-size: 24px; font-weight: bold; color: #1e293b; text-transform: uppercase; letter-spacing: 1px;">Access Morocco</div>
+                    <div class="report-title" style="margin-top: 5px;">Rapport de Présence</div>
+                </td>
+                <td style="text-align: right; vertical-align: middle; padding: 0; border: none;">
+                    @php
+                        $imagePath = public_path('images/logo.png');
+                        $imageData = base64_encode(file_get_contents($imagePath));
+                        $src = 'data:image/png;base64,' . $imageData;
+                    @endphp
+                    <img src="{{ $src }}" alt="Access Morocco Logo" style="max-height: 45px; display: inline-block;">
+                </td>
+            </tr>
+        </table>
     </div>
 
     <table class="info-grid">

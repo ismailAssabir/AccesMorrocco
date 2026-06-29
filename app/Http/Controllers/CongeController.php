@@ -97,9 +97,13 @@ public function store(Request $request)
         // Check if this is an admin status update
         if ($request->has('status')) {
             $request->validate([
-                'status' => 'required|in:en_attente,approuve,refuse'
+                'status' => 'required|in:en_attente,approuve,refuse',
+                'motif_refus' => 'nullable|string|max:255'
             ]);
-            $conge->update(['status' => $request->status]);
+            $conge->update([
+                'status' => $request->status,
+                'motif_refus' => $request->status === 'refuse' ? $request->motif_refus : null
+            ]);
             return redirect()->back()->with('msg', 'Le statut a été mis à jour');
         }
 

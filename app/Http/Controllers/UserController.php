@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Departement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use App\Mail\EmployeeCreatedMail;
+use App\Mail\EmployeeUpdatedMail;
 
 class UserController extends Controller
 {
@@ -75,26 +78,36 @@ public function store(Request $request) {
         'rip'           => 'nullable|string',
     ]);
     
-    $newUser['password'] = Hash::make($request->password);
+    $plainPassword = $request->password;
+    $newUser['password'] = Hash::make($plainPassword);
 
-    DB::transaction(function () use ($newUser) {
-        $user = User::create($newUser);
+    $createdUser = null;
+    DB::transaction(function () use ($newUser, &$createdUser) {
+        $createdUser = User::create($newUser);
 
-        $user->assignRole($user->type);
+        $createdUser->assignRole($createdUser->type);
 
-        if ($user->type === 'manager' && $user->idDepartement) {
-            $departement = Departement::find($user->idDepartement);
+        if ($createdUser->type === 'manager' && $createdUser->idDepartement) {
+            $departement = Departement::find($createdUser->idDepartement);
             
             if ($departement) {
-                if ($departement->idUser && $departement->idUser !== $user->idUser) {
+                if ($departement->idUser && $departement->idUser !== $createdUser->idUser) {
                     User::where('idUser', $departement->idUser)->update(['type' => 'employee']);
                 }
                 
               
-                $departement->update(['idUser' => $user->idUser]);
+                $departement->update(['idUser' => $createdUser->idUser]);
             }
         }
     });
+
+    // Send welcome email with credentials
+    try {
+        $createdUser->load('departement');
+        Mail::to($createdUser->email)->send(new EmployeeCreatedMail($createdUser, $plainPassword));
+    } catch (\Exception $e) {
+        \Log::error('Failed to send employee welcome email: ' . $e->getMessage());
+    }
 
     return redirect()->back()->with('msg' , "L'utilisateur a été ajouté avec succès!");
 }
@@ -146,10 +159,37 @@ public function show($id){
             'rip'           => 'nullable|string',
         ]);
         
+        $passwordChanged = false;
         if ($request->filled('password')) {
             $userUpdate['password'] = Hash::make($request->password);
+            $passwordChanged = true;
         } else {
             unset($userUpdate['password']);
+        }
+
+        // Track changes for the notification email
+        $trackedFields = ['firstName', 'lastName', 'email', 'cin', 'birthday', 'address', 'phoneNumber', 'typeContrat', 'salaire', 'post', 'dateEmb', 'idDepartement', 'status', 'type', 'rip'];
+        $changes = [];
+        foreach ($trackedFields as $field) {
+            if (array_key_exists($field, $userUpdate) && (string)$user->$field !== (string)$userUpdate[$field]) {
+                $oldVal = $user->$field;
+                $newVal = $userUpdate[$field];
+
+                if ($field === 'idDepartement') {
+                    $oldDept = \App\Models\Departement::find($oldVal);
+                    $newDept = \App\Models\Departement::find($newVal);
+                    $oldVal = $oldDept ? $oldDept->title : '—';
+                    $newVal = $newDept ? $newDept->title : '—';
+                }
+
+                $changes[$field] = [
+                    'old' => $oldVal,
+                    'new' => $newVal,
+                ];
+            }
+        }
+        if ($passwordChanged) {
+            $changes['password'] = ['old' => null, 'new' => null];
         }
 
         DB::transaction(function () use ($user, $userUpdate) {
@@ -173,6 +213,16 @@ public function show($id){
                 Departement::where('idUser', $user->idUser)->update(['idUser' => null]);
             }
         });
+
+        // Send update notification email if there are changes
+        if (!empty($changes)) {
+            try {
+                $user->refresh();
+                Mail::to($user->email)->send(new EmployeeUpdatedMail($user, $changes));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send employee update email: ' . $e->getMessage());
+            }
+        }
 
         return redirect()->route('users.index')->with('msg' , 'Les informations utilisateur ont été mises à jour avec succès');
     }

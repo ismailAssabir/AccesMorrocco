@@ -128,9 +128,12 @@
             <tr>
                 {{-- LOGO --}}
                 <td width="30%" style="text-align: left;">
-                    <div style="color:#b11d40;font-size:14px;font-weight:900;">
-                        {{ config('app.name') }}
-                    </div>
+                    @php
+    $imagePath = public_path('images/logo.png');
+    $imageData = base64_encode(file_get_contents($imagePath));
+    $src = 'data:image/png;base64,' . $imageData;
+@endphp
+<img src="{{ $src }}" alt="Access Morocco Logo" style="max-height: 45px; display: block; margin-bottom: 10px;">
                 </td>
 
                 {{-- TITLE --}}

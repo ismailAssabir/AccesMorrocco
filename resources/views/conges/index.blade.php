@@ -333,6 +333,11 @@
                     <p class="text-slate-600 mt-1" id="detail-motif">...</p>
                 </div>
 
+                <div class="bg-red-50 border border-red-100 rounded-xl p-3 hidden" id="detail-motif-refus-container">
+                    <p class="text-[10px] font-black uppercase text-red-400 tracking-widest">Motif du Refus</p>
+                    <p class="text-red-700 mt-1 font-bold" id="detail-motif-refus">...</p>
+                </div>
+
                 <div class="bg-slate-50 border border-slate-100 rounded-xl p-3">
                     <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Justification</p>
                     <p class="text-slate-600 mt-1 break-words" id="detail-justification">
@@ -353,6 +358,33 @@
         </div>
     </div>
 
+    {{-- Modal Refus Pro --}}
+    <div id="refusModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeRefusModal()"></div>
+        <div class="relative bg-white w-full max-w-md rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col z-10" style="animation: modalIn .2s ease-out">
+            <div class="px-7 py-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="text-lg font-black text-[#b11d40]">Motif du refus</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Demande de congé</p>
+                </div>
+                <button type="button" onclick="closeRefusModal()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#b11d40] hover:border-[#b11d40]/30 transition-all">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-7 space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Veuillez indiquer le motif <span class="text-[#b11d40]">*</span></label>
+                    <textarea id="refus-motif-input" rows="3" required placeholder="Ex: Période chargée, effectif réduit..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm outline-none transition-all resize-none focus:border-[#b11d40] focus:ring-4 focus:ring-[#b11d40]/10"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeRefusModal()" class="flex-1 py-3 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all text-sm">Annuler</button>
+                    <button type="button" onclick="submitRefusForm()" class="flex-1 py-3 rounded-2xl bg-[#b11d40] hover:bg-[#8f1632] active:scale-95 font-extrabold text-white transition-all shadow-lg shadow-[#b11d40]/20 text-sm">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -528,6 +560,14 @@
                     badge = `<span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">En attente</span>`;
                 }
                 document.getElementById('detail-status').innerHTML = badge;
+
+                const refusContainer = document.getElementById('detail-motif-refus-container');
+                if (conge.status === 'refuse' && conge.motif_refus) {
+                    document.getElementById('detail-motif-refus').innerText = conge.motif_refus;
+                    refusContainer.classList.remove('hidden');
+                } else {
+                    refusContainer.classList.add('hidden');
+                }
             })
             .catch(error => {
                 console.error("Erreur lors de la récupération des détails :", error);
@@ -559,6 +599,32 @@
                 display.innerText = 'Modifier le fichier';
                 display.classList.remove('text-[#be2346]');
                 display.classList.add('text-slate-600');
+            }
+        }
+
+        // --- Logic for Professional Refusal Modal ---
+        let currentRefusForm = null;
+
+        function promptForRefusal(form) {
+            currentRefusForm = form;
+            document.getElementById('refus-motif-input').value = '';
+            document.getElementById('refusModal').classList.remove('hidden');
+        }
+
+        function closeRefusModal() {
+            document.getElementById('refusModal').classList.add('hidden');
+            currentRefusForm = null;
+        }
+
+        function submitRefusForm() {
+            const reason = document.getElementById('refus-motif-input').value.trim();
+            if (!reason) {
+                alert('Veuillez entrer un motif de refus.');
+                return;
+            }
+            if (currentRefusForm) {
+                currentRefusForm.querySelector('.motif_refus_input').value = reason;
+                currentRefusForm.submit();
             }
         }
     </script>

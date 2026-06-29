@@ -9,6 +9,8 @@ use App\Models\Objectif;
 use App\Models\Departement;
 use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TaskAssignedMail;
 
 class TacheController extends Controller
 {
@@ -52,12 +54,13 @@ class TacheController extends Controller
         }
 
         // --- Default Visibility Logic ---
-        if (!$search && $status !== 'termine') {
-            $query->where(function($q) {
-                $q->where('status', '!=', 'termine')
-                  ->orWhere('updated_at', '>=', now()->subDays(30));
-            });
-        }
+        // (Commented out to show ALL tasks by default, as requested by user)
+        // if (!$search && $status !== 'termine') {
+        //     $query->where(function($q) {
+        //         $q->where('status', '!=', 'termine')
+        //           ->orWhere('updated_at', '>=', now()->subDays(30));
+        //     });
+        // }
 
         // --- Permission logic ---
         if (auth()->user()->type === 'employee') {
@@ -130,6 +133,15 @@ class TacheController extends Controller
 
         if ($request->filled('idUser')) {
             $tache->users()->attach($request->idUser);
+            
+            $user = User::find($request->idUser);
+            if ($user) {
+                try {
+                    Mail::to($user->email)->send(new TaskAssignedMail($user, $tache));
+                } catch (\Exception $e) {
+                    \Log::error('Task assigned email failed: ' . $e->getMessage());
+                }
+            }
         }
 
         return redirect()->back()->with('msg', "La tâche a été ajoutée avec succès");
@@ -176,7 +188,17 @@ class TacheController extends Controller
         ]);
 
         if ($request->filled('idUser')) {
-            $tache->users()->sync($request->idUser);
+            $syncResult = $tache->users()->sync($request->idUser);
+            if (!empty($syncResult['attached'])) {
+                $user = User::find($request->idUser);
+                if ($user) {
+                    try {
+                        Mail::to($user->email)->send(new TaskAssignedMail($user, $tache));
+                    } catch (\Exception $e) {
+                        \Log::error('Task assigned email failed: ' . $e->getMessage());
+                    }
+                }
+            }
         }
 
         return redirect()->back()->with('msg', 'La tâche a été mise à jour avec succès');
@@ -195,7 +217,17 @@ class TacheController extends Controller
             'idUser'  => 'required|exists:users,idUser',
         ]);
         $tache = Tache::findOrFail($request->idTache);
-        $tache->users()->syncWithoutDetaching($request->idUser);
+        $syncResult = $tache->users()->syncWithoutDetaching($request->idUser);
+        if (!empty($syncResult['attached'])) {
+            $user = User::find($request->idUser);
+            if ($user) {
+                try {
+                    Mail::to($user->email)->send(new TaskAssignedMail($user, $tache));
+                } catch (\Exception $e) {
+                    \Log::error('Task assigned email failed: ' . $e->getMessage());
+                }
+            }
+        }
         return redirect()->back()->with('msg', 'Utilisateur assigné avec succès');
     }
 

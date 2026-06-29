@@ -162,4 +162,24 @@ public function update(Request $request ,$id){
     $client->update($clientUpdate);
 return redirect()->route('clients.index')
     ->with('msg', 'Client modifié avec succès');}
+
+    public function destroy($id)
+    {
+        Gate::authorize('client.delete');
+
+        $client = Client::findOrFail($id);
+        
+        if ($client->lead) {
+            $client->lead->delete();
+        } elseif ($client->idLead) {
+            $lead = \App\Models\Lead::find($client->idLead);
+            if ($lead) {
+                $lead->delete();
+            }
+        }
+        
+        $client->delete();
+
+        return redirect()->route('clients.index')->with('msg', 'Client et son lead ont été supprimés avec succès !');
+    }
 }

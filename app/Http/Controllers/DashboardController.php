@@ -21,43 +21,23 @@ class DashboardController extends Controller
                 'myTasks' => $user->taches()->count(),
                 'myPendingReclamations' => $user->reclamations()->whereIn('status', ['ouverte', 'en_cours'])->count(),
                 'myDepartmentMeetings' => Reunion::where('dateHeure', '>=', now())
-                    ->where(function($q) use ($user) {
-                        $q->whereNull('idDepartement')
-                          ->orWhere('idDepartement', $user->idDepartement)
-                          ->orWhereHas('participants', function($sq) use ($user) {
-                              $sq->where('reunion_participants.idUser', $user->idUser);
-                          });
+                    ->whereHas('participants', function ($sq) use ($user) {
+                        $sq->where('reunion_participants.idUser', $user->idUser);
                     })->count(),
                 'myPoints' => 0 // Mocking points for now if applicable
             ];
 
             $myRecentTasks = $user->taches()->latest()->take(5)->get();
             $myRecentReclamations = $user->reclamations()->latest()->take(5)->get();
-            
+
             $upcomingReunions = Reunion::with('participants')->where('dateHeure', '>=', now())
-                ->where(function($q) use ($user) {
-                    $q->whereNull('idDepartement')
-                      ->orWhere('idDepartement', $user->idDepartement)
-                      ->orWhereHas('participants', function($sq) use ($user) {
-                          $sq->where('reunion_participants.idUser', $user->idUser);
-                      });
+                ->whereHas('participants', function ($sq) use ($user) {
+                    $sq->where('reunion_participants.idUser', $user->idUser);
                 })
                 ->orderBy('dateHeure', 'asc')
                 ->take(6)
                 ->get();
 
-            if ($upcomingReunions->isEmpty()) {
-                $upcomingReunions = Reunion::with('participants')->where(function($q) use ($user) {
-                        $q->whereNull('idDepartement')
-                          ->orWhere('idDepartement', $user->idDepartement)
-                          ->orWhereHas('participants', function($sq) use ($user) {
-                              $sq->where('reunion_participants.idUser', $user->idUser);
-                          });
-                    })
-                    ->latest('dateHeure')
-                    ->take(6)
-                    ->get();
-            }
 
             return view('dashboard', compact('stats', 'myRecentTasks', 'myRecentReclamations', 'upcomingReunions'));
         }
@@ -87,17 +67,6 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // 2. If less than 6, fill with recent past meetings
-        if ($upcomingReunions->count() < 6) {
-            $needed = 6 - $upcomingReunions->count();
-            $pastReunions = Reunion::with('participants')->where('dateHeure', '<', now())
-                ->latest('dateHeure')
-                ->take($needed)
-                ->get();
-            
-            // Merge them: Upcoming first, then past
-            $upcomingReunions = $upcomingReunions->concat($pastReunions);
-        }
 
         $managers = User::where('type', 'manager')
             ->take(6)
@@ -116,7 +85,7 @@ class DashboardController extends Controller
             'resolue' => Reclamation::where('status', 'resolue')->count(),
         ];
 
-        $deptStats = Departement::withCount('employes')->get()->map(function($dept) {
+        $deptStats = Departement::withCount('employes')->get()->map(function ($dept) {
             return [
                 'name' => $dept->title,
                 'count' => $dept->employes_count
@@ -130,15 +99,15 @@ class DashboardController extends Controller
             $trendData[] = [
                 'month' => $date->translatedFormat('M'),
                 'count' => User::whereMonth('created_at', $date->month)
-                              ->whereYear('created_at', $date->year)
-                              ->count()
+                    ->whereYear('created_at', $date->year)
+                    ->count()
             ];
         }
 
         return view('dashboard', compact(
-            'stats', 
-            'recentReclamations', 
-            'upcomingReunions', 
+            'stats',
+            'recentReclamations',
+            'upcomingReunions',
             'managers',
             'tasksByStatus',
             'reclamationsByStatus',

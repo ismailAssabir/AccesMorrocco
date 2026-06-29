@@ -14,7 +14,7 @@ class Conge extends Model
         'sold',
         'type', 
         'justification',
-        'status', 'motif',
+        'status', 'motif', 'motif_refus',
         'dateDebut',
         'dateFin',
         'dateDemande'

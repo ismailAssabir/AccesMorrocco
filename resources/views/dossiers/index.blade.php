@@ -101,35 +101,37 @@
     <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div class="h-1.5 w-full bg-gradient-to-r from-[#b11d40] to-[#7c1233]"></div>
 
-        <table class="w-full text-sm">
+        <table class="w-full text-left border-collapse text-sm">
             <thead>
-                <tr class="bg-slate-50 text-slate-400 text-xs uppercase">
-                    <th class="px-4 py-4 text-left">Ref</th>
-                    <th class="px-4 py-4 text-left">Client</th>
-                    <th class="px-4 py-4 text-left">Destination</th>
-                    <th class="px-4 py-4 text-left">Département</th>
-                    <th class="px-4 py-4 text-left">Assigné</th>
-                    <th class="px-4 py-4 text-left">Statut</th>
-                    <th class="px-4 py-4 text-left">Actions</th>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Ref</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Client</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Destination</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Département</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Assigné</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Statut</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
                 </tr>
             </thead>
 
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-slate-100">
                 @forelse($dossiers as $dossier)
-                <tr class="hover:bg-slate-50">
+                <tr class="hover:bg-slate-50/80 transition-colors group">
 
-                    <td class="px-4 py-4 font-bold text-slate-700">
+                    <td class="px-6 py-4 font-bold text-slate-700">
                         {{ $dossier->reference }}
                     </td>
 
-                    <td class="px-4 py-4">
-                        {{ $dossier->client->firstName ?? '' }}
-                        {{ $dossier->client->lastName ?? '' }}
+                    <td class="px-6 py-4">
+                        <span class="text-sm font-bold text-slate-700">
+                            {{ $dossier->client->firstName ?? '' }}
+                            {{ $dossier->client->lastName ?? '' }}
+                        </span>
                     </td>
 
-                    <td class="px-4 py-4">{{ $dossier->distination }}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-600">{{ $dossier->distination }}</td>
 
-                    <td class="px-4 py-4">
+                    <td class="px-6 py-4">
                         @if(!$dossier->idDepartement && auth()->user()->hasRole('admin'))
                             <button onclick="openDeptModal({{ $dossier->idDossier }})"
                                 class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
@@ -137,15 +139,25 @@
                                 Non assigné
                             </button>
                         @else
-                            {{ $dossier->departement->title ?? '-' }}
+                            @if($dossier->departement)
+                                <span class="text-[12px] text-slate-500 font-bold">{{ $dossier->departement->title }}</span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non assigné</span>
+                            @endif
                         @endif
                     </td>
 
-                    <td class="px-4 py-4 text-green-600 font-bold">
-                        {{$dossier->idUser? $dossier->user->firstName." ".$dossier->user->lastName : 'Non assigné' }}
+                    <td class="px-6 py-4">
+                        @if($dossier->idUser && $dossier->user)
+                            <span class="text-[12px] font-bold text-emerald-600">
+                                {{ $dossier->user->firstName }} {{ $dossier->user->lastName }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non assigné</span>
+                        @endif
                     </td>
 
-                    <td class="px-4 py-4">
+                    <td class="px-6 py-4">
                     @php
                         $statusColors = [
                             'ouvert' => 'bg-blue-100 text-blue-700',
@@ -182,7 +194,7 @@
                         </span>
                     @endif
                     </td>
-                <td class="px-4 py-4">
+                <td class="px-6 py-4">
                     <div class="flex items-center gap-1">
 
                         @can('dossier.view')

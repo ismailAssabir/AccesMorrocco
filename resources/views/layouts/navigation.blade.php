@@ -2,7 +2,7 @@
     $user = auth()->user();
     $client = auth()->guard('client')->user();
     $userType = $user ? $user->type : ($client ? 'client' : null);
-    $searchItems = \Illuminate\Support\Facades\Cache::remember('global_search_items_' . $userType, 600, function() use ($userType) {
+    $searchItems = \Illuminate\Support\Facades\Cache::remember('global_search_items_' . $userType, 600, function () use ($userType) {
         $items = [
             ['title' => 'Accueil', 'url' => '/dashboard', 'type' => 'Page', 'keywords' => 'home dashboard tableau de bord accueil', 'icon' => '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />'],
         ];
@@ -45,7 +45,7 @@
         try {
             if (Gate::allows('user.view')) {
                 $users = \App\Models\User::select('idUser', 'firstName', 'lastName')->limit(50)->get();
-                foreach($users as $user) {
+                foreach ($users as $user) {
                     $items[] = [
                         'title' => ($user->firstName ?? '') . ' ' . ($user->lastName ?? ''),
                         'url' => '/users/' . $user->idUser,
@@ -61,7 +61,7 @@
                     $reclamations->where('idUser', auth()->id());
                 }
                 $reclamations = $reclamations->latest()->limit(50)->get();
-                foreach($reclamations as $rec) {
+                foreach ($reclamations as $rec) {
                     $items[] = [
                         'title' => $rec->titre,
                         'url' => '/reclamation/' . $rec->idReclamation,
@@ -73,7 +73,7 @@
 
             if (Gate::allows('tache.view')) {
                 $tasks = \App\Models\Tache::select('idTache', 'titre')->latest()->limit(50)->get();
-                foreach($tasks as $task) {
+                foreach ($tasks as $task) {
                     $items[] = [
                         'title' => $task->titre,
                         'url' => '/tasks',
@@ -85,7 +85,7 @@
 
             if (Gate::allows('reunion.view')) {
                 $reunions = \App\Models\Reunion::select('idReunion', 'titre')->latest()->limit(50)->get();
-                foreach($reunions as $reunion) {
+                foreach ($reunions as $reunion) {
                     $items[] = [
                         'title' => $reunion->titre,
                         'url' => '/meetings',
@@ -94,19 +94,23 @@
                     ];
                 }
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return $items;
     });
 
-    $recentNotifications = \Illuminate\Support\Facades\Cache::remember('recent_notifications_' . ($userType ?? 'guest') . '_' . auth()->id(), 60, function() use ($userType, $user) {
+    $recentNotifications = \Illuminate\Support\Facades\Cache::remember('recent_notifications_' . ($userType ?? 'guest') . '_' . auth()->id(), 60, function () use ($userType, $user) {
         $notifications = collect();
-        if (!$user) return $notifications;
+        if (!$user)
+            return $notifications;
 
         try {
             // 1. Tâches
             $tacheQuery = \App\Models\Tache::latest()->limit(15);
             if ($userType === 'employee') {
-                $tacheQuery->whereHas('users', function($q) use ($user) { $q->where('user_taches.idUser', $user->idUser); });
+                $tacheQuery->whereHas('users', function ($q) use ($user) {
+                    $q->where('user_taches.idUser', $user->idUser);
+                });
             } elseif ($userType === 'manager') {
                 $tacheQuery->where('idDepartement', $user->idDepartement);
             }
@@ -121,12 +125,8 @@
             // 2. Réunions
             $reunionQuery = \App\Models\Reunion::latest()->limit(15);
             if ($userType === 'employee') {
-                $reunionQuery->where(function($q) use ($user) {
-                    $q->whereNull('idDepartement')
-                      ->orWhere('idDepartement', $user->idDepartement)
-                      ->orWhereHas('participants', function($sq) use ($user) {
-                          $sq->where('reunion_participants.idUser', $user->idUser);
-                      });
+                $reunionQuery->whereHas('participants', function ($sq) use ($user) {
+                    $sq->where('reunion_participants.idUser', $user->idUser);
                 });
             } elseif ($userType === 'manager') {
                 $reunionQuery->where('idDepartement', $user->idDepartement);
@@ -142,9 +142,12 @@
             // 3. Reclamations
             $recQuery = \App\Models\Reclamation::latest()->limit(15);
             if ($userType === 'employee') {
-                $recQuery->where('idUser', $user->idUser);
+                $recQuery->where('idUser', $user->idUser)
+                         ->where('status', '!=', 'ouverte');
             } elseif ($userType === 'manager') {
-                $recQuery->whereHas('user', function($q) use ($user) { $q->where('idDepartement', $user->idDepartement); });
+                $recQuery->whereHas('user', function ($q) use ($user) {
+                    $q->where('idDepartement', $user->idDepartement);
+                });
             }
             $recs = $recQuery->get()->map(fn($item) => [
                 'title' => 'Réclamation',
@@ -183,9 +186,12 @@
             // 6. Congés
             $congeQuery = \App\Models\Conge::latest()->limit(15);
             if ($userType === 'employee') {
-                $congeQuery->where('idUser', $user->idUser);
+                $congeQuery->where('idUser', $user->idUser)
+                           ->where('status', '!=', 'en_attente');
             } elseif ($userType === 'manager') {
-                $congeQuery->whereHas('user', function($q) use ($user) { $q->where('idDepartement', $user->idDepartement); });
+                $congeQuery->whereHas('user', function ($q) use ($user) {
+                    $q->where('idDepartement', $user->idDepartement);
+                });
             }
             $conges = $congeQuery->get()->map(fn($item) => [
                 'title' => 'Demande de Congé',
@@ -194,13 +200,13 @@
                 'url' => '/conge'
             ]);
             $notifications = $notifications->concat($conges);
-            
+
             return $notifications->sortByDesc('time')->take(30)->values();
         } catch (\Exception $e) {
             return collect();
         }
     });
-    
+
     $newestNotificationTime = $recentNotifications->max('time');
     $newestTimestamp = $newestNotificationTime ? $newestNotificationTime->timestamp * 1000 : 0;
 @endphp
@@ -208,9 +214,9 @@
 
 <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-3">
     <div class="flex items-center justify-end">
-        
+
         <div class="flex items-center gap-6">
-            
+
             <div x-data="{ 
                 search: '', 
                 items: {{ json_encode($searchItems) }},
@@ -225,52 +231,61 @@
                 }
             }" class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-gray-400 group-focus-within:text-[#be2346] transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg class="h-4 w-4 text-gray-400 group-focus-within:text-[#be2346] transition-colors duration-300"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input type="text" 
-                    x-model="search"
-                    placeholder="Rechercher (nom, page...)" 
+                <input type="text" x-model="search" placeholder="Rechercher (nom, page...)"
                     class="block w-64 group-focus-within:w-80 pl-11 pr-4 py-2 border-none bg-gray-100/60 rounded-xl text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#be2346]/10 focus:bg-white transition-all duration-300">
 
                 <!-- Results Dropdown -->
-                <div x-show="search.length >= 2" 
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-200"
+                <div x-show="search.length >= 2" x-cloak x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    @click.away="search = ''"
+                    x-transition:enter-end="opacity-100 translate-y-0" @click.away="search = ''"
                     class="absolute top-full right-0 mt-3 w-[350px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-50">
-                    
+
                     <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-50 flex justify-between items-center">
-                        <span class="text-[10px] font-black uppercase tracking-widest text-[#be2346]">Résultats de recherche</span>
-                        <span class="text-[10px] font-bold text-gray-400" x-text="filteredItems.length + ' trouvé(s)'"></span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-[#be2346]">Résultats de
+                            recherche</span>
+                        <span class="text-[10px] font-bold text-gray-400"
+                            x-text="filteredItems.length + ' trouvé(s)'"></span>
                     </div>
 
                     <div class="max-h-[400px] overflow-y-auto">
                         <template x-for="item in filteredItems" :key="item.url + item.title">
-                            <a :href="item.url" class="flex items-center gap-4 px-5 py-4 hover:bg-[#be2346]/5 transition-all group">
-                                <div class="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-white flex items-center justify-center text-gray-400 group-hover:text-[#be2346] transition-all shadow-sm">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-html="item.icon"></svg>
+                            <a :href="item.url"
+                                class="flex items-center gap-4 px-5 py-4 hover:bg-[#be2346]/5 transition-all group">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-white flex items-center justify-center text-gray-400 group-hover:text-[#be2346] transition-all shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        x-html="item.icon"></svg>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346] transition-colors" x-text="item.title"></p>
-                                    <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 mt-0.5" x-text="item.type"></p>
+                                    <p class="text-sm font-bold text-gray-800 group-hover:text-[#be2346] transition-colors"
+                                        x-text="item.title"></p>
+                                    <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 mt-0.5"
+                                        x-text="item.type"></p>
                                 </div>
-                                <svg class="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                <svg class="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
                         </template>
 
                         <div x-show="filteredItems.length === 0" class="px-5 py-8 text-center">
                             <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <p class="text-sm font-bold text-gray-400">Aucun résultat pour "<span x-text="search" class="text-gray-600"></span>"</p>
+                            <p class="text-sm font-bold text-gray-400">Aucun résultat pour "<span x-text="search"
+                                    class="text-gray-600"></span>"</p>
                         </div>
                     </div>
                 </div>
@@ -281,7 +296,7 @@
             <div x-data="{ 
                 open: false,
                 readNotifs: JSON.parse(localStorage.getItem('read_notifications_{{ auth()->id() }}') || '[]'),
-                notifications: {{ json_encode($recentNotifications->map(function($n) {
+                notifications: {{ json_encode($recentNotifications->map(function ($n) {
                     $n['timestamp'] = \Carbon\Carbon::parse($n['time'])->timestamp * 1000;
                     $n['time_human'] = \Carbon\Carbon::parse($n['time'])->diffForHumans();
                     $n['id'] = md5(($n['url'] ?? '') . $n['title'] . $n['timestamp']);
@@ -312,48 +327,59 @@
                     this.open = false;
                 }
             }" @click.away="close()" class="relative">
-                <button @click="toggle()" 
+                <button @click="toggle()"
                     class="relative p-2 rounded-xl hover:bg-[#be2346]/5 transition-all duration-300 group">
-                    
+
                     <template x-if="unreadNotifications.length > 0">
-                        <span class="absolute -top-1 -right-1 flex min-w-[16px] h-4 px-1 items-center justify-center bg-[#be2346] text-[9px] font-black text-white rounded-full border-2 border-white shadow-sm ring-1 ring-[#be2346]/20">
+                        <span
+                            class="absolute -top-1 -right-1 flex min-w-[16px] h-4 px-1 items-center justify-center bg-[#be2346] text-[9px] font-black text-white rounded-full border-2 border-white shadow-sm ring-1 ring-[#be2346]/20">
                             <span x-text="unreadNotifications.length"></span>
                         </span>
                     </template>
-                    
-                    <svg class="w-6 h-6 text-gray-500 group-hover:text-[#be2346] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+
+                    <svg class="w-6 h-6 text-gray-500 group-hover:text-[#be2346] transition-colors" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                 </button>
 
-                <div x-show="open" 
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-200"
+                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                     class="absolute right-0 mt-4 w-80 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100]">
-                    
+
                     <div class="px-6 py-5 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
                         <p class="text-[11px] font-black uppercase tracking-[0.2em] text-[#be2346]">Notifications</p>
-                        <button @click="markAllAsRead()" x-show="unreadNotifications.length > 0" class="text-[10px] font-bold text-gray-400 hover:text-[#be2346] transition-colors uppercase tracking-wider">Tout marquer comme lu</button>
+                        <button @click="markAllAsRead()" x-show="unreadNotifications.length > 0"
+                            class="text-[10px] font-bold text-gray-400 hover:text-[#be2346] transition-colors uppercase tracking-wider">Tout
+                            marquer comme lu</button>
                     </div>
 
                     <div class="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                         <template x-for="notif in unreadNotifications" :key="notif.id">
-                            <a :href="notif.url" @click="markAsRead(notif.id)" class="block px-6 py-5 border-b border-gray-50 hover:bg-gray-50 transition-all cursor-pointer group relative">
+                            <a :href="notif.url" @click="markAsRead(notif.id)"
+                                class="block px-6 py-5 border-b border-gray-50 hover:bg-gray-50 transition-all cursor-pointer group relative">
                                 <div class="flex justify-between items-start mb-1.5">
-                                    <p class="text-[13px] font-bold text-gray-800 group-hover:text-[#be2346] transition-colors pr-4" x-text="notif.title"></p>
-                                    <span class="text-[10px] text-gray-400 font-bold whitespace-nowrap" x-text="notif.time_human"></span>
+                                    <p class="text-[13px] font-bold text-gray-800 group-hover:text-[#be2346] transition-colors pr-4"
+                                        x-text="notif.title"></p>
+                                    <span class="text-[10px] text-gray-400 font-bold whitespace-nowrap"
+                                        x-text="notif.time_human"></span>
                                 </div>
                                 <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed" x-text="notif.desc"></p>
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#be2346] scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                                <div
+                                    class="absolute left-0 top-0 bottom-0 w-1 bg-[#be2346] scale-y-0 group-hover:scale-y-100 transition-transform duration-300">
+                                </div>
                             </a>
                         </template>
 
                         <div x-show="unreadNotifications.length === 0" class="py-16 text-center">
-                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            <div
+                                class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </div>
                             <p class="text-sm font-bold text-gray-400">Aucune nouvelle notification</p>

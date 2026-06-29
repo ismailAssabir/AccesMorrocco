@@ -94,6 +94,11 @@
 <body>
     <div class="container">
         <div class="header">
+            @if(isset($message) && file_exists(public_path('images/logo.png')))
+                <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="Access Morocco" style="height: 50px; background:#fff; padding:8px 15px; border-radius:40px; margin-bottom: 15px;">
+            @else
+                <img src="{{ asset('images/logo.png') }}" alt="Access Morocco" style="height: 50px; background:#fff; padding:8px 15px; border-radius:40px; margin-bottom: 15px;">
+            @endif
             <h1>Bonne Nouvelle !</h1>
         </div>
         <div class="content">

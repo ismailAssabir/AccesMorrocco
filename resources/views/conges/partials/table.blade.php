@@ -28,7 +28,20 @@
         @if($conge->status == 'approuve')
             <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200">Approuvé</span>
         @elseif($conge->status == 'refuse')
-            <span class="bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-xs border border-red-200">Refusé</span>
+            <span class="bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-xs border border-red-200 mb-1 inline-block">Refusé</span>
+            @if($conge->motif_refus)
+                <div>
+                    <button type="button" onclick="document.getElementById('motif-{{ $conge->idConge }}').classList.toggle('hidden')" class="text-[10px] font-bold text-red-500 hover:text-red-700 underline flex items-center gap-1 transition-colors mt-1">
+                        Voir motif
+                    </button>
+                    <div id="motif-{{ $conge->idConge }}" class="hidden mt-2 w-[180px] bg-red-50/80 p-2.5 rounded-lg border border-red-200/60 shadow-sm relative">
+                        <div class="absolute -top-1.5 left-4 w-3 h-3 bg-red-50/80 border-t border-l border-red-200/60 transform rotate-45"></div>
+                        <p class="text-xs text-red-800 font-medium leading-relaxed relative z-10">
+                            {{ $conge->motif_refus }}
+                        </p>
+                    </div>
+                </div>
+            @endif
         @else
             <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-xs border border-amber-200">En attente</span>
         @endif
@@ -58,7 +71,8 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="status" value="refuse">
-                        <button type="submit" class="text-[#b11d40] hover:text-[#911633] bg-[#b11d40]/10 hover:bg-[#b11d40]/20 border border-[#b11d40]/30 p-2 rounded-lg transition-colors shadow-sm" title="Refuser">
+                        <input type="hidden" name="motif_refus" class="motif_refus_input">
+                        <button type="button" onclick="promptForRefusal(this.closest('form'))" class="text-[#b11d40] hover:text-[#911633] bg-[#b11d40]/10 hover:bg-[#b11d40]/20 border border-[#b11d40]/30 p-2 rounded-lg transition-colors shadow-sm" title="Refuser">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </form>

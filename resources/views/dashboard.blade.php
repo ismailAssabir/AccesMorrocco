@@ -320,11 +320,11 @@
                                             <td class="px-8 py-5">
                                                 <div class="flex items-center gap-4">
                                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center text-xs font-black text-gray-400 group-hover:bg-[#be2346]/10 group-hover:text-[#be2346] transition-colors">
-                                                        {{ substr($reclamation->user->firstName, 0, 1) }}{{ substr($reclamation->user->lastName, 0, 1) }}
+                                                        {{ substr($reclamation->user?->firstName ?? '?', 0, 1) }}{{ substr($reclamation->user?->lastName ?? '?', 0, 1) }}
                                                     </div>
                                                     <div>
                                                         <div class="font-bold text-gray-900 group-hover:text-[#be2346] transition-colors">{{ $reclamation->titre ?? 'Requête' }}</div>
-                                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{{ $reclamation->user->firstName }} • {{ $reclamation->created_at->diffForHumans() }}</div>
+                                                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{{ $reclamation->user?->firstName ?? 'Utilisateur supprimé' }} • {{ $reclamation->created_at->diffForHumans() }}</div>
                                                     </div>
                                                 </div>
                                             </td>

@@ -104,8 +104,8 @@
 <script>
     function openEditDeptModal(id) {
         // Build the URLs
-        const editUrl = '{{ url("/departements") }}/' + id + '/edit';
-        const updateUrl = '{{ url("/departements") }}/' + id;
+        const editUrl = '{{ url("/departements/edit") }}/' + id;
+        const updateUrl = '{{ url("/departements/edit") }}/' + id;
 
         // Fetch data via AJAX
         fetch(editUrl, {

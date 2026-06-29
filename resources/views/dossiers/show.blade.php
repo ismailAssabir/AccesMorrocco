@@ -73,21 +73,35 @@
                         <div class="space-y-3">
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Client</span>
-                                <span class="text-sm font-bold text-slate-700">{{ $dossier->client->firstName ?? '—' }} {{ $dossier->client->lastName ?? '' }}</span>
+                                @if($dossier->client)
+                                    <span class="text-sm font-bold text-slate-700">{{ $dossier->client->firstName }} {{ $dossier->client->lastName }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-200/60 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non assigné</span>
+                                @endif
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Département</span>
-                                <span class="text-sm font-bold text-slate-700">{{ $dossier->departement->title ?? '—' }}</span>
+                                @if($dossier->departement)
+                                    <span class="text-sm font-bold text-slate-700">{{ $dossier->departement->title }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-200/60 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non assigné</span>
+                                @endif
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Destination</span>
-                                <span class="text-sm font-bold text-slate-700">{{ $dossier->distination ?? '—' }}</span>
+                                @if($dossier->distination)
+                                    <span class="text-sm font-bold text-slate-700">{{ $dossier->distination }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-200/60 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non renseignée</span>
+                                @endif
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Date voyage</span>
-                                <span class="text-sm font-bold text-slate-700">
-                                    {{ $dossier->dateVoyage ? \Carbon\Carbon::parse($dossier->dateVoyage)->format('d/m/Y') : '—' }}
-                                </span>
+                                @if($dossier->dateVoyage)
+                                    <span class="text-sm font-bold text-slate-700">{{ \Carbon\Carbon::parse($dossier->dateVoyage)->format('d/m/Y') }}</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-200/60 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Non renseignée</span>
+                                @endif
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-2xl">
                                 <span class="text-xs font-black text-slate-400 uppercase">Personnes</span>
@@ -151,7 +165,11 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-black text-slate-700">{{ $paiement->ref ?? '—' }}</p>
+                                        @if($paiement->ref)
+                                            <p class="text-xs font-black text-slate-700">{{ $paiement->ref }}</p>
+                                        @else
+                                            <p class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-200/60 text-slate-400 text-[8px] font-bold uppercase tracking-wider mt-0.5 mb-0.5">Non renseignée</p>
+                                        @endif
                                         <p class="text-[9px] text-slate-400 font-bold">{{ $paiement->created_at?->format('d/m/Y') }}</p>
                                     </div>
                                 </div>
